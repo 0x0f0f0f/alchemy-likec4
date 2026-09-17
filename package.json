@@ -50,7 +50,7 @@
     "example:basic": "bun run src/cli.ts generate --project examples/basic/docs/architecture --entrypoint examples/basic/alchemy.run.ts --stage prod",
     "example:shortener": "bun run src/cli.ts generate --project examples/link-shortener/docs/architecture --entrypoint examples/link-shortener/alchemy.run.ts --stage prod && bun run src/cli.ts generate --project examples/link-shortener/docs/architecture --entrypoint examples/link-shortener/alchemy.run.ts --stage staging",
     "example:validate": "likec4 validate --json --no-layout examples",
-    "example:png": "likec4 export png examples/basic/docs/architecture --flat -f my_app_prod -o . && mv my_app_prod.png screenshot.png",
+    "example:png": "likec4 export png examples/link-shortener/docs/architecture --flat -f index -o . && mv index.png shortener.png && likec4 export png examples/basic/docs/architecture --flat -f my_app_prod -o . && mv my_app_prod.png screenshot.png",
     "test": "bun test",
     "lint": "biome check .",
     "typecheck": "tsc --noEmit",
