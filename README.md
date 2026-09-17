@@ -1,5 +1,14 @@
 # alchemy-likec4
 
+![The link-shortener example, production stage, as LikeC4 renders it from the alchemy stack](prod_topology.png)
+
+> [!WARNING]
+> **Alchemy is in beta and under active development.** Resource
+> declarations will change between version, Every release of `alchemy-likec4`
+> targets **one alchemy 2 beta only** and the version says which: `0.77.x` is
+> built against `alchemy@2.0.0-beta.77`. Match them and regenerate your diagrams after every
+> alchemy bump!
+
 ## Automatically generate [LikeC4](https://likec4.dev) specs and diagrams from [alchemy](https://alchemy.run) stacks!
 
 **Why?** You have written your infrastructure with
@@ -73,13 +82,6 @@ and you get this, without deploying anything:
 
 # How to
 
-> [!WARNING]
-> **Alchemy is in beta and under active development.** Resource
-> declarations will change between version, Every release of `alchemy-likec4`
-> targets **one alchemy 2 beta only** and the version says which: `0.77.x` is
-> built against `alchemy@2.0.0-beta.77`. Match them and regenerate your diagrams after every
-> alchemy bump!
-
 ## Add a LikeC4 project to your alchemy repo
 
 LikeC4 treats any directory holding a `likec4.config.json` as a project, and every `.c4` under
@@ -123,13 +125,12 @@ alchemy-likec4 spec       --project docs/architecture               # kinds, for
 alchemy-likec4 deployment --project docs/architecture --stage prod  # your stack, from ./alchemy.run.ts
 ```
 
-`--project` is required, and anything that is not a LikeC4 project is refused:
+`--project` is required, and anything that is not a LikeC4 project is refused.
+If you need to create a LikeC4 project, create the directory, and create a `likec4.config.json` file
 
-```
-docs/architecture is not a LikeC4 project: no likec4.config.* found in it.
-Create one:  mkdir -p docs/architecture && echo '{ "name": "my-app" }' > docs/architecture/likec4.config.json
+`echo '{ "name": "my-app" }' > docs/architecture/likec4.config.json`
+
 Docs: https://likec4.dev/dsl/config/
-```
 
 `spec --provider Cloudflare` limits the kinds to one provider. `deployment --entrypoint
 path/to/alchemy.run.ts --stage staging` reads another stack or stage; one file per stage.
