@@ -9,12 +9,13 @@
  *   import { openStack, buildDeployment } from "alchemy-likec4";
  *   await writeFile("infra.gen.c4", buildDeployment(await openStack({ stage: "prod" })));
  */
+
+export { type Annotations, annotationsFor, categoriesFor } from "./src/annotations.ts";
 export { assertConverges, type Baseline, freeze, newViolations, type Reflexion, reflexion } from "./src/assert.ts";
 export { bindingKinds, toRelationshipKind } from "./src/bindings.ts";
-export { buildDeployment, buildSpecification, buildStackSpecification, toIdentifier, toTag } from "./src/build.ts";
-export { categoriesFor } from "./src/categories.ts";
+export { buildDeployment, buildModel, buildViews, modelId, stackId, toIdentifier, toTag } from "./src/build.ts";
 export { type AlchemyResource, discoverProviders, extractResources } from "./src/extract.ts";
-export { type GenerateOptions, type GenerateResult, generateSpecs } from "./src/generate.ts";
+export { type GenerateOptions, type GenerateResult, generate, write } from "./src/generate.ts";
 export {
   type OpenOptions,
   openStack,

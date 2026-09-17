@@ -1,0 +1,100 @@
+// GENERATED — DO NOT EDIT.
+// Stack MyApp: 3 resources, 2 relationships,
+// 4 kinds, reflected from alchemy@2.0.0-beta.77.
+// Regenerate with:  alchemy-likec4 generate --project <dir>
+//
+// Relationships live here, not in the deployment: LikeC4 inherits deployment relationships
+// from the logical model, so these reach deployment views through `instanceOf`.
+//
+// Enrich from your own file:  extend <element> { #tag  metadata { … }  link … }
+// `extend` cannot set a description — write one as JSDoc above the resource in your stack.
+
+specification {
+  element cloudflare_kv_namespace {
+    #storage_databases
+    technology 'KV'
+    notation 'Cloudflare.KV.Namespace'
+    style {
+      shape storage
+      color indigo
+      icon tech:cloudflare-icon
+    }
+  }
+  element cloudflare_r2_bucket {
+    #storage_databases
+    technology 'R2'
+    notation 'Cloudflare.R2.Bucket'
+    style {
+      shape bucket
+      color indigo
+      icon tech:cloudflare-icon
+    }
+  }
+  element cloudflare_worker {
+    #workers_compute
+    technology 'Workers'
+    notation 'Cloudflare.Worker'
+    style {
+      shape component
+      color amber
+      icon tech:cloudflare-workers-icon
+    }
+  }
+  element alchemy_stack {
+    style {
+      shape rectangle
+      color muted
+      border dashed
+      opacity 10%
+    }
+  }
+  
+  deploymentNode alchemy_stack {
+    notation 'Alchemy stack'
+  }
+  
+  relationship kv_namespace_binding {
+    notation 'kv_namespace'
+  }
+  relationship r2_bucket_binding {
+    notation 'r2_bucket'
+  }
+  
+  tag storage_databases
+  tag workers_compute
+}
+
+model {
+  my_app = alchemy_stack 'MyApp' {
+    photos = cloudflare_r2_bucket 'Photos' {
+      description '
+        Original uploads, never served directly.
+      '
+      metadata {
+        fqn 'Photos'
+        type 'Cloudflare.R2.Bucket'
+      }
+    }
+    
+    sessions = cloudflare_kv_namespace 'Sessions' {
+      metadata {
+        fqn 'Sessions'
+        type 'Cloudflare.KV.Namespace'
+      }
+    }
+    
+    api = cloudflare_worker 'Api' {
+      description '
+        The only public entrypoint.
+      '
+      metadata {
+        fqn 'Api'
+        type 'Cloudflare.Worker'
+      }
+    }
+  }
+  
+  my_app.api -[r2_bucket_binding]-> my_app.photos 'Photos'
+  
+  my_app.api -[kv_namespace_binding]-> my_app.sessions 'Sessions'
+}
