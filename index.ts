@@ -4,11 +4,11 @@
  *
  *   bun run generate                      # every provider alchemy exports
  *   bun run generate --provider Cloudflare
- *   bun run generate --outdir specs --no-styles
+ *   bun run generate --outdir specs --no-relationships
  */
+import { buildSpecification } from "./src/build.ts";
 import { categoriesFor } from "./src/categories.ts";
 import { type AlchemyResource, discoverProviders, extractResources } from "./src/extract.ts";
-import { emitSpecification } from "./src/emit.ts";
 
 const ALCHEMY = "node_modules/alchemy";
 
@@ -20,7 +20,6 @@ const has = (name: string) => Bun.argv.includes(name);
 
 const outdir = flag("--outdir") ?? "specs";
 const only = flag("--provider");
-const includeStyles = !has("--no-styles");
 const includeRelationships = !has("--no-relationships");
 
 const alchemyVersion: string = JSON.parse(await Bun.file(`${ALCHEMY}/package.json`).text()).version;
@@ -43,8 +42,10 @@ for (const ns of namespaces) {
     skipped.push(`${ns.name} (import failed: ${String((error as Error).message).slice(0, 60)})`);
     continue;
   }
+  const found = extractResources(mod);
+  if (found.length === 0) continue; // a runtime helper (Cli, State, …), not a provider
   sourceDirs.set(ns.name, ns.sourceDir);
-  for (const r of extractResources(mod)) if (!all.has(r.type)) all.set(r.type, r);
+  for (const r of found) if (!all.has(r.type)) all.set(r.type, r);
 }
 
 const byProvider = new Map<string, AlchemyResource[]>();
@@ -62,12 +63,11 @@ for (const [provider, resources] of [...byProvider].sort(([a], [b]) => a.localeC
     resources.map((r) => r.type),
   );
 
-  const dsl = emitSpecification(resources, {
+  const dsl = buildSpecification(resources, {
     alchemyVersion,
     provider,
     categories,
-    includeStyles,
-    // Binding kinds are Cloudflare-shaped; emitting them for AWS would be fiction.
+    // Binding kinds are Cloudflare's; emitting them for AWS would be fiction.
     includeRelationships: includeRelationships && provider === "Cloudflare",
   });
 

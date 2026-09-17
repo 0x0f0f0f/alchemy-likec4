@@ -3,6 +3,7 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
+    "@likec4/generators": "1.59.3",
     "@types/bun": "latest",
     "likec4": "1.59.3"
   },

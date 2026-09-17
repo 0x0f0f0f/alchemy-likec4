@@ -88,13 +88,13 @@ model {
 
     // Typed relationships, using the binding kinds from the generated spec. The deployment
     // model inherits every one of these, so each stage gets them without repeating a line.
-    redirect  -[kv_binding]->    cache   'lookup'
+    redirect  -[kv_namespace_binding]->    cache   'lookup'
     redirect  -[d1_binding]->    links   'on cache miss'
     redirect  -[queue_binding]-> clicks  'enqueue click'
     api       -[d1_binding]->    links   'create, list'
-    api       -[kv_binding]->    cache   'warm on create'
+    api       -[kv_namespace_binding]->    cache   'warm on create'
     analytics -[d1_binding]->    links   'resolve slug'
-    analytics -[r2_binding]->    reports 'nightly export'
+    analytics -[r2_bucket_binding]->    reports 'nightly export'
   }
 
   // Sourceless form: inside an element body, `-> x` means "this element -> x".
