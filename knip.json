@@ -1,7 +1,10 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["example/alchemy.run.ts", "example/workers/noop.ts"],
-  "project": ["src/**/*.ts", "example/**/*.ts"],
+  "entry": ["examples/*/alchemy.run.ts", "examples/link-shortener/workers/noop.ts"],
+  "project": ["src/**/*.ts", "examples/**/*.ts"],
   "ignoreDependencies": ["@effect/platform-node-shared"],
-  "ignoreExportsUsedInFile": { "interface": true, "type": true }
+  "ignoreExportsUsedInFile": {
+    "interface": true,
+    "type": true
+  }
 }

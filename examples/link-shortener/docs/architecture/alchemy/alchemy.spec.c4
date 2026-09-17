@@ -1,0 +1,7 @@
+// GENERATED — DO NOT EDIT.
+// The containers a stack graph needs that no alchemy resource provides.
+
+specification {
+  deploymentNode alchemy_stack
+  deploymentNode alchemy_namespace
+}

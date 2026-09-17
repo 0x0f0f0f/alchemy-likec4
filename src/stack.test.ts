@@ -3,7 +3,7 @@ import { buildDeployment } from "./build.ts";
 import { deriveGraph, openStack } from "./stack.ts";
 
 // Compiles the example stack — no deploy, no network, no state on disk.
-const graph = await openStack({ entrypoint: "example/alchemy.run.ts", stage: "prod" });
+const graph = await openStack({ entrypoint: "examples/link-shortener/alchemy.run.ts", stage: "prod" });
 
 describe("openStack", () => {
   it("compiles the stack without deploying it", () => {

@@ -1,0 +1,18 @@
+// The logical vocabulary. Nothing infrastructural is declared here: the `cloudflare_*` kinds and
+// `*_binding` relationship kinds come from ./alchemy, generated from alchemy itself.
+specification {
+  element actor {
+    style { shape person; color secondary }
+  }
+  element system
+  element service {
+    style { shape rectangle }
+  }
+  element store {
+    style { shape storage; color indigo }
+  }
+
+  // Tags are free-form labels you can filter and style views by.
+  tag hot-path { color green }
+  tag async { color amber }
+}

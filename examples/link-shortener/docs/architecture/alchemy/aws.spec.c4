@@ -1,0 +1,2154 @@
+// GENERATED — DO NOT EDIT.
+// 715 AWS resources, reflected from alchemy@2.0.0-beta.77.
+// Regenerate with:  alchemy-likec4 spec --project <dir>
+//
+// Kinds are alchemy's `.Type`s; tags are its `@category`. Unused kinds are harmless — LikeC4
+// validates a specification with kinds nothing instantiates, so one shared file serves every repo.
+
+specification {
+  deploymentNode aws_access_analyzer_analyzer {
+    notation 'AWS.AccessAnalyzer.Analyzer'
+  }
+  deploymentNode aws_access_analyzer_archive_rule {
+    notation 'AWS.AccessAnalyzer.ArchiveRule'
+  }
+  deploymentNode aws_account_account_name {
+    notation 'AWS.Account.AccountName'
+  }
+  deploymentNode aws_account_alternate_contact {
+    notation 'AWS.Account.AlternateContact'
+  }
+  deploymentNode aws_account_contact_information {
+    notation 'AWS.Account.ContactInformation'
+  }
+  deploymentNode aws_account_region {
+    notation 'AWS.Account.Region'
+  }
+  deploymentNode aws_acm_account_configuration {
+    notation 'AWS.ACM.AccountConfiguration'
+  }
+  deploymentNode aws_acm_certificate {
+    notation 'AWS.ACM.Certificate'
+  }
+  deploymentNode aws_acmpca_certificate_authority {
+    notation 'AWS.ACMPCA.CertificateAuthority'
+  }
+  deploymentNode aws_acmpca_certificate_authority_policy {
+    notation 'AWS.ACMPCA.CertificateAuthorityPolicy'
+  }
+  deploymentNode aws_acmpca_permission {
+    notation 'AWS.ACMPCA.Permission'
+  }
+  deploymentNode aws_aiops_investigation_group {
+    notation 'AWS.AIOps.InvestigationGroup'
+  }
+  deploymentNode aws_amp_alert_manager_definition {
+    notation 'AWS.AMP.AlertManagerDefinition'
+  }
+  deploymentNode aws_amp_anomaly_detector {
+    notation 'AWS.AMP.AnomalyDetector'
+  }
+  deploymentNode aws_amp_logging_configuration {
+    notation 'AWS.AMP.LoggingConfiguration'
+  }
+  deploymentNode aws_amp_query_logging_configuration {
+    notation 'AWS.AMP.QueryLoggingConfiguration'
+  }
+  deploymentNode aws_amp_resource_policy {
+    notation 'AWS.AMP.ResourcePolicy'
+  }
+  deploymentNode aws_amp_rule_groups_namespace {
+    notation 'AWS.AMP.RuleGroupsNamespace'
+  }
+  deploymentNode aws_amp_scraper {
+    notation 'AWS.AMP.Scraper'
+  }
+  deploymentNode aws_amp_scraper_logging_configuration {
+    notation 'AWS.AMP.ScraperLoggingConfiguration'
+  }
+  deploymentNode aws_amp_workspace {
+    notation 'AWS.AMP.Workspace'
+  }
+  deploymentNode aws_amplify_app {
+    notation 'AWS.Amplify.App'
+  }
+  deploymentNode aws_amplify_branch {
+    notation 'AWS.Amplify.Branch'
+  }
+  deploymentNode aws_api_gateway_account {
+    notation 'AWS.ApiGateway.Account'
+  }
+  deploymentNode aws_api_gateway_api_key {
+    notation 'AWS.ApiGateway.ApiKey'
+  }
+  deploymentNode aws_api_gateway_authorizer {
+    notation 'AWS.ApiGateway.Authorizer'
+  }
+  deploymentNode aws_api_gateway_base_path_mapping {
+    notation 'AWS.ApiGateway.BasePathMapping'
+  }
+  deploymentNode aws_api_gateway_deployment {
+    notation 'AWS.ApiGateway.Deployment'
+  }
+  deploymentNode aws_api_gateway_domain_name {
+    notation 'AWS.ApiGateway.DomainName'
+  }
+  deploymentNode aws_api_gateway_gateway_response {
+    notation 'AWS.ApiGateway.GatewayResponse'
+  }
+  deploymentNode aws_api_gateway_method {
+    notation 'AWS.ApiGateway.Method'
+  }
+  deploymentNode aws_api_gateway_resource {
+    notation 'AWS.ApiGateway.Resource'
+  }
+  deploymentNode aws_api_gateway_rest_api {
+    notation 'AWS.ApiGateway.RestApi'
+  }
+  deploymentNode aws_api_gateway_stage {
+    notation 'AWS.ApiGateway.Stage'
+  }
+  deploymentNode aws_api_gateway_usage_plan {
+    notation 'AWS.ApiGateway.UsagePlan'
+  }
+  deploymentNode aws_api_gateway_usage_plan_key {
+    notation 'AWS.ApiGateway.UsagePlanKey'
+  }
+  deploymentNode aws_api_gateway_vpc_link {
+    notation 'AWS.ApiGateway.VpcLink'
+  }
+  deploymentNode aws_api_gateway_v2_api {
+    notation 'AWS.ApiGatewayV2.Api'
+  }
+  deploymentNode aws_api_gateway_v2_api_mapping {
+    notation 'AWS.ApiGatewayV2.ApiMapping'
+  }
+  deploymentNode aws_api_gateway_v2_authorizer {
+    notation 'AWS.ApiGatewayV2.Authorizer'
+  }
+  deploymentNode aws_api_gateway_v2_domain_name {
+    notation 'AWS.ApiGatewayV2.DomainName'
+  }
+  deploymentNode aws_api_gateway_v2_integration {
+    notation 'AWS.ApiGatewayV2.Integration'
+  }
+  deploymentNode aws_api_gateway_v2_route {
+    notation 'AWS.ApiGatewayV2.Route'
+  }
+  deploymentNode aws_api_gateway_v2_stage {
+    notation 'AWS.ApiGatewayV2.Stage'
+  }
+  deploymentNode aws_api_gateway_v2_vpc_link {
+    notation 'AWS.ApiGatewayV2.VpcLink'
+  }
+  deploymentNode aws_app_config_application {
+    notation 'AWS.AppConfig.Application'
+  }
+  deploymentNode aws_app_config_configuration_profile {
+    notation 'AWS.AppConfig.ConfigurationProfile'
+  }
+  deploymentNode aws_app_config_deployment {
+    notation 'AWS.AppConfig.Deployment'
+  }
+  deploymentNode aws_app_config_deployment_strategy {
+    notation 'AWS.AppConfig.DeploymentStrategy'
+  }
+  deploymentNode aws_app_config_environment {
+    notation 'AWS.AppConfig.Environment'
+  }
+  deploymentNode aws_app_config_extension {
+    notation 'AWS.AppConfig.Extension'
+  }
+  deploymentNode aws_app_config_extension_association {
+    notation 'AWS.AppConfig.ExtensionAssociation'
+  }
+  deploymentNode aws_app_config_hosted_configuration_version {
+    notation 'AWS.AppConfig.HostedConfigurationVersion'
+  }
+  deploymentNode aws_app_flow_connector_profile {
+    notation 'AWS.AppFlow.ConnectorProfile'
+  }
+  deploymentNode aws_app_flow_flow {
+    notation 'AWS.AppFlow.Flow'
+  }
+  deploymentNode aws_app_integrations_application {
+    notation 'AWS.AppIntegrations.Application'
+  }
+  deploymentNode aws_app_integrations_data_integration {
+    notation 'AWS.AppIntegrations.DataIntegration'
+  }
+  deploymentNode aws_app_integrations_event_integration {
+    notation 'AWS.AppIntegrations.EventIntegration'
+  }
+  deploymentNode aws_application_auto_scaling_scalable_target {
+    notation 'AWS.ApplicationAutoScaling.ScalableTarget'
+  }
+  deploymentNode aws_application_auto_scaling_scaling_policy {
+    notation 'AWS.ApplicationAutoScaling.ScalingPolicy'
+  }
+  deploymentNode aws_application_auto_scaling_scheduled_action {
+    notation 'AWS.ApplicationAutoScaling.ScheduledAction'
+  }
+  deploymentNode aws_application_signals_discovery {
+    notation 'AWS.ApplicationSignals.Discovery'
+  }
+  deploymentNode aws_application_signals_grouping_configuration {
+    notation 'AWS.ApplicationSignals.GroupingConfiguration'
+  }
+  deploymentNode aws_application_signals_instrumentation_configuration {
+    notation 'AWS.ApplicationSignals.InstrumentationConfiguration'
+  }
+  deploymentNode aws_application_signals_service_level_objective {
+    notation 'AWS.ApplicationSignals.ServiceLevelObjective'
+  }
+  deploymentNode aws_app_registry_application {
+    notation 'AWS.AppRegistry.Application'
+  }
+  deploymentNode aws_app_registry_attribute_group {
+    notation 'AWS.AppRegistry.AttributeGroup'
+  }
+  deploymentNode aws_app_registry_attribute_group_association {
+    notation 'AWS.AppRegistry.AttributeGroupAssociation'
+  }
+  deploymentNode aws_app_registry_resource_association {
+    notation 'AWS.AppRegistry.ResourceAssociation'
+  }
+  deploymentNode aws_app_runner_auto_scaling_configuration {
+    notation 'AWS.AppRunner.AutoScalingConfiguration'
+  }
+  deploymentNode aws_app_runner_observability_configuration {
+    notation 'AWS.AppRunner.ObservabilityConfiguration'
+  }
+  deploymentNode aws_app_runner_service {
+    notation 'AWS.AppRunner.Service'
+  }
+  deploymentNode aws_app_runner_vpc_connector {
+    notation 'AWS.AppRunner.VpcConnector'
+  }
+  deploymentNode aws_app_sync_api_association {
+    notation 'AWS.AppSync.ApiAssociation'
+  }
+  deploymentNode aws_app_sync_api_key {
+    notation 'AWS.AppSync.ApiKey'
+  }
+  deploymentNode aws_app_sync_data_source {
+    notation 'AWS.AppSync.DataSource'
+  }
+  deploymentNode aws_app_sync_domain_name {
+    notation 'AWS.AppSync.DomainName'
+  }
+  deploymentNode aws_app_sync_function {
+    notation 'AWS.AppSync.Function'
+  }
+  deploymentNode aws_app_sync_graphql_api {
+    notation 'AWS.AppSync.GraphqlApi'
+  }
+  deploymentNode aws_app_sync_resolver {
+    notation 'AWS.AppSync.Resolver'
+  }
+  deploymentNode aws_athena_data_catalog {
+    notation 'AWS.Athena.DataCatalog'
+  }
+  deploymentNode aws_athena_named_query {
+    notation 'AWS.Athena.NamedQuery'
+  }
+  deploymentNode aws_athena_prepared_statement {
+    notation 'AWS.Athena.PreparedStatement'
+  }
+  deploymentNode aws_athena_work_group {
+    notation 'AWS.Athena.WorkGroup'
+  }
+  deploymentNode aws_audit_manager_assessment {
+    notation 'AWS.AuditManager.Assessment'
+  }
+  deploymentNode aws_audit_manager_control {
+    notation 'AWS.AuditManager.Control'
+  }
+  deploymentNode aws_audit_manager_framework {
+    notation 'AWS.AuditManager.Framework'
+  }
+  deploymentNode aws_auto_scaling_auto_scaling_group {
+    notation 'AWS.AutoScaling.AutoScalingGroup'
+  }
+  deploymentNode aws_auto_scaling_launch_template {
+    notation 'AWS.AutoScaling.LaunchTemplate'
+  }
+  deploymentNode aws_auto_scaling_lifecycle_hook {
+    notation 'AWS.AutoScaling.LifecycleHook'
+  }
+  deploymentNode aws_auto_scaling_scaling_policy {
+    notation 'AWS.AutoScaling.ScalingPolicy'
+  }
+  deploymentNode aws_auto_scaling_scheduled_action {
+    notation 'AWS.AutoScaling.ScheduledAction'
+  }
+  deploymentNode aws_b2_bi_capability {
+    notation 'AWS.B2BI.Capability'
+  }
+  deploymentNode aws_b2_bi_partnership {
+    notation 'AWS.B2BI.Partnership'
+  }
+  deploymentNode aws_b2_bi_profile {
+    notation 'AWS.B2BI.Profile'
+  }
+  deploymentNode aws_b2_bi_transformer {
+    notation 'AWS.B2BI.Transformer'
+  }
+  deploymentNode aws_backup_backup_plan {
+    notation 'AWS.Backup.BackupPlan'
+  }
+  deploymentNode aws_backup_backup_selection {
+    notation 'AWS.Backup.BackupSelection'
+  }
+  deploymentNode aws_backup_backup_vault {
+    notation 'AWS.Backup.BackupVault'
+  }
+  deploymentNode aws_backup_search_export_job {
+    notation 'AWS.BackupSearch.ExportJob'
+  }
+  deploymentNode aws_backup_search_search_job {
+    notation 'AWS.BackupSearch.SearchJob'
+  }
+  deploymentNode aws_batch_compute_environment {
+    notation 'AWS.Batch.ComputeEnvironment'
+  }
+  deploymentNode aws_batch_job_definition {
+    notation 'AWS.Batch.JobDefinition'
+  }
+  deploymentNode aws_batch_job_queue {
+    notation 'AWS.Batch.JobQueue'
+  }
+  deploymentNode aws_bcmdata_exports_export {
+    notation 'AWS.BCMDataExports.Export'
+  }
+  deploymentNode aws_bedrock_agent {
+    notation 'AWS.Bedrock.Agent'
+  }
+  deploymentNode aws_bedrock_agent_alias {
+    notation 'AWS.Bedrock.AgentAlias'
+  }
+  deploymentNode aws_bedrock_data_source {
+    notation 'AWS.Bedrock.DataSource'
+  }
+  deploymentNode aws_bedrock_knowledge_base {
+    notation 'AWS.Bedrock.KnowledgeBase'
+  }
+  deploymentNode aws_bedrock_agent_core_browser_custom {
+    notation 'AWS.BedrockAgentCore.BrowserCustom'
+  }
+  deploymentNode aws_bedrock_agent_core_code_interpreter {
+    notation 'AWS.BedrockAgentCore.CodeInterpreter'
+  }
+  deploymentNode aws_bedrock_agent_core_gateway {
+    notation 'AWS.BedrockAgentCore.Gateway'
+  }
+  deploymentNode aws_bedrock_agent_core_memory {
+    notation 'AWS.BedrockAgentCore.Memory'
+  }
+  deploymentNode aws_bedrock_agent_core_runtime {
+    notation 'AWS.BedrockAgentCore.Runtime'
+  }
+  deploymentNode aws_bedrock_data_automation_blueprint {
+    notation 'AWS.BedrockDataAutomation.Blueprint'
+  }
+  deploymentNode aws_bedrock_data_automation_data_automation_library {
+    notation 'AWS.BedrockDataAutomation.DataAutomationLibrary'
+  }
+  deploymentNode aws_bedrock_data_automation_data_automation_project {
+    notation 'AWS.BedrockDataAutomation.DataAutomationProject'
+  }
+  deploymentNode aws_budgets_budget {
+    notation 'AWS.Budgets.Budget'
+  }
+  deploymentNode aws_budgets_budget_action {
+    notation 'AWS.Budgets.BudgetAction'
+  }
+  deploymentNode aws_chatbot_association {
+    notation 'AWS.Chatbot.Association'
+  }
+  deploymentNode aws_chatbot_custom_action {
+    notation 'AWS.Chatbot.CustomAction'
+  }
+  deploymentNode aws_chatbot_microsoft_teams_channel_configuration {
+    notation 'AWS.Chatbot.MicrosoftTeamsChannelConfiguration'
+  }
+  deploymentNode aws_chatbot_slack_channel_configuration {
+    notation 'AWS.Chatbot.SlackChannelConfiguration'
+  }
+  deploymentNode aws_cloud_control_resource {
+    notation 'AWS.CloudControl.Resource'
+  }
+  deploymentNode aws_cloud_formation_stack {
+    notation 'AWS.CloudFormation.Stack'
+  }
+  deploymentNode aws_cloud_front_cache_policy {
+    notation 'AWS.CloudFront.CachePolicy'
+  }
+  deploymentNode aws_cloud_front_distribution {
+    notation 'AWS.CloudFront.Distribution'
+  }
+  deploymentNode aws_cloud_front_function {
+    notation 'AWS.CloudFront.Function'
+  }
+  deploymentNode aws_cloud_front_invalidation {
+    notation 'AWS.CloudFront.Invalidation'
+  }
+  deploymentNode aws_cloud_front_key_group {
+    notation 'AWS.CloudFront.KeyGroup'
+  }
+  deploymentNode aws_cloud_front_key_value_store {
+    notation 'AWS.CloudFront.KeyValueStore'
+  }
+  deploymentNode aws_cloud_front_kv_entries {
+    notation 'AWS.CloudFront.KvEntries'
+  }
+  deploymentNode aws_cloud_front_kv_routes_update {
+    notation 'AWS.CloudFront.KvRoutesUpdate'
+  }
+  deploymentNode aws_cloud_front_origin_access_control {
+    notation 'AWS.CloudFront.OriginAccessControl'
+  }
+  deploymentNode aws_cloud_front_origin_request_policy {
+    notation 'AWS.CloudFront.OriginRequestPolicy'
+  }
+  deploymentNode aws_cloud_front_public_key {
+    notation 'AWS.CloudFront.PublicKey'
+  }
+  deploymentNode aws_cloud_front_realtime_log_config {
+    notation 'AWS.CloudFront.RealtimeLogConfig'
+  }
+  deploymentNode aws_cloud_front_response_headers_policy {
+    notation 'AWS.CloudFront.ResponseHeadersPolicy'
+  }
+  deploymentNode aws_cloud_front_vpc_origin {
+    notation 'AWS.CloudFront.VpcOrigin'
+  }
+  deploymentNode aws_cloud_hsmv2_cluster {
+    notation 'AWS.CloudHSMV2.Cluster'
+  }
+  deploymentNode aws_cloud_hsmv2_hsm {
+    notation 'AWS.CloudHSMV2.Hsm'
+  }
+  deploymentNode aws_cloud_map_http_namespace {
+    notation 'AWS.CloudMap.HttpNamespace'
+  }
+  deploymentNode aws_cloud_map_instance_registration {
+    notation 'AWS.CloudMap.InstanceRegistration'
+  }
+  deploymentNode aws_cloud_map_private_dns_namespace {
+    notation 'AWS.CloudMap.PrivateDnsNamespace'
+  }
+  deploymentNode aws_cloud_map_public_dns_namespace {
+    notation 'AWS.CloudMap.PublicDnsNamespace'
+  }
+  deploymentNode aws_cloud_map_service {
+    notation 'AWS.CloudMap.Service'
+  }
+  deploymentNode aws_cloud_trail_event_data_store {
+    notation 'AWS.CloudTrail.EventDataStore'
+  }
+  deploymentNode aws_cloud_trail_trail {
+    notation 'AWS.CloudTrail.Trail'
+  }
+  deploymentNode aws_cloud_watch_alarm {
+    notation 'AWS.CloudWatch.Alarm'
+  }
+  deploymentNode aws_cloud_watch_alarm_mute_rule {
+    notation 'AWS.CloudWatch.AlarmMuteRule'
+  }
+  deploymentNode aws_cloud_watch_anomaly_detector {
+    notation 'AWS.CloudWatch.AnomalyDetector'
+  }
+  deploymentNode aws_cloud_watch_composite_alarm {
+    notation 'AWS.CloudWatch.CompositeAlarm'
+  }
+  deploymentNode aws_cloud_watch_dashboard {
+    notation 'AWS.CloudWatch.Dashboard'
+  }
+  deploymentNode aws_cloud_watch_insight_rule {
+    notation 'AWS.CloudWatch.InsightRule'
+  }
+  deploymentNode aws_cloud_watch_metric_stream {
+    notation 'AWS.CloudWatch.MetricStream'
+  }
+  deploymentNode aws_code_artifact_domain {
+    notation 'AWS.CodeArtifact.Domain'
+  }
+  deploymentNode aws_code_artifact_repository {
+    notation 'AWS.CodeArtifact.Repository'
+  }
+  deploymentNode aws_code_build_project {
+    notation 'AWS.CodeBuild.Project'
+  }
+  deploymentNode aws_code_build_report_group {
+    notation 'AWS.CodeBuild.ReportGroup'
+  }
+  deploymentNode aws_code_connections_connection {
+    notation 'AWS.CodeConnections.Connection'
+  }
+  deploymentNode aws_code_connections_host {
+    notation 'AWS.CodeConnections.Host'
+  }
+  deploymentNode aws_code_connections_repository_link {
+    notation 'AWS.CodeConnections.RepositoryLink'
+  }
+  deploymentNode aws_code_connections_sync_configuration {
+    notation 'AWS.CodeConnections.SyncConfiguration'
+  }
+  deploymentNode aws_code_deploy_application {
+    notation 'AWS.CodeDeploy.Application'
+  }
+  deploymentNode aws_code_deploy_deployment_config {
+    notation 'AWS.CodeDeploy.DeploymentConfig'
+  }
+  deploymentNode aws_code_deploy_deployment_group {
+    notation 'AWS.CodeDeploy.DeploymentGroup'
+  }
+  deploymentNode aws_code_pipeline_pipeline {
+    notation 'AWS.CodePipeline.Pipeline'
+  }
+  deploymentNode aws_cognito_group {
+    notation 'AWS.Cognito.Group'
+  }
+  deploymentNode aws_cognito_identity_pool {
+    notation 'AWS.Cognito.IdentityPool'
+  }
+  deploymentNode aws_cognito_identity_pool_role_attachment {
+    notation 'AWS.Cognito.IdentityPoolRoleAttachment'
+  }
+  deploymentNode aws_cognito_identity_provider {
+    notation 'AWS.Cognito.IdentityProvider'
+  }
+  deploymentNode aws_cognito_managed_login_branding {
+    notation 'AWS.Cognito.ManagedLoginBranding'
+  }
+  deploymentNode aws_cognito_resource_server {
+    notation 'AWS.Cognito.ResourceServer'
+  }
+  deploymentNode aws_cognito_user {
+    notation 'AWS.Cognito.User'
+  }
+  deploymentNode aws_cognito_user_pool {
+    notation 'AWS.Cognito.UserPool'
+  }
+  deploymentNode aws_cognito_user_pool_client {
+    notation 'AWS.Cognito.UserPoolClient'
+  }
+  deploymentNode aws_cognito_user_pool_domain {
+    notation 'AWS.Cognito.UserPoolDomain'
+  }
+  deploymentNode aws_config_aggregation_authorization {
+    notation 'AWS.Config.AggregationAuthorization'
+  }
+  deploymentNode aws_config_config_rule {
+    notation 'AWS.Config.ConfigRule'
+  }
+  deploymentNode aws_config_configuration_recorder {
+    notation 'AWS.Config.ConfigurationRecorder'
+  }
+  deploymentNode aws_config_delivery_channel {
+    notation 'AWS.Config.DeliveryChannel'
+  }
+  deploymentNode aws_config_retention_configuration {
+    notation 'AWS.Config.RetentionConfiguration'
+  }
+  deploymentNode aws_control_tower_enabled_baseline {
+    notation 'AWS.ControlTower.EnabledBaseline'
+  }
+  deploymentNode aws_control_tower_enabled_control {
+    notation 'AWS.ControlTower.EnabledControl'
+  }
+  deploymentNode aws_control_tower_landing_zone {
+    notation 'AWS.ControlTower.LandingZone'
+  }
+  deploymentNode aws_cost_and_usage_report_report_definition {
+    notation 'AWS.CostAndUsageReport.ReportDefinition'
+  }
+  deploymentNode aws_cost_explorer_anomaly_monitor {
+    notation 'AWS.CostExplorer.AnomalyMonitor'
+  }
+  deploymentNode aws_cost_explorer_anomaly_subscription {
+    notation 'AWS.CostExplorer.AnomalySubscription'
+  }
+  deploymentNode aws_cost_explorer_cost_category {
+    notation 'AWS.CostExplorer.CostCategory'
+  }
+  deploymentNode aws_data_brew_dataset {
+    notation 'AWS.DataBrew.Dataset'
+  }
+  deploymentNode aws_data_brew_job {
+    notation 'AWS.DataBrew.Job'
+  }
+  deploymentNode aws_data_brew_project {
+    notation 'AWS.DataBrew.Project'
+  }
+  deploymentNode aws_data_brew_recipe {
+    notation 'AWS.DataBrew.Recipe'
+  }
+  deploymentNode aws_data_brew_ruleset {
+    notation 'AWS.DataBrew.Ruleset'
+  }
+  deploymentNode aws_data_brew_schedule {
+    notation 'AWS.DataBrew.Schedule'
+  }
+  deploymentNode aws_data_exchange_data_set {
+    notation 'AWS.DataExchange.DataSet'
+  }
+  deploymentNode aws_data_exchange_event_action {
+    notation 'AWS.DataExchange.EventAction'
+  }
+  deploymentNode aws_data_exchange_revision {
+    notation 'AWS.DataExchange.Revision'
+  }
+  deploymentNode aws_data_sync_location_efs {
+    notation 'AWS.DataSync.LocationEfs'
+  }
+  deploymentNode aws_data_sync_location_s3 {
+    notation 'AWS.DataSync.LocationS3'
+  }
+  deploymentNode aws_data_sync_task {
+    notation 'AWS.DataSync.Task'
+  }
+  deploymentNode aws_data_zone_domain {
+    notation 'AWS.DataZone.Domain'
+  }
+  deploymentNode aws_data_zone_environment {
+    notation 'AWS.DataZone.Environment'
+  }
+  deploymentNode aws_data_zone_environment_blueprint_configuration {
+    notation 'AWS.DataZone.EnvironmentBlueprintConfiguration'
+  }
+  deploymentNode aws_data_zone_project {
+    notation 'AWS.DataZone.Project'
+  }
+  deploymentNode aws_dax_cluster {
+    notation 'AWS.DAX.Cluster'
+  }
+  deploymentNode aws_dax_parameter_group {
+    notation 'AWS.DAX.ParameterGroup'
+  }
+  deploymentNode aws_dax_subnet_group {
+    notation 'AWS.DAX.SubnetGroup'
+  }
+  deploymentNode aws_deadline_budget {
+    notation 'AWS.Deadline.Budget'
+  }
+  deploymentNode aws_deadline_farm {
+    notation 'AWS.Deadline.Farm'
+  }
+  deploymentNode aws_deadline_fleet {
+    notation 'AWS.Deadline.Fleet'
+  }
+  deploymentNode aws_deadline_monitor {
+    notation 'AWS.Deadline.Monitor'
+  }
+  deploymentNode aws_deadline_queue {
+    notation 'AWS.Deadline.Queue'
+  }
+  deploymentNode aws_deadline_storage_profile {
+    notation 'AWS.Deadline.StorageProfile'
+  }
+  deploymentNode aws_detective_graph {
+    notation 'AWS.Detective.Graph'
+  }
+  deploymentNode aws_dev_ops_guru_event_sources_config {
+    notation 'AWS.DevOpsGuru.EventSourcesConfig'
+  }
+  deploymentNode aws_dev_ops_guru_notification_channel {
+    notation 'AWS.DevOpsGuru.NotificationChannel'
+  }
+  deploymentNode aws_dev_ops_guru_resource_collection {
+    notation 'AWS.DevOpsGuru.ResourceCollection'
+  }
+  deploymentNode aws_dev_ops_guru_service_integration {
+    notation 'AWS.DevOpsGuru.ServiceIntegration'
+  }
+  deploymentNode aws_directory_service_conditional_forwarder {
+    notation 'AWS.DirectoryService.ConditionalForwarder'
+  }
+  deploymentNode aws_directory_service_directory {
+    notation 'AWS.DirectoryService.Directory'
+  }
+  deploymentNode aws_directory_service_event_topic {
+    notation 'AWS.DirectoryService.EventTopic'
+  }
+  deploymentNode aws_dlm_lifecycle_policy {
+    notation 'AWS.DLM.LifecyclePolicy'
+  }
+  deploymentNode aws_dms_endpoint {
+    notation 'AWS.DMS.Endpoint'
+  }
+  deploymentNode aws_dms_replication_instance {
+    notation 'AWS.DMS.ReplicationInstance'
+  }
+  deploymentNode aws_dms_replication_subnet_group {
+    notation 'AWS.DMS.ReplicationSubnetGroup'
+  }
+  deploymentNode aws_doc_db_dbcluster {
+    notation 'AWS.DocDB.DBCluster'
+  }
+  deploymentNode aws_doc_db_dbinstance {
+    notation 'AWS.DocDB.DBInstance'
+  }
+  deploymentNode aws_doc_db_dbsubnet_group {
+    notation 'AWS.DocDB.DBSubnetGroup'
+  }
+  deploymentNode aws_doc_dbelastic_cluster {
+    notation 'AWS.DocDBElastic.Cluster'
+  }
+  deploymentNode aws_dsql_cluster {
+    notation 'AWS.DSQL.Cluster'
+  }
+  deploymentNode aws_dsql_cluster_policy {
+    notation 'AWS.DSQL.ClusterPolicy'
+  }
+  deploymentNode aws_dsql_stream {
+    notation 'AWS.DSQL.Stream'
+  }
+  deploymentNode aws_dynamo_db_table {
+    notation 'AWS.DynamoDB.Table'
+  }
+  deploymentNode aws_ec2_dhcp_options {
+    notation 'AWS.EC2.DhcpOptions'
+  }
+  deploymentNode aws_ec2_egress_only_internet_gateway {
+    notation 'AWS.EC2.EgressOnlyInternetGateway'
+  }
+  deploymentNode aws_ec2_eip {
+    notation 'AWS.EC2.EIP'
+  }
+  deploymentNode aws_ec2_flow_log {
+    notation 'AWS.EC2.FlowLog'
+  }
+  deploymentNode aws_ec2_instance {
+    notation 'AWS.EC2.Instance'
+  }
+  deploymentNode aws_ec2_internet_gateway {
+    notation 'AWS.EC2.InternetGateway'
+  }
+  deploymentNode aws_ec2_key_pair {
+    notation 'AWS.EC2.KeyPair'
+  }
+  deploymentNode aws_ec2_nat_gateway {
+    notation 'AWS.EC2.NatGateway'
+  }
+  deploymentNode aws_ec2_network_acl {
+    notation 'AWS.EC2.NetworkAcl'
+  }
+  deploymentNode aws_ec2_network_acl_association {
+    notation 'AWS.EC2.NetworkAclAssociation'
+  }
+  deploymentNode aws_ec2_network_acl_entry {
+    notation 'AWS.EC2.NetworkAclEntry'
+  }
+  deploymentNode aws_ec2_network_interface {
+    notation 'AWS.EC2.NetworkInterface'
+  }
+  deploymentNode aws_ec2_network_interface_attachment {
+    notation 'AWS.EC2.NetworkInterfaceAttachment'
+  }
+  deploymentNode aws_ec2_prefix_list {
+    notation 'AWS.EC2.PrefixList'
+  }
+  deploymentNode aws_ec2_route {
+    notation 'AWS.EC2.Route'
+  }
+  deploymentNode aws_ec2_route_table {
+    notation 'AWS.EC2.RouteTable'
+  }
+  deploymentNode aws_ec2_route_table_association {
+    notation 'AWS.EC2.RouteTableAssociation'
+  }
+  deploymentNode aws_ec2_security_group {
+    notation 'AWS.EC2.SecurityGroup'
+  }
+  deploymentNode aws_ec2_security_group_rule {
+    notation 'AWS.EC2.SecurityGroupRule'
+  }
+  deploymentNode aws_ec2_snapshot {
+    notation 'AWS.EC2.Snapshot'
+  }
+  deploymentNode aws_ec2_subnet {
+    notation 'AWS.EC2.Subnet'
+  }
+  deploymentNode aws_ec2_volume {
+    notation 'AWS.EC2.Volume'
+  }
+  deploymentNode aws_ec2_volume_attachment {
+    notation 'AWS.EC2.VolumeAttachment'
+  }
+  deploymentNode aws_ec2_vpc {
+    notation 'AWS.EC2.VPC'
+  }
+  deploymentNode aws_ec2_vpc_endpoint {
+    notation 'AWS.EC2.VpcEndpoint'
+  }
+  deploymentNode aws_ec2_vpc_peering_connection {
+    notation 'AWS.EC2.VpcPeeringConnection'
+  }
+  deploymentNode aws_ecr_image {
+    notation 'AWS.ECR.Image'
+  }
+  deploymentNode aws_ecr_registry_policy {
+    notation 'AWS.ECR.RegistryPolicy'
+  }
+  deploymentNode aws_ecr_repository {
+    notation 'AWS.ECR.Repository'
+  }
+  deploymentNode aws_ecrpublic_repository {
+    notation 'AWS.ECRPublic.Repository'
+  }
+  deploymentNode aws_ecs_capacity_provider {
+    notation 'AWS.ECS.CapacityProvider'
+  }
+  deploymentNode aws_ecs_cluster {
+    notation 'AWS.ECS.Cluster'
+  }
+  deploymentNode aws_ecs_service {
+    notation 'AWS.ECS.Service'
+  }
+  deploymentNode aws_ecs_task {
+    notation 'AWS.ECS.Task'
+  }
+  deploymentNode aws_ecs_task_definition {
+    notation 'AWS.ECS.TaskDefinition'
+  }
+  deploymentNode aws_efs_access_point {
+    notation 'AWS.EFS.AccessPoint'
+  }
+  deploymentNode aws_efs_file_system {
+    notation 'AWS.EFS.FileSystem'
+  }
+  deploymentNode aws_efs_mount_target {
+    notation 'AWS.EFS.MountTarget'
+  }
+  deploymentNode aws_eks_access_entry {
+    notation 'AWS.EKS.AccessEntry'
+  }
+  deploymentNode aws_eks_addon {
+    notation 'AWS.EKS.Addon'
+  }
+  deploymentNode aws_eks_cluster {
+    notation 'AWS.EKS.Cluster'
+  }
+  deploymentNode aws_eks_fargate_profile {
+    notation 'AWS.EKS.FargateProfile'
+  }
+  deploymentNode aws_eks_nodegroup {
+    notation 'AWS.EKS.Nodegroup'
+  }
+  deploymentNode aws_eks_pod_identity_association {
+    notation 'AWS.EKS.PodIdentityAssociation'
+  }
+  deploymentNode aws_elasti_cache_cache_cluster {
+    notation 'AWS.ElastiCache.CacheCluster'
+  }
+  deploymentNode aws_elasti_cache_replication_group {
+    notation 'AWS.ElastiCache.ReplicationGroup'
+  }
+  deploymentNode aws_elasti_cache_serverless_cache {
+    notation 'AWS.ElastiCache.ServerlessCache'
+  }
+  deploymentNode aws_elasti_cache_subnet_group {
+    notation 'AWS.ElastiCache.SubnetGroup'
+  }
+  deploymentNode aws_elbv2_listener {
+    notation 'AWS.ELBv2.Listener'
+  }
+  deploymentNode aws_elbv2_listener_certificate {
+    notation 'AWS.ELBv2.ListenerCertificate'
+  }
+  deploymentNode aws_elbv2_listener_rule {
+    notation 'AWS.ELBv2.ListenerRule'
+  }
+  deploymentNode aws_elbv2_load_balancer {
+    notation 'AWS.ELBv2.LoadBalancer'
+  }
+  deploymentNode aws_elbv2_target_group {
+    notation 'AWS.ELBv2.TargetGroup'
+  }
+  deploymentNode aws_elbv2_target_group_attachment {
+    notation 'AWS.ELBv2.TargetGroupAttachment'
+  }
+  deploymentNode aws_elbv2_trust_store {
+    notation 'AWS.ELBv2.TrustStore'
+  }
+  deploymentNode aws_emr_cluster {
+    notation 'AWS.EMR.Cluster'
+  }
+  deploymentNode aws_emr_security_configuration {
+    notation 'AWS.EMR.SecurityConfiguration'
+  }
+  deploymentNode aws_emr_studio {
+    notation 'AWS.EMR.Studio'
+  }
+  deploymentNode aws_emrcontainers_job_template {
+    notation 'AWS.EMRContainers.JobTemplate'
+  }
+  deploymentNode aws_emrcontainers_virtual_cluster {
+    notation 'AWS.EMRContainers.VirtualCluster'
+  }
+  deploymentNode aws_emrserverless_application {
+    notation 'AWS.EMRServerless.Application'
+  }
+  deploymentNode aws_entity_resolution_id_mapping_workflow {
+    notation 'AWS.EntityResolution.IdMappingWorkflow'
+  }
+  deploymentNode aws_entity_resolution_id_namespace {
+    notation 'AWS.EntityResolution.IdNamespace'
+  }
+  deploymentNode aws_entity_resolution_matching_workflow {
+    notation 'AWS.EntityResolution.MatchingWorkflow'
+  }
+  deploymentNode aws_entity_resolution_schema_mapping {
+    notation 'AWS.EntityResolution.SchemaMapping'
+  }
+  deploymentNode aws_event_bridge_api_destination {
+    notation 'AWS.EventBridge.ApiDestination'
+  }
+  deploymentNode aws_event_bridge_archive {
+    notation 'AWS.EventBridge.Archive'
+  }
+  deploymentNode aws_event_bridge_connection {
+    notation 'AWS.EventBridge.Connection'
+  }
+  deploymentNode aws_event_bridge_event_bus {
+    notation 'AWS.EventBridge.EventBus'
+  }
+  deploymentNode aws_event_bridge_permission {
+    notation 'AWS.EventBridge.Permission'
+  }
+  deploymentNode aws_event_bridge_rule {
+    notation 'AWS.EventBridge.Rule'
+  }
+  deploymentNode aws_fin_space_environment {
+    notation 'AWS.FinSpace.Environment'
+  }
+  deploymentNode aws_fin_space_kx_cluster {
+    notation 'AWS.FinSpace.KxCluster'
+  }
+  deploymentNode aws_fin_space_kx_database {
+    notation 'AWS.FinSpace.KxDatabase'
+  }
+  deploymentNode aws_fin_space_kx_environment {
+    notation 'AWS.FinSpace.KxEnvironment'
+  }
+  deploymentNode aws_firehose_delivery_stream {
+    notation 'AWS.Firehose.DeliveryStream'
+  }
+  deploymentNode aws_fis_experiment_template {
+    notation 'AWS.FIS.ExperimentTemplate'
+  }
+  deploymentNode aws_fis_target_account_configuration {
+    notation 'AWS.FIS.TargetAccountConfiguration'
+  }
+  deploymentNode aws_fms_admin_account {
+    notation 'AWS.FMS.AdminAccount'
+  }
+  deploymentNode aws_forecast_dataset {
+    notation 'AWS.Forecast.Dataset'
+  }
+  deploymentNode aws_forecast_dataset_group {
+    notation 'AWS.Forecast.DatasetGroup'
+  }
+  deploymentNode aws_fraud_detector_detector {
+    notation 'AWS.FraudDetector.Detector'
+  }
+  deploymentNode aws_fraud_detector_detector_version {
+    notation 'AWS.FraudDetector.DetectorVersion'
+  }
+  deploymentNode aws_fraud_detector_entity_type {
+    notation 'AWS.FraudDetector.EntityType'
+  }
+  deploymentNode aws_fraud_detector_event_type {
+    notation 'AWS.FraudDetector.EventType'
+  }
+  deploymentNode aws_fraud_detector_label {
+    notation 'AWS.FraudDetector.Label'
+  }
+  deploymentNode aws_fraud_detector_list {
+    notation 'AWS.FraudDetector.List'
+  }
+  deploymentNode aws_fraud_detector_outcome {
+    notation 'AWS.FraudDetector.Outcome'
+  }
+  deploymentNode aws_fraud_detector_variable {
+    notation 'AWS.FraudDetector.Variable'
+  }
+  deploymentNode aws_fsx_file_system {
+    notation 'AWS.FSx.FileSystem'
+  }
+  deploymentNode aws_glacier_vault {
+    notation 'AWS.Glacier.Vault'
+  }
+  deploymentNode aws_global_accelerator_accelerator {
+    notation 'AWS.GlobalAccelerator.Accelerator'
+  }
+  deploymentNode aws_global_accelerator_endpoint_group {
+    notation 'AWS.GlobalAccelerator.EndpointGroup'
+  }
+  deploymentNode aws_global_accelerator_listener {
+    notation 'AWS.GlobalAccelerator.Listener'
+  }
+  deploymentNode aws_glue_connection {
+    notation 'AWS.Glue.Connection'
+  }
+  deploymentNode aws_glue_crawler {
+    notation 'AWS.Glue.Crawler'
+  }
+  deploymentNode aws_glue_database {
+    notation 'AWS.Glue.Database'
+  }
+  deploymentNode aws_glue_job {
+    notation 'AWS.Glue.Job'
+  }
+  deploymentNode aws_glue_table {
+    notation 'AWS.Glue.Table'
+  }
+  deploymentNode aws_grafana_workspace {
+    notation 'AWS.Grafana.Workspace'
+  }
+  deploymentNode aws_greengrass_v2_component_version {
+    notation 'AWS.GreengrassV2.ComponentVersion'
+  }
+  deploymentNode aws_greengrass_v2_deployment {
+    notation 'AWS.GreengrassV2.Deployment'
+  }
+  deploymentNode aws_guard_duty_detector {
+    notation 'AWS.GuardDuty.Detector'
+  }
+  deploymentNode aws_guard_duty_filter {
+    notation 'AWS.GuardDuty.Filter'
+  }
+  deploymentNode aws_guard_duty_ipset {
+    notation 'AWS.GuardDuty.IPSet'
+  }
+  deploymentNode aws_guard_duty_threat_intel_set {
+    notation 'AWS.GuardDuty.ThreatIntelSet'
+  }
+  deploymentNode aws_health_lake_fhirdatastore {
+    notation 'AWS.HealthLake.FHIRDatastore'
+  }
+  deploymentNode aws_iam_access_key {
+    notation 'AWS.IAM.AccessKey'
+  }
+  deploymentNode aws_iam_account_alias {
+    notation 'AWS.IAM.AccountAlias'
+  }
+  deploymentNode aws_iam_account_password_policy {
+    notation 'AWS.IAM.AccountPasswordPolicy'
+  }
+  deploymentNode aws_iam_group {
+    notation 'AWS.IAM.Group'
+  }
+  deploymentNode aws_iam_group_membership {
+    notation 'AWS.IAM.GroupMembership'
+  }
+  deploymentNode aws_iam_instance_profile {
+    notation 'AWS.IAM.InstanceProfile'
+  }
+  deploymentNode aws_iam_login_profile {
+    notation 'AWS.IAM.LoginProfile'
+  }
+  deploymentNode aws_iam_open_idconnect_provider {
+    notation 'AWS.IAM.OpenIDConnectProvider'
+  }
+  deploymentNode aws_iam_policy {
+    notation 'AWS.IAM.Policy'
+  }
+  deploymentNode aws_iam_role {
+    notation 'AWS.IAM.Role'
+  }
+  deploymentNode aws_iam_samlprovider {
+    notation 'AWS.IAM.SAMLProvider'
+  }
+  deploymentNode aws_iam_server_certificate {
+    notation 'AWS.IAM.ServerCertificate'
+  }
+  deploymentNode aws_iam_service_linked_role {
+    notation 'AWS.IAM.ServiceLinkedRole'
+  }
+  deploymentNode aws_iam_service_specific_credential {
+    notation 'AWS.IAM.ServiceSpecificCredential'
+  }
+  deploymentNode aws_iam_signing_certificate {
+    notation 'AWS.IAM.SigningCertificate'
+  }
+  deploymentNode aws_iam_sshpublic_key {
+    notation 'AWS.IAM.SSHPublicKey'
+  }
+  deploymentNode aws_iam_user {
+    notation 'AWS.IAM.User'
+  }
+  deploymentNode aws_iam_virtual_mfadevice {
+    notation 'AWS.IAM.VirtualMFADevice'
+  }
+  deploymentNode aws_identity_center_account_assignment {
+    notation 'AWS.IdentityCenter.AccountAssignment'
+  }
+  deploymentNode aws_identity_center_group {
+    notation 'AWS.IdentityCenter.Group'
+  }
+  deploymentNode aws_identity_center_instance {
+    notation 'AWS.IdentityCenter.Instance'
+  }
+  deploymentNode aws_identity_center_permission_set {
+    notation 'AWS.IdentityCenter.PermissionSet'
+  }
+  deploymentNode aws_image_builder_component {
+    notation 'AWS.ImageBuilder.Component'
+  }
+  deploymentNode aws_image_builder_distribution_configuration {
+    notation 'AWS.ImageBuilder.DistributionConfiguration'
+  }
+  deploymentNode aws_image_builder_image_pipeline {
+    notation 'AWS.ImageBuilder.ImagePipeline'
+  }
+  deploymentNode aws_image_builder_image_recipe {
+    notation 'AWS.ImageBuilder.ImageRecipe'
+  }
+  deploymentNode aws_image_builder_infrastructure_configuration {
+    notation 'AWS.ImageBuilder.InfrastructureConfiguration'
+  }
+  deploymentNode aws_inspector2_cis_scan_configuration {
+    notation 'AWS.Inspector2.CisScanConfiguration'
+  }
+  deploymentNode aws_inspector2_enabler {
+    notation 'AWS.Inspector2.Enabler'
+  }
+  deploymentNode aws_inspector2_filter {
+    notation 'AWS.Inspector2.Filter'
+  }
+  deploymentNode aws_internet_monitor_monitor {
+    notation 'AWS.InternetMonitor.Monitor'
+  }
+  deploymentNode aws_io_t_policy {
+    notation 'AWS.IoT.Policy'
+  }
+  deploymentNode aws_io_t_thing {
+    notation 'AWS.IoT.Thing'
+  }
+  deploymentNode aws_io_t_thing_type {
+    notation 'AWS.IoT.ThingType'
+  }
+  deploymentNode aws_io_t_topic_rule {
+    notation 'AWS.IoT.TopicRule'
+  }
+  deploymentNode aws_io_tfleet_wise_campaign {
+    notation 'AWS.IoTFleetWise.Campaign'
+  }
+  deploymentNode aws_io_tfleet_wise_decoder_manifest {
+    notation 'AWS.IoTFleetWise.DecoderManifest'
+  }
+  deploymentNode aws_io_tfleet_wise_fleet {
+    notation 'AWS.IoTFleetWise.Fleet'
+  }
+  deploymentNode aws_io_tfleet_wise_model_manifest {
+    notation 'AWS.IoTFleetWise.ModelManifest'
+  }
+  deploymentNode aws_io_tfleet_wise_signal_catalog {
+    notation 'AWS.IoTFleetWise.SignalCatalog'
+  }
+  deploymentNode aws_io_tfleet_wise_state_template {
+    notation 'AWS.IoTFleetWise.StateTemplate'
+  }
+  deploymentNode aws_io_tfleet_wise_vehicle {
+    notation 'AWS.IoTFleetWise.Vehicle'
+  }
+  deploymentNode aws_io_tmanaged_integrations_credential_locker {
+    notation 'AWS.IoTManagedIntegrations.CredentialLocker'
+  }
+  deploymentNode aws_io_tmanaged_integrations_destination {
+    notation 'AWS.IoTManagedIntegrations.Destination'
+  }
+  deploymentNode aws_io_tmanaged_integrations_managed_thing {
+    notation 'AWS.IoTManagedIntegrations.ManagedThing'
+  }
+  deploymentNode aws_io_tmanaged_integrations_notification_configuration {
+    notation 'AWS.IoTManagedIntegrations.NotificationConfiguration'
+  }
+  deploymentNode aws_io_tsite_wise_asset {
+    notation 'AWS.IoTSiteWise.Asset'
+  }
+  deploymentNode aws_io_tsite_wise_asset_model {
+    notation 'AWS.IoTSiteWise.AssetModel'
+  }
+  deploymentNode aws_io_tsite_wise_gateway {
+    notation 'AWS.IoTSiteWise.Gateway'
+  }
+  deploymentNode aws_io_twireless_destination {
+    notation 'AWS.IoTWireless.Destination'
+  }
+  deploymentNode aws_io_twireless_device_profile {
+    notation 'AWS.IoTWireless.DeviceProfile'
+  }
+  deploymentNode aws_io_twireless_service_profile {
+    notation 'AWS.IoTWireless.ServiceProfile'
+  }
+  deploymentNode aws_io_twireless_wireless_device {
+    notation 'AWS.IoTWireless.WirelessDevice'
+  }
+  deploymentNode aws_io_twireless_wireless_gateway {
+    notation 'AWS.IoTWireless.WirelessGateway'
+  }
+  deploymentNode aws_ivs_channel {
+    notation 'AWS.IVS.Channel'
+  }
+  deploymentNode aws_ivs_playback_key_pair {
+    notation 'AWS.IVS.PlaybackKeyPair'
+  }
+  deploymentNode aws_ivs_playback_restriction_policy {
+    notation 'AWS.IVS.PlaybackRestrictionPolicy'
+  }
+  deploymentNode aws_ivs_recording_configuration {
+    notation 'AWS.IVS.RecordingConfiguration'
+  }
+  deploymentNode aws_ivs_stream_key {
+    notation 'AWS.IVS.StreamKey'
+  }
+  deploymentNode aws_ivschat_logging_configuration {
+    notation 'AWS.IVSChat.LoggingConfiguration'
+  }
+  deploymentNode aws_ivschat_room {
+    notation 'AWS.IVSChat.Room'
+  }
+  deploymentNode aws_ivsrealtime_stage {
+    notation 'AWS.IVSRealtime.Stage'
+  }
+  deploymentNode aws_kafka_serverless_cluster {
+    notation 'AWS.Kafka.ServerlessCluster'
+  }
+  deploymentNode aws_kendra_data_source {
+    notation 'AWS.Kendra.DataSource'
+  }
+  deploymentNode aws_kendra_index {
+    notation 'AWS.Kendra.Index'
+  }
+  deploymentNode aws_keyspaces_keyspace {
+    notation 'AWS.Keyspaces.Keyspace'
+  }
+  deploymentNode aws_keyspaces_table {
+    notation 'AWS.Keyspaces.Table'
+  }
+  deploymentNode aws_keyspaces_type {
+    notation 'AWS.Keyspaces.Type'
+  }
+  deploymentNode aws_kinesis_stream {
+    notation 'AWS.Kinesis.Stream'
+  }
+  deploymentNode aws_kinesis_stream_consumer {
+    notation 'AWS.Kinesis.StreamConsumer'
+  }
+  deploymentNode aws_kinesis_analytics_v2_application {
+    notation 'AWS.KinesisAnalyticsV2.Application'
+  }
+  deploymentNode aws_kinesis_analytics_v2_application_cloud_watch_logging_option {
+    notation 'AWS.KinesisAnalyticsV2.ApplicationCloudWatchLoggingOption'
+  }
+  deploymentNode aws_kinesis_analytics_v2_application_snapshot {
+    notation 'AWS.KinesisAnalyticsV2.ApplicationSnapshot'
+  }
+  deploymentNode aws_kinesis_video_signaling_channel {
+    notation 'AWS.KinesisVideo.SignalingChannel'
+  }
+  deploymentNode aws_kinesis_video_stream {
+    notation 'AWS.KinesisVideo.Stream'
+  }
+  deploymentNode aws_kms_alias {
+    notation 'AWS.KMS.Alias'
+  }
+  deploymentNode aws_kms_key {
+    notation 'AWS.KMS.Key'
+  }
+  deploymentNode aws_lake_formation_data_cells_filter {
+    notation 'AWS.LakeFormation.DataCellsFilter'
+  }
+  deploymentNode aws_lake_formation_data_lake_settings {
+    notation 'AWS.LakeFormation.DataLakeSettings'
+  }
+  deploymentNode aws_lake_formation_lftag {
+    notation 'AWS.LakeFormation.LFTag'
+  }
+  deploymentNode aws_lake_formation_lftag_association {
+    notation 'AWS.LakeFormation.LFTagAssociation'
+  }
+  deploymentNode aws_lake_formation_lftag_expression {
+    notation 'AWS.LakeFormation.LFTagExpression'
+  }
+  deploymentNode aws_lake_formation_opt_in {
+    notation 'AWS.LakeFormation.OptIn'
+  }
+  deploymentNode aws_lake_formation_permissions {
+    notation 'AWS.LakeFormation.Permissions'
+  }
+  deploymentNode aws_lake_formation_resource {
+    notation 'AWS.LakeFormation.Resource'
+  }
+  deploymentNode aws_lambda_alias {
+    notation 'AWS.Lambda.Alias'
+  }
+  deploymentNode aws_lambda_event_source_mapping {
+    notation 'AWS.Lambda.EventSourceMapping'
+  }
+  deploymentNode aws_lambda_function {
+    notation 'AWS.Lambda.Function'
+  }
+  deploymentNode aws_lambda_layer_version {
+    notation 'AWS.Lambda.LayerVersion'
+  }
+  deploymentNode aws_lambda_microvm_image {
+    notation 'AWS.Lambda.MicrovmImage'
+  }
+  deploymentNode aws_lambda_network_connector {
+    notation 'AWS.Lambda.NetworkConnector'
+  }
+  deploymentNode aws_lambda_permission {
+    notation 'AWS.Lambda.Permission'
+  }
+  deploymentNode aws_lambda_version {
+    notation 'AWS.Lambda.Version'
+  }
+  deploymentNode aws_lex_v2_bot {
+    notation 'AWS.LexV2.Bot'
+  }
+  deploymentNode aws_lex_v2_bot_alias {
+    notation 'AWS.LexV2.BotAlias'
+  }
+  deploymentNode aws_lex_v2_bot_locale {
+    notation 'AWS.LexV2.BotLocale'
+  }
+  deploymentNode aws_lex_v2_bot_version {
+    notation 'AWS.LexV2.BotVersion'
+  }
+  deploymentNode aws_lex_v2_intent {
+    notation 'AWS.LexV2.Intent'
+  }
+  deploymentNode aws_lex_v2_slot_type {
+    notation 'AWS.LexV2.SlotType'
+  }
+  deploymentNode aws_license_manager_license_configuration {
+    notation 'AWS.LicenseManager.LicenseConfiguration'
+  }
+  deploymentNode aws_location_api_key {
+    notation 'AWS.Location.ApiKey'
+  }
+  deploymentNode aws_location_geofence_collection {
+    notation 'AWS.Location.GeofenceCollection'
+  }
+  deploymentNode aws_location_map {
+    notation 'AWS.Location.Map'
+  }
+  deploymentNode aws_location_place_index {
+    notation 'AWS.Location.PlaceIndex'
+  }
+  deploymentNode aws_location_route_calculator {
+    notation 'AWS.Location.RouteCalculator'
+  }
+  deploymentNode aws_location_tracker {
+    notation 'AWS.Location.Tracker'
+  }
+  deploymentNode aws_location_tracker_consumer {
+    notation 'AWS.Location.TrackerConsumer'
+  }
+  deploymentNode aws_logs_destination {
+    notation 'AWS.Logs.Destination'
+  }
+  deploymentNode aws_logs_log_group {
+    notation 'AWS.Logs.LogGroup'
+  }
+  deploymentNode aws_logs_log_stream {
+    notation 'AWS.Logs.LogStream'
+  }
+  deploymentNode aws_logs_metric_filter {
+    notation 'AWS.Logs.MetricFilter'
+  }
+  deploymentNode aws_logs_resource_policy {
+    notation 'AWS.Logs.ResourcePolicy'
+  }
+  deploymentNode aws_logs_subscription_filter {
+    notation 'AWS.Logs.SubscriptionFilter'
+  }
+  deploymentNode aws_macie2_allow_list {
+    notation 'AWS.Macie2.AllowList'
+  }
+  deploymentNode aws_macie2_classification_job {
+    notation 'AWS.Macie2.ClassificationJob'
+  }
+  deploymentNode aws_macie2_custom_data_identifier {
+    notation 'AWS.Macie2.CustomDataIdentifier'
+  }
+  deploymentNode aws_macie2_findings_filter {
+    notation 'AWS.Macie2.FindingsFilter'
+  }
+  deploymentNode aws_macie2_session {
+    notation 'AWS.Macie2.Session'
+  }
+  deploymentNode aws_mail_manager_addon_instance {
+    notation 'AWS.MailManager.AddonInstance'
+  }
+  deploymentNode aws_mail_manager_addon_subscription {
+    notation 'AWS.MailManager.AddonSubscription'
+  }
+  deploymentNode aws_mail_manager_address_list {
+    notation 'AWS.MailManager.AddressList'
+  }
+  deploymentNode aws_mail_manager_archive {
+    notation 'AWS.MailManager.Archive'
+  }
+  deploymentNode aws_mail_manager_ingress_point {
+    notation 'AWS.MailManager.IngressPoint'
+  }
+  deploymentNode aws_mail_manager_relay {
+    notation 'AWS.MailManager.Relay'
+  }
+  deploymentNode aws_mail_manager_rule_set {
+    notation 'AWS.MailManager.RuleSet'
+  }
+  deploymentNode aws_mail_manager_traffic_policy {
+    notation 'AWS.MailManager.TrafficPolicy'
+  }
+  deploymentNode aws_media_connect_flow {
+    notation 'AWS.MediaConnect.Flow'
+  }
+  deploymentNode aws_media_convert_job {
+    notation 'AWS.MediaConvert.Job'
+  }
+  deploymentNode aws_media_convert_job_template {
+    notation 'AWS.MediaConvert.JobTemplate'
+  }
+  deploymentNode aws_media_convert_preset {
+    notation 'AWS.MediaConvert.Preset'
+  }
+  deploymentNode aws_media_convert_queue {
+    notation 'AWS.MediaConvert.Queue'
+  }
+  deploymentNode aws_media_live_channel {
+    notation 'AWS.MediaLive.Channel'
+  }
+  deploymentNode aws_media_live_input {
+    notation 'AWS.MediaLive.Input'
+  }
+  deploymentNode aws_media_live_input_security_group {
+    notation 'AWS.MediaLive.InputSecurityGroup'
+  }
+  deploymentNode aws_media_package_v2_channel {
+    notation 'AWS.MediaPackageV2.Channel'
+  }
+  deploymentNode aws_media_package_v2_channel_group {
+    notation 'AWS.MediaPackageV2.ChannelGroup'
+  }
+  deploymentNode aws_media_package_v2_origin_endpoint {
+    notation 'AWS.MediaPackageV2.OriginEndpoint'
+  }
+  deploymentNode aws_media_tailor_playback_configuration {
+    notation 'AWS.MediaTailor.PlaybackConfiguration'
+  }
+  deploymentNode aws_medical_imaging_datastore {
+    notation 'AWS.MedicalImaging.Datastore'
+  }
+  deploymentNode aws_memory_db_acl {
+    notation 'AWS.MemoryDB.ACL'
+  }
+  deploymentNode aws_memory_db_cluster {
+    notation 'AWS.MemoryDB.Cluster'
+  }
+  deploymentNode aws_memory_db_parameter_group {
+    notation 'AWS.MemoryDB.ParameterGroup'
+  }
+  deploymentNode aws_memory_db_subnet_group {
+    notation 'AWS.MemoryDB.SubnetGroup'
+  }
+  deploymentNode aws_memory_db_user {
+    notation 'AWS.MemoryDB.User'
+  }
+  deploymentNode aws_mq_broker {
+    notation 'AWS.MQ.Broker'
+  }
+  deploymentNode aws_mq_configuration {
+    notation 'AWS.MQ.Configuration'
+  }
+  deploymentNode aws_mwaa_environment {
+    notation 'AWS.MWAA.Environment'
+  }
+  deploymentNode aws_mwaaserverless_workflow {
+    notation 'AWS.MWAAServerless.Workflow'
+  }
+  deploymentNode aws_neptune_dbcluster {
+    notation 'AWS.Neptune.DBCluster'
+  }
+  deploymentNode aws_neptune_dbcluster_parameter_group {
+    notation 'AWS.Neptune.DBClusterParameterGroup'
+  }
+  deploymentNode aws_neptune_dbinstance {
+    notation 'AWS.Neptune.DBInstance'
+  }
+  deploymentNode aws_neptune_dbparameter_group {
+    notation 'AWS.Neptune.DBParameterGroup'
+  }
+  deploymentNode aws_neptune_dbsubnet_group {
+    notation 'AWS.Neptune.DBSubnetGroup'
+  }
+  deploymentNode aws_neptune_graph_graph {
+    notation 'AWS.NeptuneGraph.Graph'
+  }
+  deploymentNode aws_network_firewall_firewall {
+    notation 'AWS.NetworkFirewall.Firewall'
+  }
+  deploymentNode aws_network_firewall_firewall_policy {
+    notation 'AWS.NetworkFirewall.FirewallPolicy'
+  }
+  deploymentNode aws_network_firewall_logging_configuration {
+    notation 'AWS.NetworkFirewall.LoggingConfiguration'
+  }
+  deploymentNode aws_network_firewall_rule_group {
+    notation 'AWS.NetworkFirewall.RuleGroup'
+  }
+  deploymentNode aws_notifications_channel_association {
+    notation 'AWS.Notifications.ChannelAssociation'
+  }
+  deploymentNode aws_notifications_event_rule {
+    notation 'AWS.Notifications.EventRule'
+  }
+  deploymentNode aws_notifications_notification_configuration {
+    notation 'AWS.Notifications.NotificationConfiguration'
+  }
+  deploymentNode aws_notifications_notification_hub {
+    notation 'AWS.Notifications.NotificationHub'
+  }
+  deploymentNode aws_notifications_contacts_email_contact {
+    notation 'AWS.NotificationsContacts.EmailContact'
+  }
+  deploymentNode aws_oam_link {
+    notation 'AWS.OAM.Link'
+  }
+  deploymentNode aws_oam_sink {
+    notation 'AWS.OAM.Sink'
+  }
+  deploymentNode aws_observability_admin_telemetry_config {
+    notation 'AWS.ObservabilityAdmin.TelemetryConfig'
+  }
+  deploymentNode aws_observability_admin_telemetry_rule {
+    notation 'AWS.ObservabilityAdmin.TelemetryRule'
+  }
+  deploymentNode aws_omics_annotation_store {
+    notation 'AWS.Omics.AnnotationStore'
+  }
+  deploymentNode aws_omics_reference_store {
+    notation 'AWS.Omics.ReferenceStore'
+  }
+  deploymentNode aws_omics_run_group {
+    notation 'AWS.Omics.RunGroup'
+  }
+  deploymentNode aws_omics_sequence_store {
+    notation 'AWS.Omics.SequenceStore'
+  }
+  deploymentNode aws_omics_variant_store {
+    notation 'AWS.Omics.VariantStore'
+  }
+  deploymentNode aws_omics_workflow {
+    notation 'AWS.Omics.Workflow'
+  }
+  deploymentNode aws_open_search_domain {
+    notation 'AWS.OpenSearch.Domain'
+  }
+  deploymentNode aws_open_search_serverless_access_policy {
+    notation 'AWS.OpenSearchServerless.AccessPolicy'
+  }
+  deploymentNode aws_open_search_serverless_collection {
+    notation 'AWS.OpenSearchServerless.Collection'
+  }
+  deploymentNode aws_open_search_serverless_collection_group {
+    notation 'AWS.OpenSearchServerless.CollectionGroup'
+  }
+  deploymentNode aws_open_search_serverless_lifecycle_policy {
+    notation 'AWS.OpenSearchServerless.LifecyclePolicy'
+  }
+  deploymentNode aws_open_search_serverless_security_config {
+    notation 'AWS.OpenSearchServerless.SecurityConfig'
+  }
+  deploymentNode aws_open_search_serverless_security_policy {
+    notation 'AWS.OpenSearchServerless.SecurityPolicy'
+  }
+  deploymentNode aws_open_search_serverless_vpc_endpoint {
+    notation 'AWS.OpenSearchServerless.VpcEndpoint'
+  }
+  deploymentNode aws_organizations_account {
+    notation 'AWS.Organizations.Account'
+  }
+  deploymentNode aws_organizations_delegated_administrator {
+    notation 'AWS.Organizations.DelegatedAdministrator'
+  }
+  deploymentNode aws_organizations_organization {
+    notation 'AWS.Organizations.Organization'
+  }
+  deploymentNode aws_organizations_organizational_unit {
+    notation 'AWS.Organizations.OrganizationalUnit'
+  }
+  deploymentNode aws_organizations_organization_resource_policy {
+    notation 'AWS.Organizations.OrganizationResourcePolicy'
+  }
+  deploymentNode aws_organizations_policy {
+    notation 'AWS.Organizations.Policy'
+  }
+  deploymentNode aws_organizations_policy_attachment {
+    notation 'AWS.Organizations.PolicyAttachment'
+  }
+  deploymentNode aws_organizations_root {
+    notation 'AWS.Organizations.Root'
+  }
+  deploymentNode aws_organizations_root_policy_type {
+    notation 'AWS.Organizations.RootPolicyType'
+  }
+  deploymentNode aws_organizations_trusted_service_access {
+    notation 'AWS.Organizations.TrustedServiceAccess'
+  }
+  deploymentNode aws_osis_pipeline {
+    notation 'AWS.OSIS.Pipeline'
+  }
+  deploymentNode aws_osis_pipeline_endpoint {
+    notation 'AWS.OSIS.PipelineEndpoint'
+  }
+  deploymentNode aws_osis_resource_policy {
+    notation 'AWS.OSIS.ResourcePolicy'
+  }
+  deploymentNode aws_payment_cryptography_alias {
+    notation 'AWS.PaymentCryptography.Alias'
+  }
+  deploymentNode aws_payment_cryptography_key {
+    notation 'AWS.PaymentCryptography.Key'
+  }
+  deploymentNode aws_personalize_dataset {
+    notation 'AWS.Personalize.Dataset'
+  }
+  deploymentNode aws_personalize_dataset_group {
+    notation 'AWS.Personalize.DatasetGroup'
+  }
+  deploymentNode aws_personalize_event_tracker {
+    notation 'AWS.Personalize.EventTracker'
+  }
+  deploymentNode aws_personalize_schema {
+    notation 'AWS.Personalize.Schema'
+  }
+  deploymentNode aws_pinpoint_smsvoice_v2_configuration_set {
+    notation 'AWS.PinpointSMSVoiceV2.ConfigurationSet'
+  }
+  deploymentNode aws_pinpoint_smsvoice_v2_event_destination {
+    notation 'AWS.PinpointSMSVoiceV2.EventDestination'
+  }
+  deploymentNode aws_pinpoint_smsvoice_v2_opt_out_list {
+    notation 'AWS.PinpointSMSVoiceV2.OptOutList'
+  }
+  deploymentNode aws_pinpoint_smsvoice_v2_phone_number {
+    notation 'AWS.PinpointSMSVoiceV2.PhoneNumber'
+  }
+  deploymentNode aws_pipes_pipe {
+    notation 'AWS.Pipes.Pipe'
+  }
+  deploymentNode aws_polly_lexicon {
+    notation 'AWS.Polly.Lexicon'
+  }
+  deploymentNode aws_qapps_qapp {
+    notation 'AWS.QApps.QApp'
+  }
+  deploymentNode aws_qbusiness_application {
+    notation 'AWS.QBusiness.Application'
+  }
+  deploymentNode aws_qbusiness_data_source {
+    notation 'AWS.QBusiness.DataSource'
+  }
+  deploymentNode aws_qbusiness_index {
+    notation 'AWS.QBusiness.Index'
+  }
+  deploymentNode aws_qbusiness_retriever {
+    notation 'AWS.QBusiness.Retriever'
+  }
+  deploymentNode aws_qbusiness_web_experience {
+    notation 'AWS.QBusiness.WebExperience'
+  }
+  deploymentNode aws_quick_sight_analysis {
+    notation 'AWS.QuickSight.Analysis'
+  }
+  deploymentNode aws_quick_sight_dashboard {
+    notation 'AWS.QuickSight.Dashboard'
+  }
+  deploymentNode aws_quick_sight_data_set {
+    notation 'AWS.QuickSight.DataSet'
+  }
+  deploymentNode aws_quick_sight_data_source {
+    notation 'AWS.QuickSight.DataSource'
+  }
+  deploymentNode aws_ram_permission {
+    notation 'AWS.RAM.Permission'
+  }
+  deploymentNode aws_ram_resource_share {
+    notation 'AWS.RAM.ResourceShare'
+  }
+  deploymentNode aws_rbin_rule {
+    notation 'AWS.Rbin.Rule'
+  }
+  deploymentNode aws_rds_dbcluster {
+    notation 'AWS.RDS.DBCluster'
+  }
+  deploymentNode aws_rds_dbcluster_endpoint {
+    notation 'AWS.RDS.DBClusterEndpoint'
+  }
+  deploymentNode aws_rds_dbcluster_parameter_group {
+    notation 'AWS.RDS.DBClusterParameterGroup'
+  }
+  deploymentNode aws_rds_dbinstance {
+    notation 'AWS.RDS.DBInstance'
+  }
+  deploymentNode aws_rds_dbparameter_group {
+    notation 'AWS.RDS.DBParameterGroup'
+  }
+  deploymentNode aws_rds_dbproxy {
+    notation 'AWS.RDS.DBProxy'
+  }
+  deploymentNode aws_rds_dbproxy_endpoint {
+    notation 'AWS.RDS.DBProxyEndpoint'
+  }
+  deploymentNode aws_rds_dbproxy_target_group {
+    notation 'AWS.RDS.DBProxyTargetGroup'
+  }
+  deploymentNode aws_rds_dbsubnet_group {
+    notation 'AWS.RDS.DBSubnetGroup'
+  }
+  deploymentNode aws_redshift_cluster {
+    notation 'AWS.Redshift.Cluster'
+  }
+  deploymentNode aws_redshift_cluster_parameter_group {
+    notation 'AWS.Redshift.ClusterParameterGroup'
+  }
+  deploymentNode aws_redshift_cluster_subnet_group {
+    notation 'AWS.Redshift.ClusterSubnetGroup'
+  }
+  deploymentNode aws_redshift_event_subscription {
+    notation 'AWS.Redshift.EventSubscription'
+  }
+  deploymentNode aws_redshift_serverless_namespace {
+    notation 'AWS.RedshiftServerless.Namespace'
+  }
+  deploymentNode aws_redshift_serverless_workgroup {
+    notation 'AWS.RedshiftServerless.Workgroup'
+  }
+  deploymentNode aws_re_post_space_space {
+    notation 'AWS.RePostSpace.Space'
+  }
+  deploymentNode aws_resource_explorer_index {
+    notation 'AWS.ResourceExplorer.Index'
+  }
+  deploymentNode aws_resource_explorer_view {
+    notation 'AWS.ResourceExplorer.View'
+  }
+  deploymentNode aws_resource_groups_group {
+    notation 'AWS.ResourceGroups.Group'
+  }
+  deploymentNode aws_roles_anywhere_crl {
+    notation 'AWS.RolesAnywhere.Crl'
+  }
+  deploymentNode aws_roles_anywhere_profile {
+    notation 'AWS.RolesAnywhere.Profile'
+  }
+  deploymentNode aws_roles_anywhere_trust_anchor {
+    notation 'AWS.RolesAnywhere.TrustAnchor'
+  }
+  deploymentNode aws_route53_health_check {
+    notation 'AWS.Route53.HealthCheck'
+  }
+  deploymentNode aws_route53_hosted_zone {
+    notation 'AWS.Route53.HostedZone'
+  }
+  deploymentNode aws_route53_query_logging_config {
+    notation 'AWS.Route53.QueryLoggingConfig'
+  }
+  deploymentNode aws_route53_record {
+    notation 'AWS.Route53.Record'
+  }
+  deploymentNode aws_route53_records {
+    notation 'AWS.Route53.Records'
+  }
+  deploymentNode aws_route53_vpc_association_authorization {
+    notation 'AWS.Route53.VpcAssociationAuthorization'
+  }
+  deploymentNode aws_route53_zone_vpc_association {
+    notation 'AWS.Route53.ZoneVpcAssociation'
+  }
+  deploymentNode aws_route53_profiles_profile {
+    notation 'AWS.Route53Profiles.Profile'
+  }
+  deploymentNode aws_route53_profiles_profile_association {
+    notation 'AWS.Route53Profiles.ProfileAssociation'
+  }
+  deploymentNode aws_route53_profiles_profile_resource_association {
+    notation 'AWS.Route53Profiles.ProfileResourceAssociation'
+  }
+  deploymentNode aws_route53_resolver_resolver_endpoint {
+    notation 'AWS.Route53Resolver.ResolverEndpoint'
+  }
+  deploymentNode aws_route53_resolver_resolver_rule {
+    notation 'AWS.Route53Resolver.ResolverRule'
+  }
+  deploymentNode aws_route53_resolver_resolver_rule_association {
+    notation 'AWS.Route53Resolver.ResolverRuleAssociation'
+  }
+  deploymentNode aws_rum_app_monitor {
+    notation 'AWS.RUM.AppMonitor'
+  }
+  deploymentNode aws_rum_metrics_destination {
+    notation 'AWS.RUM.MetricsDestination'
+  }
+  deploymentNode aws_rum_resource_policy {
+    notation 'AWS.RUM.ResourcePolicy'
+  }
+  deploymentNode aws_s3_bucket {
+    notation 'AWS.S3.Bucket'
+  }
+  deploymentNode aws_s3_control_access_point {
+    notation 'AWS.S3Control.AccessPoint'
+  }
+  deploymentNode aws_s3_control_access_point_policy {
+    notation 'AWS.S3Control.AccessPointPolicy'
+  }
+  deploymentNode aws_s3_control_multi_region_access_point {
+    notation 'AWS.S3Control.MultiRegionAccessPoint'
+  }
+  deploymentNode aws_s3_control_object_lambda_access_point {
+    notation 'AWS.S3Control.ObjectLambdaAccessPoint'
+  }
+  deploymentNode aws_s3_control_storage_lens_configuration {
+    notation 'AWS.S3Control.StorageLensConfiguration'
+  }
+  deploymentNode aws_s3_files_access_point {
+    notation 'AWS.S3Files.AccessPoint'
+  }
+  deploymentNode aws_s3_files_file_system {
+    notation 'AWS.S3Files.FileSystem'
+  }
+  deploymentNode aws_s3_tables_namespace {
+    notation 'AWS.S3Tables.Namespace'
+  }
+  deploymentNode aws_s3_tables_table {
+    notation 'AWS.S3Tables.Table'
+  }
+  deploymentNode aws_s3_tables_table_bucket {
+    notation 'AWS.S3Tables.TableBucket'
+  }
+  deploymentNode aws_s3_vectors_index {
+    notation 'AWS.S3Vectors.Index'
+  }
+  deploymentNode aws_s3_vectors_vector_bucket {
+    notation 'AWS.S3Vectors.VectorBucket'
+  }
+  deploymentNode aws_sage_maker_cluster {
+    notation 'AWS.SageMaker.Cluster'
+  }
+  deploymentNode aws_sage_maker_cluster_scheduler_config {
+    notation 'AWS.SageMaker.ClusterSchedulerConfig'
+  }
+  deploymentNode aws_sage_maker_compute_quota {
+    notation 'AWS.SageMaker.ComputeQuota'
+  }
+  deploymentNode aws_sage_maker_endpoint {
+    notation 'AWS.SageMaker.Endpoint'
+  }
+  deploymentNode aws_sage_maker_endpoint_config {
+    notation 'AWS.SageMaker.EndpointConfig'
+  }
+  deploymentNode aws_sage_maker_feature_group {
+    notation 'AWS.SageMaker.FeatureGroup'
+  }
+  deploymentNode aws_sage_maker_model {
+    notation 'AWS.SageMaker.Model'
+  }
+  deploymentNode aws_scheduler_schedule {
+    notation 'AWS.Scheduler.Schedule'
+  }
+  deploymentNode aws_scheduler_schedule_group {
+    notation 'AWS.Scheduler.ScheduleGroup'
+  }
+  deploymentNode aws_schemas_discoverer {
+    notation 'AWS.Schemas.Discoverer'
+  }
+  deploymentNode aws_schemas_registry {
+    notation 'AWS.Schemas.Registry'
+  }
+  deploymentNode aws_schemas_schema {
+    notation 'AWS.Schemas.Schema'
+  }
+  deploymentNode aws_secrets_manager_rotation_schedule {
+    notation 'AWS.SecretsManager.RotationSchedule'
+  }
+  deploymentNode aws_secrets_manager_secret {
+    notation 'AWS.SecretsManager.Secret'
+  }
+  deploymentNode aws_security_hub_action_target {
+    notation 'AWS.SecurityHub.ActionTarget'
+  }
+  deploymentNode aws_security_hub_automation_rule {
+    notation 'AWS.SecurityHub.AutomationRule'
+  }
+  deploymentNode aws_security_hub_finding_aggregator {
+    notation 'AWS.SecurityHub.FindingAggregator'
+  }
+  deploymentNode aws_security_hub_hub {
+    notation 'AWS.SecurityHub.Hub'
+  }
+  deploymentNode aws_security_hub_insight {
+    notation 'AWS.SecurityHub.Insight'
+  }
+  deploymentNode aws_security_lake_aws_log_source {
+    notation 'AWS.SecurityLake.AwsLogSource'
+  }
+  deploymentNode aws_security_lake_custom_log_source {
+    notation 'AWS.SecurityLake.CustomLogSource'
+  }
+  deploymentNode aws_security_lake_data_lake {
+    notation 'AWS.SecurityLake.DataLake'
+  }
+  deploymentNode aws_security_lake_exception_subscription {
+    notation 'AWS.SecurityLake.ExceptionSubscription'
+  }
+  deploymentNode aws_security_lake_subscriber {
+    notation 'AWS.SecurityLake.Subscriber'
+  }
+  deploymentNode aws_security_lake_subscriber_notification {
+    notation 'AWS.SecurityLake.SubscriberNotification'
+  }
+  deploymentNode aws_service_catalog_portfolio {
+    notation 'AWS.ServiceCatalog.Portfolio'
+  }
+  deploymentNode aws_service_catalog_portfolio_product_association {
+    notation 'AWS.ServiceCatalog.PortfolioProductAssociation'
+  }
+  deploymentNode aws_service_catalog_principal_portfolio_association {
+    notation 'AWS.ServiceCatalog.PrincipalPortfolioAssociation'
+  }
+  deploymentNode aws_service_catalog_product {
+    notation 'AWS.ServiceCatalog.Product'
+  }
+  deploymentNode aws_service_quotas_service_quota_increase_request {
+    notation 'AWS.ServiceQuotas.ServiceQuotaIncreaseRequest'
+  }
+  deploymentNode aws_ses_account_settings {
+    notation 'AWS.SES.AccountSettings'
+  }
+  deploymentNode aws_ses_active_receipt_rule_set {
+    notation 'AWS.SES.ActiveReceiptRuleSet'
+  }
+  deploymentNode aws_ses_configuration_set {
+    notation 'AWS.SES.ConfigurationSet'
+  }
+  deploymentNode aws_ses_configuration_set_event_destination {
+    notation 'AWS.SES.ConfigurationSetEventDestination'
+  }
+  deploymentNode aws_ses_contact {
+    notation 'AWS.SES.Contact'
+  }
+  deploymentNode aws_ses_contact_list {
+    notation 'AWS.SES.ContactList'
+  }
+  deploymentNode aws_ses_custom_verification_email_template {
+    notation 'AWS.SES.CustomVerificationEmailTemplate'
+  }
+  deploymentNode aws_ses_dedicated_ip_pool {
+    notation 'AWS.SES.DedicatedIpPool'
+  }
+  deploymentNode aws_ses_email_identity {
+    notation 'AWS.SES.EmailIdentity'
+  }
+  deploymentNode aws_ses_email_identity_policy {
+    notation 'AWS.SES.EmailIdentityPolicy'
+  }
+  deploymentNode aws_ses_email_template {
+    notation 'AWS.SES.EmailTemplate'
+  }
+  deploymentNode aws_ses_multi_region_endpoint {
+    notation 'AWS.SES.MultiRegionEndpoint'
+  }
+  deploymentNode aws_ses_receipt_filter {
+    notation 'AWS.SES.ReceiptFilter'
+  }
+  deploymentNode aws_ses_receipt_rule {
+    notation 'AWS.SES.ReceiptRule'
+  }
+  deploymentNode aws_ses_receipt_rule_set {
+    notation 'AWS.SES.ReceiptRuleSet'
+  }
+  deploymentNode aws_ses_tenant {
+    notation 'AWS.SES.Tenant'
+  }
+  deploymentNode aws_ses_tenant_resource_association {
+    notation 'AWS.SES.TenantResourceAssociation'
+  }
+  deploymentNode aws_shield_protection {
+    notation 'AWS.Shield.Protection'
+  }
+  deploymentNode aws_shield_protection_group {
+    notation 'AWS.Shield.ProtectionGroup'
+  }
+  deploymentNode aws_shield_subscription {
+    notation 'AWS.Shield.Subscription'
+  }
+  deploymentNode aws_signer_profile_permission {
+    notation 'AWS.Signer.ProfilePermission'
+  }
+  deploymentNode aws_signer_signing_profile {
+    notation 'AWS.Signer.SigningProfile'
+  }
+  deploymentNode aws_simple_db_domain {
+    notation 'AWS.SimpleDB.Domain'
+  }
+  deploymentNode aws_sns_platform_application {
+    notation 'AWS.SNS.PlatformApplication'
+  }
+  deploymentNode aws_sns_subscription {
+    notation 'AWS.SNS.Subscription'
+  }
+  deploymentNode aws_sns_topic {
+    notation 'AWS.SNS.Topic'
+  }
+  deploymentNode aws_social_messaging_linked_whats_app_business_account {
+    notation 'AWS.SocialMessaging.LinkedWhatsAppBusinessAccount'
+  }
+  deploymentNode aws_sqs_queue {
+    notation 'AWS.SQS.Queue'
+  }
+  deploymentNode aws_ssm_parameter {
+    notation 'AWS.SSM.Parameter'
+  }
+  deploymentNode aws_ssmcontacts_contact {
+    notation 'AWS.SSMContacts.Contact'
+  }
+  deploymentNode aws_ssmcontacts_contact_channel {
+    notation 'AWS.SSMContacts.ContactChannel'
+  }
+  deploymentNode aws_ssmcontacts_plan {
+    notation 'AWS.SSMContacts.Plan'
+  }
+  deploymentNode aws_ssmcontacts_rotation {
+    notation 'AWS.SSMContacts.Rotation'
+  }
+  deploymentNode aws_ssmincidents_replication_set {
+    notation 'AWS.SSMIncidents.ReplicationSet'
+  }
+  deploymentNode aws_ssmincidents_response_plan {
+    notation 'AWS.SSMIncidents.ResponsePlan'
+  }
+  deploymentNode aws_step_functions_activity {
+    notation 'AWS.StepFunctions.Activity'
+  }
+  deploymentNode aws_step_functions_state_machine {
+    notation 'AWS.StepFunctions.StateMachine'
+  }
+  deploymentNode aws_synthetics_canary {
+    notation 'AWS.Synthetics.Canary'
+  }
+  deploymentNode aws_synthetics_group {
+    notation 'AWS.Synthetics.Group'
+  }
+  deploymentNode aws_textract_adapter {
+    notation 'AWS.Textract.Adapter'
+  }
+  deploymentNode aws_timestream_database {
+    notation 'AWS.Timestream.Database'
+  }
+  deploymentNode aws_timestream_db_instance {
+    notation 'AWS.Timestream.DbInstance'
+  }
+  deploymentNode aws_timestream_scheduled_query {
+    notation 'AWS.Timestream.ScheduledQuery'
+  }
+  deploymentNode aws_timestream_table {
+    notation 'AWS.Timestream.Table'
+  }
+  deploymentNode aws_transfer_server {
+    notation 'AWS.Transfer.Server'
+  }
+  deploymentNode aws_transfer_user {
+    notation 'AWS.Transfer.User'
+  }
+  deploymentNode aws_translate_parallel_data {
+    notation 'AWS.Translate.ParallelData'
+  }
+  deploymentNode aws_translate_terminology {
+    notation 'AWS.Translate.Terminology'
+  }
+  deploymentNode aws_verified_permissions_identity_source {
+    notation 'AWS.VerifiedPermissions.IdentitySource'
+  }
+  deploymentNode aws_verified_permissions_policy {
+    notation 'AWS.VerifiedPermissions.Policy'
+  }
+  deploymentNode aws_verified_permissions_policy_store {
+    notation 'AWS.VerifiedPermissions.PolicyStore'
+  }
+  deploymentNode aws_verified_permissions_policy_store_alias {
+    notation 'AWS.VerifiedPermissions.PolicyStoreAlias'
+  }
+  deploymentNode aws_verified_permissions_policy_template {
+    notation 'AWS.VerifiedPermissions.PolicyTemplate'
+  }
+  deploymentNode aws_verified_permissions_schema {
+    notation 'AWS.VerifiedPermissions.Schema'
+  }
+  deploymentNode aws_vpc_lattice_access_log_subscription {
+    notation 'AWS.VpcLattice.AccessLogSubscription'
+  }
+  deploymentNode aws_vpc_lattice_auth_policy {
+    notation 'AWS.VpcLattice.AuthPolicy'
+  }
+  deploymentNode aws_vpc_lattice_listener {
+    notation 'AWS.VpcLattice.Listener'
+  }
+  deploymentNode aws_vpc_lattice_resource_policy {
+    notation 'AWS.VpcLattice.ResourcePolicy'
+  }
+  deploymentNode aws_vpc_lattice_rule {
+    notation 'AWS.VpcLattice.Rule'
+  }
+  deploymentNode aws_vpc_lattice_service {
+    notation 'AWS.VpcLattice.Service'
+  }
+  deploymentNode aws_vpc_lattice_service_network {
+    notation 'AWS.VpcLattice.ServiceNetwork'
+  }
+  deploymentNode aws_vpc_lattice_service_network_service_association {
+    notation 'AWS.VpcLattice.ServiceNetworkServiceAssociation'
+  }
+  deploymentNode aws_vpc_lattice_service_network_vpc_association {
+    notation 'AWS.VpcLattice.ServiceNetworkVpcAssociation'
+  }
+  deploymentNode aws_vpc_lattice_target_group {
+    notation 'AWS.VpcLattice.TargetGroup'
+  }
+  deploymentNode aws_wafv2_ipset {
+    notation 'AWS.WAFv2.IPSet'
+  }
+  deploymentNode aws_wafv2_logging_configuration {
+    notation 'AWS.WAFv2.LoggingConfiguration'
+  }
+  deploymentNode aws_wafv2_regex_pattern_set {
+    notation 'AWS.WAFv2.RegexPatternSet'
+  }
+  deploymentNode aws_wafv2_rule_group {
+    notation 'AWS.WAFv2.RuleGroup'
+  }
+  deploymentNode aws_wafv2_web_acl {
+    notation 'AWS.WAFv2.WebACL'
+  }
+  deploymentNode aws_wafv2_web_aclassociation {
+    notation 'AWS.WAFv2.WebACLAssociation'
+  }
+  deploymentNode aws_website_asset_deployment {
+    notation 'AWS.Website.AssetDeployment'
+  }
+  deploymentNode aws_xray_group {
+    notation 'AWS.XRay.Group'
+  }
+  deploymentNode aws_xray_resource_policy {
+    notation 'AWS.XRay.ResourcePolicy'
+  }
+  deploymentNode aws_xray_sampling_rule {
+    notation 'AWS.XRay.SamplingRule'
+  }
+}

@@ -1,0 +1,64 @@
+views {
+  view index {
+    title 'Shortener — landscape'
+    include *
+    include shortener.*
+  }
+
+  // A scoped view: `of` narrows it to one element and its neighbours.
+  view inside of shortener {
+    title 'Inside the shortener'
+    include *
+    // Style by tag, so the request path stands out from the async side.
+    style element.tag = #hot-path { color green }
+    style element.tag = #async { color amber; opacity 40% }
+  }
+
+  // Filtering with `where` — the modern predicate form.
+  view request_path {
+    title 'Request path only'
+    include shortener.* where tag is #hot-path
+    include visitor -> shortener.redirect
+  }
+
+  deployment view prod_topology {
+    title 'Cloudflare — production'
+    include shortener_prod.**
+    autoLayout LeftRight
+  }
+
+  deployment view both_stages {
+    title 'Both stages'
+    include shortener_prod.**
+    include shortener_staging.**
+  }
+
+  // A dynamic view: the steps are authored here and exist only in this view.
+  // `alt` / `opt` are flow-control blocks — they render as UML frames in sequence variant.
+  dynamic view resolve {
+    title 'Resolving a short link'
+    variant sequence
+
+    visitor -> shortener.redirect 'GET /abc123'
+    alt {
+      when 'cached' {
+        shortener.redirect -> shortener.cache 'get(abc123)'
+        shortener.redirect <- shortener.cache 'https://…'
+      }
+      else 'cold' {
+        shortener.redirect -> shortener.cache 'get(abc123)'
+        shortener.redirect <- shortener.cache 'miss'
+        shortener.redirect -> shortener.links 'SELECT url WHERE slug = ?'
+        shortener.redirect <- shortener.links 'https://…'
+        shortener.redirect -> shortener.cache 'put, 1h ttl'
+      }
+    }
+    visitor <- shortener.redirect '302 Location'
+
+    // Off the request path, so the visitor is not waiting on it.
+    opt 'fire and forget' {
+      shortener.redirect -> shortener.clicks 'enqueue {slug, ts, ua}'
+      shortener.clicks -> shortener.analytics 'batch of 100'
+    }
+  }
+}

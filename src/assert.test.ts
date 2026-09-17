@@ -6,8 +6,8 @@ import { matchers } from "./vitest.ts";
 
 expect.extend(matchers);
 
-const graph = await openStack({ entrypoint: "example/alchemy.run.ts", stage: "prod" });
-const model = await (await LikeC4.fromWorkspace("example")).computedModel();
+const graph = await openStack({ entrypoint: "examples/link-shortener/alchemy.run.ts", stage: "prod" });
+const model = await (await LikeC4.fromWorkspace("examples/link-shortener/docs/architecture")).computedModel();
 
 describe("reflexion", () => {
   it("the example converges: every resource is claimed by an instanceOf", () => {
