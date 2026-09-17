@@ -77,58 +77,57 @@ export const stackGraph = (opts: OpenOptions = {}): Effect.Effect<StackGraph> =>
   // Placeholders satisfy the lookup; real values, when present, are left alone.
   process.env.CLOUDFLARE_API_TOKEN ??= "placeholder";
   process.env.CLOUDFLARE_ACCOUNT_ID ??= "placeholder";
-  return (
-    Effect.gen(function* () {
-      const session = yield* Alchemist.open({ entrypoint: opts.entrypoint, stage: opts.stage }, { dev: true });
-      const stack = session.stack as {
-        name: string;
-        stage: string;
-        resources: Record<string, ResourceLike>;
-        bindings: Record<string, readonly Binding[]>;
-      };
+  return Effect.gen(function* () {
+    const session = yield* Alchemist.open({ entrypoint: opts.entrypoint, stage: opts.stage }, { dev: true });
+    const stack = session.stack as {
+      name: string;
+      stage: string;
+      resources: Record<string, ResourceLike>;
+      bindings: Record<string, readonly Binding[]>;
+    };
 
-      const resources = Object.values(stack.resources).map(
-        (r): StackResource => ({
-          type: r.Type,
-          fqn: r.FQN,
-          logicalId: r.LogicalId,
-          namespace: namespacePath(r.Namespace),
-          name: typeof (r.Props as { name?: unknown })?.name === "string" ? (r.Props as { name: string }).name : undefined,
-        }),
-      );
-      const byName = new Map(resources.flatMap((r) => (r.name ? [[r.name, r.fqn] as const] : [])));
+    const resources = Object.values(stack.resources).map(
+      (r): StackResource => ({
+        type: r.Type,
+        fqn: r.FQN,
+        logicalId: r.LogicalId,
+        namespace: namespacePath(r.Namespace),
+        name:
+          typeof (r.Props as { name?: unknown })?.name === "string" ? (r.Props as { name: string }).name : undefined,
+      }),
+    );
+    const byName = new Map(resources.flatMap((r) => (r.name ? [[r.name, r.fqn] as const] : [])));
 
-      const edges: StackEdge[] = [];
-      const seen = new Set<string>();
-      const add = (e: StackEdge) => {
-        const key = `${e.from}|${e.to}|${e.kind}|${e.sid ?? ""}`;
-        if (e.from !== e.to && !seen.has(key)) {
-          seen.add(key);
-          edges.push(e);
-        }
-      };
-
-      for (const r of Object.values(stack.resources)) {
-        // Bindings first: they carry the kind. Each binding is walked on its own so the edge is
-        // attributed to the right `env` key.
-        for (const b of stack.bindings[r.FQN] ?? []) {
-          for (const wire of b.data.bindings) {
-            const targets = upstream(wire);
-            // A Durable Object binding names its host script instead of referencing it.
-            const script = wire.scriptName ?? wire.service;
-            if (targets.length === 0 && typeof script === "string" && byName.has(script))
-              targets.push(byName.get(script) as string);
-            for (const to of targets) add({ from: r.FQN, to, kind: wire.type, sid: b.sid });
-          }
-        }
-        // Then plain prop references not already covered by a binding.
-        for (const to of upstream(r.Props))
-          if (!edges.some((e) => e.from === r.FQN && e.to === to)) add({ from: r.FQN, to, kind: "prop", sid: undefined });
+    const edges: StackEdge[] = [];
+    const seen = new Set<string>();
+    const add = (e: StackEdge) => {
+      const key = `${e.from}|${e.to}|${e.kind}|${e.sid ?? ""}`;
+      if (e.from !== e.to && !seen.has(key)) {
+        seen.add(key);
+        edges.push(e);
       }
+    };
 
-      return { name: stack.name, stage: stack.stage, resources, edges };
-    }).pipe(Effect.scoped, Effect.provide(Alchemist.layer())) as Effect.Effect<StackGraph>
-  );
+    for (const r of Object.values(stack.resources)) {
+      // Bindings first: they carry the kind. Each binding is walked on its own so the edge is
+      // attributed to the right `env` key.
+      for (const b of stack.bindings[r.FQN] ?? []) {
+        for (const wire of b.data.bindings) {
+          const targets = upstream(wire);
+          // A Durable Object binding names its host script instead of referencing it.
+          const script = wire.scriptName ?? wire.service;
+          if (targets.length === 0 && typeof script === "string" && byName.has(script))
+            targets.push(byName.get(script) as string);
+          for (const to of targets) add({ from: r.FQN, to, kind: wire.type, sid: b.sid });
+        }
+      }
+      // Then plain prop references not already covered by a binding.
+      for (const to of upstream(r.Props))
+        if (!edges.some((e) => e.from === r.FQN && e.to === to)) add({ from: r.FQN, to, kind: "prop", sid: undefined });
+    }
+
+    return { name: stack.name, stage: stack.stage, resources, edges };
+  }).pipe(Effect.scoped, Effect.provide(Alchemist.layer())) as Effect.Effect<StackGraph>;
 };
 
 /** Promise form, for scripts. */

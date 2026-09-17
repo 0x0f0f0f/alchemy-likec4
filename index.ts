@@ -9,9 +9,17 @@
  *   import { openStack, buildDeployment } from "alchemy-likec4";
  *   await Bun.write("infra.gen.c4", buildDeployment(await openStack({ stage: "prod" })));
  */
+export { assertConverges, type Baseline, freeze, newViolations, type Reflexion, reflexion } from "./src/assert.ts";
 export { bindingKinds, toRelationshipKind } from "./src/bindings.ts";
 export { buildDeployment, buildSpecification, buildStackSpecification, toIdentifier, toTag } from "./src/build.ts";
 export { categoriesFor } from "./src/categories.ts";
 export { type AlchemyResource, discoverProviders, extractResources } from "./src/extract.ts";
 export { type GenerateOptions, type GenerateResult, generateSpecs } from "./src/generate.ts";
-export { type OpenOptions, openStack, type StackEdge, type StackGraph, stackGraph, type StackResource } from "./src/stack.ts";
+export {
+  type OpenOptions,
+  openStack,
+  type StackEdge,
+  type StackGraph,
+  type StackResource,
+  stackGraph,
+} from "./src/stack.ts";

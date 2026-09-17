@@ -9,7 +9,15 @@ describe("openStack", () => {
   it("compiles the stack without deploying it", () => {
     expect(graph.name).toBe("Shortener");
     expect(graph.stage).toBe("prod");
-    expect(graph.resources.map((r) => r.fqn).sort()).toEqual(["analytics", "api", "clicks", "hot", "links", "redirect", "reports"]);
+    expect(graph.resources.map((r) => r.fqn).sort()).toEqual([
+      "analytics",
+      "api",
+      "clicks",
+      "hot",
+      "links",
+      "redirect",
+      "reports",
+    ]);
   });
 
   it("identifies each resource by the same canonical type the specification uses", () => {
@@ -25,7 +33,12 @@ describe("openStack", () => {
 
   it("recovers the Durable Object edge alchemy's own graph omits", () => {
     // A DO binding names its host script; nothing in alchemy's dependency graph links them.
-    expect(graph.edges).toContainEqual({ from: "analytics", to: "api", kind: "durable_object_namespace", sid: "COUNTER" });
+    expect(graph.edges).toContainEqual({
+      from: "analytics",
+      to: "api",
+      kind: "durable_object_namespace",
+      sid: "COUNTER",
+    });
   });
 
   it("emits no edge for a value binding, so secrets are never read", () => {
@@ -49,7 +62,9 @@ describe("buildDeployment", () => {
   });
 
   it("types relations by binding kind", () => {
-    expect(dsl).toInclude("shortener_prod.analytics -[durable_object_namespace_binding]-> shortener_prod.api 'COUNTER'");
+    expect(dsl).toInclude(
+      "shortener_prod.analytics -[durable_object_namespace_binding]-> shortener_prod.api 'COUNTER'",
+    );
     expect(dsl).toInclude("-[d1_binding]->");
   });
 

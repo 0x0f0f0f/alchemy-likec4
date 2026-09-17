@@ -130,7 +130,11 @@ describe("buildSpecification", () => {
   });
 
   it("can be asked for kinds only", () => {
-    const bare = buildSpecification(resources, { alchemyVersion: "test", provider: "Cloudflare", includeRelationships: false });
+    const bare = buildSpecification(resources, {
+      alchemyVersion: "test",
+      provider: "Cloudflare",
+      includeRelationships: false,
+    });
     expect(bare).not.toMatch(/^ {2}relationship /m);
     expect(bare.length).toBeLessThan(dsl.length);
   });
