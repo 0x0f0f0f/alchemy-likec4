@@ -1,8 +1,8 @@
 // GENERATED — DO NOT EDIT.
-// Stack MyApp, stage prod: 3 resources, 2 edges.
-// Regenerate with:  alchemy-likec4 deployment --project <dir> --stage prod
+// Stack MyApp, stage prod: 5 resources.
+// Regenerate with:  alchemy-likec4 generate --project <dir> --stage prod
 //
-// Map nodes onto the logical model from a hand-written file:  extend <node> { instanceOf <element> }
+// No relationships here on purpose: they are inherited from the model through `instanceOf`.
 
 deployment {
   my_app_prod = alchemy_stack 'MyApp (prod)' {
@@ -10,29 +10,39 @@ deployment {
       stage 'prod'
     }
     
-    photos = cloudflare_r2_bucket 'Photos' {
+    instanceOf my_app.photos {
       metadata {
         fqn 'Photos'
         type 'Cloudflare.R2.Bucket'
       }
     }
     
-    sessions = cloudflare_kv_namespace 'Sessions' {
+    instanceOf my_app.sessions {
       metadata {
         fqn 'Sessions'
         type 'Cloudflare.KV.Namespace'
       }
     }
     
-    api = cloudflare_worker 'Api' {
+    instanceOf my_app.api {
       metadata {
         fqn 'Api'
         type 'Cloudflare.Worker'
       }
     }
+    
+    instanceOf my_app.site {
+      metadata {
+        fqn 'Site'
+        type 'Cloudflare.Worker'
+      }
+    }
+    
+    instanceOf my_app.site_session {
+      metadata {
+        fqn 'SiteSession'
+        type 'Cloudflare.KV.Namespace'
+      }
+    }
   }
-  
-  my_app_prod.api -[r2_bucket_binding]-> my_app_prod.photos 'Photos'
-  
-  my_app_prod.api -[kv_namespace_binding]-> my_app_prod.sessions 'Sessions'
 }

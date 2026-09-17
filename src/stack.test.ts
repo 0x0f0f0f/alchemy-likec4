@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { buildDeployment } from "./build.ts";
+import { buildDeployment, buildModel, buildViews } from "./build.ts";
 import { deriveGraph, openStack } from "./stack.ts";
 
 // Compiles the example stack — no deploy, no network, no state on disk.
@@ -50,26 +50,90 @@ describe("openStack", () => {
 describe("buildDeployment", () => {
   const dsl = buildDeployment(graph);
 
-  it("roots the stack, stage in the id, and nests resources under it", () => {
+  it("roots the stack with the stage in the id", () => {
     expect(dsl).toInclude("shortener_prod = alchemy_stack 'Shortener (prod)'");
-    expect(dsl).toInclude("api = cloudflare_worker");
+    expect(dsl).toInclude("stage 'prod'");
   });
 
-  it("carries the join keys as metadata", () => {
+  it("deploys every resource as an instance of the logical model", () => {
+    expect(dsl).toInclude("instanceOf shortener.api");
+    expect([...dsl.matchAll(/^ {4}instanceOf /gm)].length).toBe(graph.resources.length);
+  });
+
+  it("carries the join keys as metadata, because instance metadata replaces the element's", () => {
     expect(dsl).toInclude("fqn 'api'");
     expect(dsl).toInclude("type 'Cloudflare.Worker'");
     expect(dsl).toInclude("name 'shortener-api'");
   });
 
-  it("types relations by binding kind", () => {
-    expect(dsl).toInclude(
-      "shortener_prod.analytics -[durable_object_namespace_binding]-> shortener_prod.api 'COUNTER'",
-    );
-    expect(dsl).toInclude("-[d1_binding]->");
+  it("declares no relationships: LikeC4 inherits them from the model through instanceOf", () => {
+    expect(dsl).not.toInclude("->");
+    expect(dsl).not.toInclude("-[");
   });
 
-  it("declares no kinds — they come from the specification files", () => {
+  it("declares no kinds — they come from the model file", () => {
     expect(dsl).not.toInclude("specification {");
+  });
+});
+
+describe("buildModel", () => {
+  const dsl = buildModel(graph, {
+    alchemyVersion: "test",
+    kinds: [...new Set(graph.resources.map((r) => r.type))],
+    annotations: new Map([["Cloudflare.Worker", { category: "Workers & Compute", product: "Workers" }]]),
+    descriptions: new Map([["api", "Creates links."]]),
+  });
+
+  it("declares one element kind per used resource type, and nothing else", () => {
+    const kinds = [...dsl.matchAll(/^ {2}element (\w+)/gm)].map((m) => m[1]);
+    // Five resource types in the fixture, plus the stack container.
+    expect(kinds).toContain("cloudflare_worker");
+    expect(kinds).toContain("alchemy_stack");
+    expect(kinds).not.toContain("cloudflare_hyperdrive");
+    expect(kinds.length).toBe(new Set(graph.resources.map((r) => r.type)).size + 1);
+  });
+
+  it("styles each kind from its category and gives it the vendor icon", () => {
+    expect(dsl).toInclude("shape component");
+    expect(dsl).toInclude("icon tech:cloudflare-workers-icon");
+    expect(dsl).toInclude("#workers_compute");
+  });
+
+  it("uses alchemy's @product as the technology label", () => {
+    expect(dsl).toInclude("technology 'Workers'");
+  });
+
+  it("carries the JSDoc from the stack as the description", () => {
+    expect(dsl).toInclude("Creates links.");
+  });
+
+  it("puts every relationship in the model, typed by binding kind", () => {
+    expect(dsl).toInclude("shortener.analytics -[durable_object_namespace_binding]-> shortener.api 'COUNTER'");
+    expect(dsl).toInclude("-[d1_binding]->");
+    expect([...dsl.matchAll(/^ {2}shortener\.\w+ -/gm)].length).toBe(graph.edges.length);
+  });
+
+  it("declares only the binding kinds this stack wires", () => {
+    const declared = [...dsl.matchAll(/^ {2}relationship (\w+)/gm)].map((m) => m[1]);
+    expect(declared).toContain("d1_binding");
+    expect(declared).not.toContain("hyperdrive_binding");
+  });
+});
+
+describe("buildViews", () => {
+  const dsl = buildViews(graph, ["prod", "staging"]);
+
+  it("emits a landscape and one deployment view per stage", () => {
+    expect(dsl).toInclude("view shortener_landscape");
+    expect(dsl).toInclude("deployment view shortener_prod");
+    expect(dsl).toInclude("deployment view shortener_staging");
+  });
+
+  it("uses the children selector, because `.**` drops resources with no relationship", () => {
+    expect(dsl).toInclude("include shortener_prod, shortener_prod.*");
+    const includes = [...dsl.matchAll(/^ {4}include .+$/gm)].map((m) => m[0]);
+    expect(includes.length).toBe(3);
+    expect(includes.some((line) => line.includes(".**"))).toBe(false);
   });
 });
 
