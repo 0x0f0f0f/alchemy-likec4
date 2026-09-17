@@ -36,18 +36,19 @@
   "scripts": {
     "generate": "bun run src/cli.ts spec",
     "validate": "bun run src/cli.ts spec --outdir .validate && likec4 validate --json --no-layout .validate",
-    "example": "likec4 start example --port 5199",
-    "example:generate": "bun run src/cli.ts deployment --entrypoint example/alchemy.run.ts --stage prod && bun run src/cli.ts deployment --entrypoint example/alchemy.run.ts --stage staging",
-    "example:validate": "likec4 validate --json example",
+    "example": "likec4 start examples --port 5199",
+    "example:generate": "bun run src/cli.ts deployment --entrypoint examples/basic/alchemy.run.ts --stage prod && bun run src/cli.ts deployment --entrypoint examples/link-shortener/alchemy.run.ts --stage prod && bun run src/cli.ts deployment --entrypoint examples/link-shortener/alchemy.run.ts --stage staging",
+    "example:validate": "likec4 validate --json --no-layout examples",
     "test": "bun test",
     "lint": "biome check .",
     "check": "biome check . && knip",
-    "prepublishOnly": "bun run check && bun run generate && bun run example:generate && bun test"
+    "prepublishOnly": "bun run check && bun run generate && bun run example:generate && bun test",
+    "example:png": "likec4 export png examples/basic --flat --notation -o . && mv index.png screenshot.png"
   },
   "files": [
     "specs",
     "src",
-    "example",
+    "examples",
     "index.ts",
     "README.md"
   ],
