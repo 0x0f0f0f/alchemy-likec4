@@ -23,7 +23,10 @@ const say = (line: string) => Effect.sync(() => console.log(line));
 const spec = Command.make(
   "spec",
   {
-    outdir: Flag.string("outdir").pipe(Flag.withDescription("Directory for <provider>.spec.c4"), Flag.withDefault("specs")),
+    outdir: Flag.string("outdir").pipe(
+      Flag.withDescription("Directory for <provider>.spec.c4"),
+      Flag.withDefault("specs"),
+    ),
     provider: Flag.string("provider").pipe(Flag.withDescription("Only this provider, e.g. Cloudflare"), Flag.optional),
   },
   ({ outdir, provider }) =>
@@ -41,23 +44,33 @@ const spec = Command.make(
 const deployment = Command.make(
   "deployment",
   {
-    entrypoint: Flag.string("entrypoint").pipe(Flag.withDescription("Stack entrypoint"), Flag.withDefault("alchemy.run.ts")),
+    entrypoint: Flag.string("entrypoint").pipe(
+      Flag.withDescription("Stack entrypoint"),
+      Flag.withDefault("alchemy.run.ts"),
+    ),
     stage: Flag.string("stage").pipe(Flag.withDescription("Stage; only names derived from it change"), Flag.optional),
-    out: Flag.string("out").pipe(Flag.withDescription("Output file; default <stack>.<stage>.gen.c4 beside the entrypoint"), Flag.optional),
+    out: Flag.string("out").pipe(
+      Flag.withDescription("Output file; default <stack>.<stage>.gen.c4 beside the entrypoint"),
+      Flag.optional,
+    ),
   },
   ({ entrypoint, stage, out }) =>
     Effect.gen(function* () {
       const graph = yield* stackGraph({ entrypoint, stage: Option.getOrUndefined(stage) });
       const path = Option.getOrElse(out, () => `${dirname(entrypoint)}/${graph.name}.${graph.stage}.gen.c4`);
       yield* Effect.promise(() => Bun.write(path, buildDeployment(graph)));
-      yield* say(`${graph.name} @ ${graph.stage}: ${graph.resources.length} resources, ${graph.edges.length} edges → ${path}`);
+      yield* say(
+        `${graph.name} @ ${graph.stage}: ${graph.resources.length} resources, ${graph.edges.length} edges → ${path}`,
+      );
     }),
 ).pipe(Command.withDescription("Generate the deployment model from a stack, without deploying it"));
 
 const root = Command.make("alchemy-likec4", {}, () =>
   Effect.fail(new CliError.ShowHelp({ commandPath: ["alchemy-likec4"], errors: [] })),
 ).pipe(
-  Command.withDescription("LikeC4 from alchemy: the specification from its resources, the deployment model from a stack"),
+  Command.withDescription(
+    "LikeC4 from alchemy: the specification from its resources, the deployment model from a stack",
+  ),
   Command.withSubcommands([spec, deployment]),
 );
 

@@ -74,7 +74,7 @@ export const buildSpecification = (resources: readonly AlchemyResource[], opts: 
 
 /** The two container kinds a stack graph needs that no alchemy resource provides. Declared once,
  *  in their own generated file, so several stacks' `.gen.c4` files can share a project. */
-export const STACK_KINDS = { alchemy_stack: {}, alchemy_namespace: {} } as const;
+const STACK_KINDS = { alchemy_stack: {}, alchemy_namespace: {} } as const;
 
 export const buildStackSpecification = (): string =>
   generate(Builder.forSpecification({ deployments: STACK_KINDS }).builder.build());
@@ -88,7 +88,10 @@ export const buildStackSpecification = (): string =>
 export const buildDeployment = (graph: StackGraph): string => {
   const kinds = new Set(graph.resources.map((r) => toIdentifier(r.type)));
   const relationships = Object.fromEntries(
-    [...new Set(graph.edges.filter((e) => e.kind !== "prop").map((e) => toRelationshipKind(e.kind)))].map((k) => [k, {}]),
+    [...new Set(graph.edges.filter((e) => e.kind !== "prop").map((e) => toRelationshipKind(e.kind)))].map((k) => [
+      k,
+      {},
+    ]),
   );
 
   const { builder, deployment: d } = Builder.forSpecification({
@@ -96,7 +99,10 @@ export const buildDeployment = (graph: StackGraph): string => {
     relationships,
     metadataKeys: ["fqn", "type", "name", "stage"],
   });
-  const helpers = d as unknown as Record<string, (id: string, props?: object) => { with: (...ops: unknown[]) => unknown }>;
+  const helpers = d as unknown as Record<
+    string,
+    (id: string, props?: object) => { with: (...ops: unknown[]) => unknown }
+  >;
 
   // Stage in the id, so one file per stage can share a project without colliding.
   const stackId = toIdentifier(`${graph.name}_${graph.stage}`);
@@ -127,9 +133,10 @@ export const buildDeployment = (graph: StackGraph): string => {
   const built = builder
     .with(
       (d as unknown as { deployment: (...ops: unknown[]) => (b: unknown) => unknown }).deployment(
-        helpers.alchemy_stack!(stackId, { title: `${graph.name} (${graph.stage})`, metadata: { stage: graph.stage } }).with(
-          ...emit(root),
-        ),
+        helpers.alchemy_stack!(stackId, {
+          title: `${graph.name} (${graph.stage})`,
+          metadata: { stage: graph.stage },
+        }).with(...emit(root)),
         ...graph.edges.map((e) =>
           rel(byFqn.get(e.from)!, byFqn.get(e.to)!, {
             title: e.sid ?? "",
