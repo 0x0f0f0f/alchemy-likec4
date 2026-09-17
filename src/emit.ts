@@ -3,8 +3,8 @@
  *
  * Identifiers are flat snake_case with the provider kept: `Cloudflare.R2.Bucket` becomes
  * `cloudflare_r2_bucket`. Flat because LikeC4 identifiers cannot contain dots — dots are FQN
- * separators, so the canonical id is not a legal identifier. Provider kept because a bare
- * `bucket` collides the day a second provider is generated, and AWS has one.
+ * separators, so a canonical id is not a legal identifier. Provider kept because a bare
+ * `bucket` collides across providers, and AWS has one.
  */
 import type { AlchemyResource } from "./extract.ts";
 
@@ -17,29 +17,44 @@ export const toIdentifier = (type: string): string =>
     .join("_")
     .toLowerCase();
 
-/** Shape and icon by namespace. Deliberately coarse — a wrong-looking box is a cheap problem,
- *  and a per-resource table would be 241 hand-maintained rows, i.e. the thing we are avoiding. */
-const STYLE: ReadonlyArray<readonly [RegExp, { shape?: string; icon?: string; color?: string }]> = [
-  [/^Cloudflare\.(Worker|Container|Workflow|DynamicWorker)$/, { shape: "component", icon: "tech:cloudflare-workers", color: "amber" }],
-  [/^Cloudflare\.Workers\./, { shape: "component", icon: "tech:cloudflare-workers", color: "amber" }],
-  [/^Cloudflare\.Workflows?\./, { shape: "component", icon: "tech:cloudflare-workers", color: "amber" }],
-  [/^Cloudflare\.R2\./, { shape: "storage", icon: "tech:cloudflare", color: "indigo" }],
-  [/^Cloudflare\.KV\./, { shape: "storage", icon: "tech:cloudflare", color: "indigo" }],
-  [/^Cloudflare\.D1/, { shape: "storage", icon: "tech:sqlite", color: "indigo" }],
-  [/^Cloudflare\.Hyperdrive/, { shape: "storage", icon: "tech:cloudflare", color: "indigo" }],
-  [/^Cloudflare\.Queues\./, { shape: "queue", icon: "tech:cloudflare", color: "indigo" }],
-  [/^Cloudflare\.(Zone|DNS)\./, { shape: "rectangle", icon: "tech:cloudflare", color: "green" }],
-  [/^Cloudflare\.Email\./, { shape: "rectangle", icon: "tech:cloudflare", color: "green" }],
-  [/^Cloudflare\.(Access|Gateway|ApiShield|BotManagement|Turnstile)\./, { shape: "rectangle", icon: "tech:cloudflare", color: "red" }],
-  [/^Cloudflare\.ApiToken\./, { shape: "rectangle", icon: "tech:cloudflare", color: "red" }],
-];
+interface Style {
+  readonly shape?: string;
+  readonly color?: string;
+  readonly icon?: string;
+}
 
-const styleFor = (type: string) =>
-  STYLE.find(([re]) => re.test(type))?.[1] ?? { shape: "rectangle", icon: "tech:cloudflare" };
+/** Style per alchemy `@category`. Fifteen curated groups beat any namespace heuristic, and
+ *  they are alchemy's own — a new resource inherits the right look without us touching this. */
+const BY_CATEGORY: Readonly<Record<string, Style>> = {
+  "Workers & Compute": { shape: "component", color: "amber" },
+  "Developer Platform": { shape: "component", color: "amber" },
+  "Storage & Databases": { shape: "storage", color: "indigo" },
+  AI: { shape: "component", color: "indigo" },
+  Media: { shape: "storage", color: "indigo" },
+  Email: { shape: "rectangle", color: "green" },
+  "Domains & DNS": { shape: "rectangle", color: "green" },
+  Network: { shape: "rectangle", color: "green" },
+  "Cloudflare One (Zero Trust)": { shape: "rectangle", color: "red" },
+  "Application Security": { shape: "rectangle", color: "red" },
+  "Account & Identity": { shape: "rectangle", color: "red" },
+  "SSL/TLS & Certificates": { shape: "rectangle", color: "red" },
+  "Observability & Analytics": { shape: "rectangle", color: "slate" },
+  "Performance & Reliability": { shape: "rectangle", color: "slate" },
+  "Rules & Configuration": { shape: "rectangle", color: "slate" },
+};
 
-/** Binding kinds, as relationship kinds. Hand-listed, and that is the honest choice: alchemy
- *  models a binding as a property on a Worker's `env`, not as a resource, so there is nothing
- *  to reflect over. Twelve entries that change about once a year beats a fragile scrape. */
+/** Icons are sparse — LikeC4 ships a Cloudflare mark and a Workers mark, nothing per service. */
+const iconFor = (provider: string, category: string | undefined): string | undefined => {
+  if (provider !== "Cloudflare") return undefined;
+  return category === "Workers & Compute" || category === "Developer Platform"
+    ? "tech:cloudflare-workers"
+    : "tech:cloudflare";
+};
+
+/** Binding kinds, as relationship kinds. Hand-listed on purpose: alchemy models a binding as a
+ *  property on a Worker's `env`, not as a resource, so there is nothing to reflect over.
+ *  `Cloudflare.DurableObject` and `Cloudflare.Website.Astro` are the same story — plain factory
+ *  functions with no `.Type`. An Astro site IS a `cloudflare_worker` once deployed. */
 const RELATIONSHIPS: ReadonlyArray<readonly [string, string, string]> = [
   ["service_binding", "Service binding", "Worker-to-Worker, in-account, no public hop"],
   ["durable_object_binding", "Durable Object", "DO namespace, addressed by getByName"],
@@ -56,18 +71,19 @@ const RELATIONSHIPS: ReadonlyArray<readonly [string, string, string]> = [
 ];
 
 export interface EmitOptions {
-  /** Version of the package the resources came from — stamped in the header. */
   readonly alchemyVersion: string;
-  /** Provider label for the header, e.g. `Cloudflare`. */
   readonly provider: string;
+  /** Canonical type → alchemy `@category`. Absent entries fall back to a default style. */
+  readonly categories?: ReadonlyMap<string, string>;
   readonly includeStyles?: boolean;
+  /** Binding relationship kinds are Cloudflare-shaped, so only that provider emits them. */
   readonly includeRelationships?: boolean;
 }
 
 const indent = (n: number) => "  ".repeat(n);
 
 export const emitSpecification = (resources: readonly AlchemyResource[], opts: EmitOptions): string => {
-  const { alchemyVersion, provider, includeStyles = true, includeRelationships = true } = opts;
+  const { alchemyVersion, provider, categories, includeStyles = true, includeRelationships = true } = opts;
   const out: string[] = [];
 
   out.push(
@@ -80,40 +96,47 @@ export const emitSpecification = (resources: readonly AlchemyResource[], opts: E
     "// registers itself under. Unused kinds are harmless — LikeC4 validates a specification",
     "// with kinds nothing instantiates, so one shared file serves every repo.",
     "//",
-    "// Bindings are NOT here. alchemy models a binding as a property of a Worker's `env`",
-    "// rather than a resource, so `Cloudflare.DurableObject` and `Cloudflare.Email.SendEmail`",
-    "// have no `.Type`. They appear below as relationship kinds instead.",
+    "// Factories and bindings are NOT here: `DurableObject`, `Email.SendEmail` and",
+    "// `Website.Astro` are plain functions with no `.Type`. An Astro site IS a worker once",
+    "// deployed; bindings appear below as relationship kinds.",
     "",
     "specification {",
   );
 
-  // Group by namespace so each `// ── X ──` header appears exactly once. Sorting by
-  // canonical id alone interleaves root-level resources between namespaces.
+  // Grouped by category where known, else by namespace — so each header appears exactly once.
+  const groupOf = (r: AlchemyResource) => categories?.get(r.type) ?? r.namespace ?? "(root)";
   const grouped = [...resources].sort((a, b) => {
-    const ns = (a.namespace ?? "").localeCompare(b.namespace ?? "");
-    return ns !== 0 ? ns : a.name.localeCompare(b.name);
+    const g = groupOf(a).localeCompare(groupOf(b));
+    return g !== 0 ? g : a.type.localeCompare(b.type);
   });
 
-  let lastNs: string | undefined;
+  let lastGroup: string | undefined;
   for (const r of grouped) {
-    const ns = r.namespace ?? "(root)";
-    if (ns !== lastNs) {
-      out.push(`${indent(1)}// ── ${ns} ──`);
-      lastNs = ns;
+    const group = groupOf(r);
+    if (group !== lastGroup) {
+      out.push(`${indent(1)}// ── ${group} ──`);
+      lastGroup = group;
     }
+
     const id = toIdentifier(r.type);
-    const alias = r.exportPath !== r.type.replace(/^[^.]+\./, "") ? `  (exported as ${r.exportPath})` : "";
+    const shortType = r.type.replace(/^[^.]+\./, "");
+    const note = r.exportPath !== shortType ? ` // exported as ${r.exportPath}` : "";
+
     if (!includeStyles) {
-      out.push(`${indent(1)}deploymentNode ${id}${alias ? ` //${alias}` : ""}`);
+      out.push(`${indent(1)}deploymentNode ${id}${note}`);
       continue;
     }
-    const s = styleFor(r.type);
-    out.push(`${indent(1)}deploymentNode ${id} {${alias ? ` //${alias}` : ""}`);
+
+    const category = categories?.get(r.type);
+    const style = (category && BY_CATEGORY[category]) ?? { shape: "rectangle" };
+    const icon = iconFor(provider, category);
+
+    out.push(`${indent(1)}deploymentNode ${id} {${note}`);
     out.push(`${indent(2)}notation '${r.type}'`);
     out.push(`${indent(2)}style {`);
-    if (s.shape) out.push(`${indent(3)}shape ${s.shape}`);
-    if (s.color) out.push(`${indent(3)}color ${s.color}`);
-    if (s.icon) out.push(`${indent(3)}icon ${s.icon}`);
+    if (style.shape) out.push(`${indent(3)}shape ${style.shape}`);
+    if (style.color) out.push(`${indent(3)}color ${style.color}`);
+    if (icon) out.push(`${indent(3)}icon ${icon}`);
     out.push(`${indent(2)}}`);
     out.push(`${indent(1)}}`);
   }

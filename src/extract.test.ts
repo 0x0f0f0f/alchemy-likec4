@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import * as Cloudflare from "alchemy/Cloudflare";
-import { extractResources } from "./extract.ts";
+import { discoverProviders, extractResources } from "./extract.ts";
+import { categoriesFor } from "./categories.ts";
 import { emitSpecification, toIdentifier } from "./emit.ts";
 
 const resources = extractResources(Cloudflare);
@@ -92,5 +93,33 @@ describe("emitSpecification", () => {
     expect(bare).not.toInclude("style {");
     expect(bare).not.toMatch(/^ {2}relationship /m);
     expect(bare.length).toBeLessThan(dsl.length);
+  });
+});
+
+describe("discoverProviders", () => {
+  it("reads providers off alchemy's own exports map", async () => {
+    const providers = await discoverProviders("node_modules/alchemy");
+    const names = providers.map((p) => p.name);
+    expect(names).toContain("Cloudflare");
+    expect(names).toContain("AWS");
+    // runtime helpers are not providers
+    expect(names).not.toContain("Runtime");
+    expect(names).not.toContain("Stack");
+    expect(names).not.toContain("Test");
+  });
+});
+
+describe("categoriesFor", () => {
+  it("resolves every Cloudflare resource to one of alchemy's curated categories", () => {
+    const types = resources.map((r) => r.type);
+    const cats = categoriesFor("node_modules/alchemy/src/Cloudflare", types);
+    // A path guess resolves 205/241; finding the declaring file resolves all of them.
+    expect(cats.size).toBe(resources.length);
+    expect(cats.get("Cloudflare.R2.Bucket")).toBe("Storage & Databases");
+    expect(cats.get("Cloudflare.Worker")).toBe("Workers & Compute");
+  });
+
+  it("returns an empty map rather than throwing when sources are absent", () => {
+    expect(categoriesFor("node_modules/alchemy/src/DoesNotExist", ["X"]).size).toBe(0);
   });
 });

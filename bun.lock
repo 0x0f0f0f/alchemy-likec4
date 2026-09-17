@@ -5,6 +5,7 @@
     "": {
       "name": "alchemy-likec4",
       "dependencies": {
+        "@alchemy.run/frontend-frameworks": "2.0.0-beta.77",
         "@effect/platform-bun": "4.0.0-rc.112",
         "@effect/platform-node": "4.0.0-rc.112",
         "@effect/platform-node-shared": "4.0.0-rc.112",
@@ -30,6 +31,8 @@
     "@alchemy.run/cloudflare-runtime": ["@alchemy.run/cloudflare-runtime@2.0.0-beta.77", "", { "dependencies": { "@alchemy.run/node-utils": "2.0.0-beta.77", "@cloudflare/unenv-preset": "^2.16.1", "@puppeteer/browsers": "^3.2.0", "capnp-es": "^0.0.16", "magic-string": "^0.30.21", "sharp": "^0.35.3", "unenv": "^2.0.0-rc.24", "workerd": "1.20260901.1", "yauzl": "^3.4.0" }, "peerDependencies": { "@distilled.cloud/cloudflare": "1.0.0-rc.9", "@effect/platform-bun": ">=4.0.0-rc.112 || >=4.0.0", "@effect/platform-node": ">=4.0.0-rc.112 || >=4.0.0", "effect": ">=4.0.0-rc.112 || >=4.0.0", "rolldown": "1.2.5", "vite": "^7.0.0 || ^8.0.0" }, "optionalPeers": ["@effect/platform-bun", "@effect/platform-node", "rolldown", "vite"] }, "sha512-RQGtSjhMNW9dvzm2D0mS/ujCMpejasFjXW9XKVq5ch50GyMLE7dfa/VuW9otMKM1pfTNuekLiMF352S04aAl0Q=="],
 
     "@alchemy.run/floci": ["@alchemy.run/floci@2.0.0-beta.77", "", { "peerDependencies": { "effect": ">=4.0.0-rc.112 || >=4.0.0" } }, "sha512-P+qf4/8MJ6Qgy28pDtdDAavxeDCn+TE3xTgvgT+d1zt6mOLkP9cxeI9C0u0UW7Q/OiLVqHToFc4FVrxYIkm6ig=="],
+
+    "@alchemy.run/frontend-frameworks": ["@alchemy.run/frontend-frameworks@2.0.0-beta.77", "", { "dependencies": { "@alchemy.run/cloudflare-runtime": "2.0.0-beta.77", "@distilled.cloud/cloudflare": "1.0.0-rc.9", "@effect/platform-node": ">=4.0.0-rc.112 || >=4.0.0", "esbuild": "^0.28.1", "fast-glob": "^3.3.2", "rolldown": "1.2.5" }, "peerDependencies": { "@effect/platform-bun": ">=4.0.0-rc.112 || >=4.0.0", "@octanejs/vite-plugin": ">=0.1.22", "@opennextjs/cloudflare": "1.20.1", "@sveltejs/kit": ">=3.0.0-next.9", "@vitejs/plugin-react": "^6.0.2", "astro": "^7.0.0", "effect": ">=4.0.0-rc.112 || >=4.0.0", "hono": "^4.12.14", "nuxt": ">=4.5.0", "vite": "^7.0.0 || ^8.0.0", "vocs": "2.8.2", "waku": "1.0.0-beta.7" }, "optionalPeers": ["@effect/platform-bun", "@octanejs/vite-plugin", "@opennextjs/cloudflare", "@sveltejs/kit", "@vitejs/plugin-react", "astro", "hono", "nuxt", "vite", "vocs", "waku"] }, "sha512-QZtRBmc8pVH5E4Axg2rxf2tRRYnNBhbQUb60MpsViWI5PtfRBomzyFoYfzpyidyiEdZsDhVF5N1jLpV7upR2vg=="],
 
     "@alchemy.run/node-utils": ["@alchemy.run/node-utils@2.0.0-beta.77", "", { "dependencies": { "chokidar": "^5.0.0", "rolldown": "1.2.5" } }, "sha512-+Z8hf9EAHMdgSVbB1O04nQLYVosElYhZtENhT4gIDCYcQrHUUu6BKpjof5P9x+tLpiR2eIOadTuGXi5KR3S/Sg=="],
 

@@ -74,3 +74,26 @@ export const extractResources = (namespace: object, maxDepth = 2): AlchemyResour
   walk(namespace, "", 0);
   return [...found.values()].sort((a, b) => a.type.localeCompare(b.type));
 };
+
+/** A provider namespace alchemy exports, e.g. `Cloudflare` at `alchemy/Cloudflare`. */
+export interface Provider {
+  readonly name: string;
+  /** Import specifier, e.g. `alchemy/Cloudflare`. */
+  readonly specifier: string;
+  /** Source root for `@category` lookup, if the package ships sources. */
+  readonly sourceDir: string;
+}
+
+/** Provider subpaths alchemy exports that are resource namespaces rather than runtime helpers.
+ *  Read from the package's own `exports` map, so a provider added upstream is picked up. */
+export const discoverProviders = async (alchemyPkgPath: string): Promise<Provider[]> => {
+  const pkg = JSON.parse(await Bun.file(`${alchemyPkgPath}/package.json`).text());
+  const NOT_A_PROVIDER =
+    /^\.$|^\.\/(bin|Alchemist|Auth|Bundle|Cli|Construct|ContentType|Drizzle|Endpoint|Output|Process|Runtime|SQLite|Server|Stack|State|TUI|Test|Util)/;
+
+  return Object.keys(pkg.exports ?? {})
+    .filter((k) => k.startsWith("./") && !k.includes("*") && !k.slice(2).includes("/") && !NOT_A_PROVIDER.test(k))
+    .map((k) => k.slice(2))
+    .sort()
+    .map((name) => ({ name, specifier: `alchemy/${name}`, sourceDir: `${alchemyPkgPath}/src/${name}` }));
+};
