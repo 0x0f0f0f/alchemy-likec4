@@ -145,7 +145,6 @@ export const buildModel = (graph: StackGraph, opts: BuildOptions): string => {
   const children: unknown[] = [
     ...[...namespaces].map(([id, title]) => (h[NAMESPACE_KIND] as ElementHelper)(local(id), { title })),
     ...graph.resources.map((r) => {
-      const a = annotations.get(r.type);
       const description = descriptions.get(r.logicalId);
       return (h[toIdentifier(r.type)] as ElementHelper)(local(pathOf(root, r)), {
         title: r.logicalId,

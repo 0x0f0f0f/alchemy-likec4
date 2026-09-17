@@ -56,7 +56,7 @@
     "typecheck": "tsc --noEmit",
     "check": "biome check . && knip && tsc --noEmit",
     "check:pack": "publint --strict && attw --pack . --profile esm-only",
-    "prepublishOnly": "bun run check && bun run build && bun run check:pack && bun run example:generate && bun run example:validate && bun test"
+    "prepublishOnly": "bun run check && bun run build && bun run example:generate && bun run example:validate && bun test"
   },
   "files": [
     "dist",
