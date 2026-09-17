@@ -4,7 +4,7 @@ import * as Alchemy from "alchemy";
 import * as Cloudflare from "alchemy/Cloudflare";
 import * as Effect from "effect/Effect";
 
-const main = `${import.meta.dir}/workers/noop.ts`;
+const main = `${import.meta.dirname}/workers/noop.ts`;
 
 export default Alchemy.Stack(
   "Shortener",

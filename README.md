@@ -119,28 +119,63 @@ On LikeC4's side:
 
 ## Generate
 
+Runs on Node 20+ or Bun. npm, pnpm, yarn and bun all work.
+
 ```bash
-bun add -d alchemy-likec4
-alchemy-likec4 spec       --project docs/architecture               # kinds, for every provider alchemy ships
-alchemy-likec4 deployment --project docs/architecture --stage prod  # your stack, from ./alchemy.run.ts
+npm install -D alchemy-likec4
+npx alchemy-likec4 spec       --project docs/architecture               # kinds, for every provider alchemy ships
+npx alchemy-likec4 deployment --project docs/architecture --stage prod  # your stack, from ./alchemy.run.ts
 ```
 
-`--project` is required, and anything that is not a LikeC4 project is refused.
-If you need to create a LikeC4 project, create the directory, and create a `likec4.config.json` file
+Bun is the recommended runtime, because alchemy itself is bun-first:
 
-`echo '{ "name": "my-app" }' > docs/architecture/likec4.config.json`
+```bash
+bun add -d alchemy-likec4
+bunx alchemy-likec4 spec --project docs/architecture
+```
 
-Docs: https://likec4.dev/dsl/config/
+`--project` is required, and anything that is not a LikeC4 project is refused. To create one, make
+the directory and put a config file in it:
+
+```bash
+mkdir -p docs/architecture && echo '{ "name": "my-app" }' > docs/architecture/likec4.config.json
+```
 
 `spec --provider Cloudflare` limits the kinds to one provider. `deployment --entrypoint
 path/to/alchemy.run.ts --stage staging` reads another stack or stage; one file per stage.
 Commit `alchemy/`: the diff on an alchemy bump is the review.
 
+### While alchemy is in beta, pin the effect graph
+
+This is alchemy's constraint, not ours, and it bites `npm install alchemy` on its own. Effect 4 is
+a release candidate with breaking changes between builds, and alchemy's version ranges are open,
+so a fresh npm install resolves a newer effect than the alchemy beta was built against. The
+symptom is `TypeError: Config.string is not a function` on the first import.
+
+Add this to your `package.json` and the whole tree lands on one version:
+
+```json
+{
+  "overrides": {
+    "effect": "4.0.0-rc.112",
+    "@effect/platform-node": "4.0.0-rc.112",
+    "@effect/platform-bun": "4.0.0-rc.112",
+    "@effect/platform-node-shared": "4.0.0-rc.112"
+  }
+}
+```
+
+Use `resolutions` instead of `overrides` on yarn, and `pnpm.overrides` on pnpm. Any direct
+dependency on one of those packages has to be the exact same version, or npm refuses the override.
+Bun users need this less often, because `bun.lock` already holds one resolved version.
+
 From a script:
 
 ```ts
+import { writeFile } from "node:fs/promises";
 import { openStack, buildDeployment } from "alchemy-likec4";
-await Bun.write(
+
+await writeFile(
   "docs/architecture/alchemy/MyApp.prod.gen.c4",
   buildDeployment(await openStack({ stage: "prod" })),
 );

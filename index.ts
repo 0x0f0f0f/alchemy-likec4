@@ -7,7 +7,7 @@
  * own generator; nothing is typed by hand.
  *
  *   import { openStack, buildDeployment } from "alchemy-likec4";
- *   await Bun.write("infra.gen.c4", buildDeployment(await openStack({ stage: "prod" })));
+ *   await writeFile("infra.gen.c4", buildDeployment(await openStack({ stage: "prod" })));
  */
 export { assertConverges, type Baseline, freeze, newViolations, type Reflexion, reflexion } from "./src/assert.ts";
 export { bindingKinds, toRelationshipKind } from "./src/bindings.ts";

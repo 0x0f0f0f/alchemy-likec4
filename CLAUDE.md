@@ -19,6 +19,16 @@ documented as allowed and is a validation error. Check the grammar
 - Version is `0.<alchemy beta>.<patch>`: built against `alchemy@2.0.0-beta.77` → publish `0.77.0`.
   First release is `0.77.0`. Bump the minor with every alchemy beta bump; patch for our own fixes.
 - README.md is for users only. Contributor and release notes live here, not there.
+- Bumping the alchemy beta means editing **four** exact pins together: `peerDependencies.alchemy`,
+  `peerDependencies.effect`, `peerDependencies["@effect/platform-node"]` and
+  `dependencies["@distilled.cloud/cloudflare"]` (match whatever the new alchemy beta pins), then
+  the same versions in the README `overrides` block. Peer ranges are deliberately exact: effect 4
+  rc builds break each other, and `>=` resolves a newer rc than the alchemy beta was built for.
+- `bun run build` (tsdown → `dist/`, ESM + d.mts, deps external) then `bun run check:pack`
+  (publint + are-the-types-wrong on the ESM-only profile). `prepublishOnly` runs both.
+- Ship no Bun-only API in `src/`: the package must run on node. `node:fs` everywhere,
+  `import.meta.resolve` not `Bun.resolveSync`, `import.meta.dirname` not `import.meta.dir`.
+  CI runs the built CLI under node and diffs the output against the committed files.
 
 ## Local facts worth not rediscovering
 
@@ -26,6 +36,11 @@ documented as allowed and is a validation error. Check the grammar
   `filteredFiles: 0`. A CI gate written that way passes vacuously. Omit `--file` in CI.
 - Importing `alchemy/Cloudflare` needs the effect peer graph pinned — see `overrides` in
   package.json. Without it you get three different failures in a row.
+- `@distilled.cloud/cloudflare/workers` resolves to `.ts` under bun and compiled `.js` under node,
+  where the binding type aliases no longer exist. `bindingKinds()` reads the `.d.ts` beside it and
+  throws on an empty list, because a silent empty list means a spec with no relationship kinds.
+- `@likec4/config` reaches `isLikeC4Config` only through an entry needing `bundle-require` and
+  `esbuild` peers, so the nine config filenames are inlined in `src/project.ts` instead.
 - Deployment views reject `style element.tag = …` / `element.kind = …` (likec4 1.59.3: "element kind
   and tag expressions are not supported in deployment view rules"). Style by node reference instead.
 - Alchemy state (`.alchemy/state/<stack>/<stage>/<id>.json`) carries `resourceType`,

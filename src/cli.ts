@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 /**
  *   alchemy-likec4 spec       --project <dir> [--provider Cloudflare]
  *   alchemy-likec4 deployment --project <dir> [--entrypoint alchemy.run.ts] [--stage prod]
@@ -15,7 +15,7 @@ import * as Command from "effect/unstable/cli/Command";
 import * as Flag from "effect/unstable/cli/Flag";
 import pkg from "../package.json" with { type: "json" };
 import { buildDeployment } from "./build.ts";
-import { generateSpecs } from "./generate.ts";
+import { generateSpecs, write } from "./generate.ts";
 import { type NotALikeC4Project, projectOutput } from "./project.ts";
 import { stackGraph } from "./stack.ts";
 
@@ -62,7 +62,7 @@ const deployment = Command.make(
       const outdir = yield* output(project);
       const graph = yield* stackGraph({ entrypoint, stage: Option.getOrUndefined(stage) });
       const path = `${outdir}/${graph.name}.${graph.stage}.gen.c4`;
-      yield* Effect.promise(() => Bun.write(path, buildDeployment(graph)));
+      yield* Effect.promise(() => write(path, buildDeployment(graph)));
       yield* say(
         `${graph.name} @ ${graph.stage}: ${graph.resources.length} resources, ${graph.edges.length} edges → ${path}`,
       );

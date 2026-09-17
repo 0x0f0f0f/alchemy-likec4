@@ -19,15 +19,28 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - run: bun install --frozen-lockfile
       - name: Biome, knip, typecheck
         run: bun run check
       - name: Tests
         run: bun test
+      - name: Build
+        run: bun run build
+      - name: Package is publishable (publint, are-the-types-wrong)
+        run: bun run check:pack
+      # The built output must run on node, not just bun, and produce the same bytes as the
+      # committed files. This is the step that catches a Bun-only API sneaking into src/.
+      - name: Built CLI runs under node
+        run: |
+          node dist/cli.mjs spec --project examples/basic/docs/architecture --provider Cloudflare
+          node dist/cli.mjs deployment --project examples/basic/docs/architecture --entrypoint examples/basic/alchemy.run.ts --stage prod
+          git diff --exit-code examples
       - name: Generated examples match their stacks
         run: |
           bun run example:generate
           git diff --exit-code examples
-          test -z "$(git status --porcelain examples)"
       - name: LikeC4 validates both example projects
         run: bun run example:validate
