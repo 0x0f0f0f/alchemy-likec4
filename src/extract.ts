@@ -15,10 +15,13 @@
  * to be version-pinned. See `overrides` in package.json.
  */
 
+import { readFile } from "node:fs/promises";
 import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
-/** alchemy's package root, wherever the consumer's linker put it — two levels above its entry. */
-export const alchemyDir = (): string => dirname(dirname(Bun.resolveSync("alchemy", process.cwd())));
+/** alchemy's package root, wherever the consumer's linker put it — two levels above its entry.
+ *  `src/index.ts` under bun, `lib/index.js` under node; both sit two levels down. */
+export const alchemyDir = (): string => dirname(dirname(fileURLToPath(import.meta.resolve("alchemy"))));
 
 /** A resource, as alchemy itself defines it. */
 export interface AlchemyResource {
@@ -99,7 +102,7 @@ export interface Provider {
  *  provider is not decided here by name: a provider is a subpath whose module yields resources,
  *  and `extractResources` is the test. Runtime helpers like `alchemy/Cli` yield none. */
 export const discoverProviders = async (alchemyPkgPath: string): Promise<Provider[]> => {
-  const pkg = JSON.parse(await Bun.file(`${alchemyPkgPath}/package.json`).text());
+  const pkg = JSON.parse(await readFile(`${alchemyPkgPath}/package.json`, "utf8"));
   return Object.keys(pkg.exports ?? {})
     .filter((k) => k.startsWith("./") && !k.includes("*") && !k.slice(2).includes("/"))
     .map((k) => k.slice(2))

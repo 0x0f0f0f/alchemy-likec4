@@ -3,9 +3,17 @@
  * `bindings.spec.c4` for the Worker binding kinds, and `alchemy.spec.c4` for the two container
  * kinds a stack graph needs.
  */
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
 import { buildBindingsSpecification, buildSpecification, buildStackSpecification } from "./build.ts";
 import { categoriesFor } from "./categories.ts";
 import { type AlchemyResource, alchemyDir, discoverProviders, extractResources } from "./extract.ts";
+
+/** Write a generated file, creating its directory. Shared with the CLI. */
+export const write = async (path: string, content: string): Promise<void> => {
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, content);
+};
 
 export interface GenerateOptions {
   /** Where the files go — a LikeC4 project's `alchemy/` directory, see `projectOutput`. */
@@ -32,7 +40,7 @@ export interface GenerateResult {
 export const generateSpecs = async (opts: GenerateOptions): Promise<GenerateResult> => {
   const { outdir, provider: only } = opts;
   const alchemy = alchemyDir();
-  const alchemyVersion: string = JSON.parse(await Bun.file(`${alchemy}/package.json`).text()).version;
+  const alchemyVersion: string = JSON.parse(await readFile(`${alchemy}/package.json`, "utf8")).version;
 
   // Collect across every subpath FIRST, then group by the provider named in each resource's
   // canonical type. Subpaths re-export each other — alchemy/AWS exposes the Kubernetes resources
@@ -68,11 +76,11 @@ export const generateSpecs = async (opts: GenerateOptions): Promise<GenerateResu
       resources.map((r) => r.type),
     );
     const path = `${outdir}/${name.toLowerCase()}.spec.c4`;
-    await Bun.write(path, buildSpecification(resources, { alchemyVersion, provider: name, categories }));
+    await write(path, buildSpecification(resources, { alchemyVersion, provider: name, categories }));
     providers.push({ name, resources: resources.length, categorised: categories.size, path });
   }
-  await Bun.write(`${outdir}/bindings.spec.c4`, buildBindingsSpecification());
-  await Bun.write(`${outdir}/alchemy.spec.c4`, buildStackSpecification());
+  await write(`${outdir}/bindings.spec.c4`, buildBindingsSpecification());
+  await write(`${outdir}/alchemy.spec.c4`, buildStackSpecification());
 
   return { alchemyVersion, providers, total: providers.reduce((n, p) => n + p.resources, 0), skipped };
 };

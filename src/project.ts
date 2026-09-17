@@ -6,7 +6,21 @@
  */
 import { readdirSync } from "node:fs";
 import * as Data from "effect/Data";
-import { isLikeC4Config } from "likec4/config";
+
+/** LikeC4's own `ConfigFilenames`, inlined: `@likec4/config` reaches them only through an entry
+ *  that needs `bundle-require` and `esbuild` as peers, which is a 10MB install to match 9 strings.
+ *  Source: `@likec4/config/src/filenames.ts`. */
+const CONFIG_FILENAMES: readonly string[] = [
+  ".likec4rc",
+  ".likec4.config.json",
+  "likec4.config.json",
+  "likec4.config.js",
+  "likec4.config.cjs",
+  "likec4.config.mjs",
+  "likec4.config.ts",
+  "likec4.config.cts",
+  "likec4.config.mts",
+];
 
 export class NotALikeC4Project extends Data.TaggedError("NotALikeC4Project")<{ readonly project: string }> {
   override get message(): string {
@@ -26,6 +40,6 @@ export const projectOutput = (project: string): string => {
   } catch {
     throw new NotALikeC4Project({ project });
   }
-  if (!entries.some(isLikeC4Config)) throw new NotALikeC4Project({ project });
+  if (!entries.some((e) => CONFIG_FILENAMES.includes(e))) throw new NotALikeC4Project({ project });
   return `${project}/alchemy`;
 };
