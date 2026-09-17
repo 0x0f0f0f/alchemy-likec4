@@ -1,3 +1,31 @@
+# alchemy-likec4 — agent notes
+
+Two upstreams, both ship a full-text dump. **Read them rather than recalling them** — both move fast
+and both have surfaces that do not match their prose.
+
+| When the task touches | Fetch first |
+|---|---|
+| LikeC4 DSL, views, deployment model, CLI, MCP | https://likec4.dev/llms-full.txt |
+| alchemy resources, Stack, state, providers | https://alchemy.run/llms-full.txt |
+
+The LikeC4 DSL also ships an official Claude skill at `likec4/likec4` under `skills/likec4-dsl/`
+(SKILL.md + 14 references). Useful, but its reference files contain claims the grammar rejects —
+verified: `include **` and bare `_` standalone are documented and invalid; nested `parallel` is
+documented as allowed and is a validation error. Check the grammar
+(`packages/language-server/src/like-c4.langium`) before trusting a reference page.
+
+## Local facts worth not rediscovering
+
+- `likec4 validate --file <path>` with a path that does not match reports **`valid: true`** and
+  `filteredFiles: 0`. A CI gate written that way passes vacuously. Omit `--file` in CI.
+- Importing `alchemy/Cloudflare` needs the effect peer graph pinned — see `overrides` in
+  package.json. Without it you get three different failures in a row.
+- Alchemy state (`.alchemy/state/<stack>/<stage>/<id>.json`) carries `resourceType`,
+  `bindings[].data.bindings[]` as `{type,name}`, and `downstream`. That is the whole deployment
+  graph, on disk, no credentials needed.
+
+---
+
 ---
 description: Use Bun instead of Node.js, npm, pnpm, or vite.
 globs: "*.ts, *.tsx, *.html, *.css, *.js, *.jsx, package.json"
