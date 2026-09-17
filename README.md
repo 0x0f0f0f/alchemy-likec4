@@ -2,7 +2,7 @@
 
 [alchemy-likec4](https://github.com/0x0f0f0f/alchemy-likec4) Automatically generate [LikeC4](https://likec4.dev) specs and diagrams from [alchemy](https://alchemy.run) stacks!
 
-![The link-shortener example, production stage, as LikeC4 renders it from the alchemy stack](prod_topology.png)
+![The link-shortener example: two actors and eight bindings, every box and arrow derived from the alchemy stack](shortener.png)
 
 > [!WARNING]
 > **Alchemy is in beta and under active development.** Resource
@@ -240,11 +240,15 @@ stack does not back.
 
 ## Examples
 
-- [`examples/basic`](examples/basic) — one Worker, one bucket, one KV namespace, one view. The screenshot above.
-- [`examples/link-shortener`](examples/link-shortener) — two stages, a logical model, the mapping,
-  model views, deployment views and a dynamic view, in the layout above.
+- [`examples/basic`](examples/basic) — one Worker, one bucket, one KV namespace. Its LikeC4 project
+  is a single file, `likec4.config.json`, and everything in the second screenshot comes from the
+  stack.
+- [`examples/link-shortener`](examples/link-shortener) — two stages, two actors, eight bindings.
+  The first screenshot is its `index` view. Hand-written: two actors, four `extend` blocks, a
+  cross-stage restore edge, and five views including a sequence diagram.
 
-`bun run example` in this repo opens both in LikeC4's UI.
+`bun run example` in this repo opens both in LikeC4's UI. `bun run example:png` regenerates both
+screenshots.
 
 ## How it works
 
