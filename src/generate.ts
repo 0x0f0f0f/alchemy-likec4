@@ -8,8 +8,8 @@ import { categoriesFor } from "./categories.ts";
 import { type AlchemyResource, alchemyDir, discoverProviders, extractResources } from "./extract.ts";
 
 export interface GenerateOptions {
-  /** @default "specs" */
-  readonly outdir?: string;
+  /** Where the files go — a LikeC4 project's `alchemy/` directory, see `projectOutput`. */
+  readonly outdir: string;
   /** Only this provider, e.g. `Cloudflare`. */
   readonly provider?: string;
 }
@@ -29,8 +29,8 @@ export interface GenerateResult {
   readonly skipped: readonly string[];
 }
 
-export const generateSpecs = async (opts: GenerateOptions = {}): Promise<GenerateResult> => {
-  const { outdir = "specs", provider: only } = opts;
+export const generateSpecs = async (opts: GenerateOptions): Promise<GenerateResult> => {
+  const { outdir, provider: only } = opts;
   const alchemy = alchemyDir();
   const alchemyVersion: string = JSON.parse(await Bun.file(`${alchemy}/package.json`).text()).version;
 
