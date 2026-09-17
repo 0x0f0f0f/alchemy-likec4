@@ -14,7 +14,9 @@
 **Why?** You have written your infrastructure with
 [Alchemy](https://alchemy.run)
 ([Github](https://github.com/alchemy-run/alchemy)), and you need a good way to
-document your software architecture. This package lets you auto-generate [LikeC4](https://github.com/likec4/likec4) diagrams, specifications and deployment models from your alchemy stack.
+document your software architecture. This package lets you auto-generate
+[LikeC4](https://github.com/likec4/likec4) diagrams, specifications and
+deployment models from your alchemy stack,
 
 **What is alchemy?** [Alchemy](https://alchemy.run) is infrastructure as code
 written in pure [Effect](https://effect.website). Your cloud is one TypeScript
@@ -35,13 +37,24 @@ export default Alchemy.Stack(
   "MyApp",
   { providers: Cloudflare.providers(), state: Alchemy.inMemoryState() },
   Effect.gen(function* () {
+    /** Original uploads, never served directly. */
     const Photos = yield* Cloudflare.R2.Bucket("Photos");
+
+    /** Signed-in sessions, read on every request. */
     const Sessions = yield* Cloudflare.KV.Namespace("Sessions");
+
+    /** The only public entrypoint. Reads photos, writes sessions. */
     const api = yield* Cloudflare.Worker("Api", {
       main: "./src/worker.ts",
       env: { Photos, Sessions },
     });
-    return { url: api.url };
+
+    /** The marketing site and dashboard, server-rendered at the edge. */
+    const site = yield* Cloudflare.Website.Astro("Site", {
+      env: { API: api },
+    });
+
+    return { url: site.url };
   }),
 );
 ```
@@ -62,6 +75,10 @@ That project contains one hand-written file, `likec4.config.json`, and nothing e
 and you get this, without deploying anything:
 
 ![MyApp — production](screenshot.png)
+
+Two things in that picture nobody wrote. `SiteSession` is a KV namespace alchemy provisions on its
+own to back Astro's session API, so the diagram shows infrastructure you did not know you had. And
+the Astro site renders as a Worker, because that is what it is once deployed.
 
 ## Supports
 
@@ -127,11 +144,11 @@ bunx alchemy-likec4 generate --project docs/architecture --stage prod
 
 One command writes three files into `docs/architecture/alchemy/`:
 
-| File | Contents |
-|---|---|
-| `<Stack>.model.gen.c4` | the element kinds your stack uses, styled and iconed, and one element per resource with its relationships |
-| `<Stack>.<stage>.gen.c4` | each resource as a deployed instance, one file per stage |
-| `<Stack>.views.gen.c4` | a landscape view and one deployment view per stage |
+| File                     | Contents                                                                                                  |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `<Stack>.model.gen.c4`   | the element kinds your stack uses, styled and iconed, and one element per resource with its relationships |
+| `<Stack>.<stage>.gen.c4` | each resource as a deployed instance, one file per stage                                                  |
+| `<Stack>.views.gen.c4`   | a landscape view and one deployment view per stage                                                        |
 
 Run it again with `--stage staging` to add a stage. Nothing else is touched, and the views file
 picks up every stage it finds. `--entrypoint path/to/alchemy.run.ts` reads another stack.
@@ -151,16 +168,16 @@ Commit `alchemy/`: the diff on an alchemy bump is the review.
 
 Nothing in the list below is typed by hand, in this package or in your repo.
 
-| On the diagram | Comes from |
-|---|---|
-| element kind, e.g. `cloudflare_r2_bucket` | the resource's canonical id, `R2.Bucket.Type` |
-| shape | the resource name: a `Bucket` is a bucket, a `Queue` is a queue |
-| colour | alchemy's `@category`, so one product family reads as one group |
-| icon | the vendor's own icon set in `@likec4/icons`, matched on the service name |
-| `technology`, e.g. `R2` | alchemy's `@product` |
-| description | the JSDoc you wrote above the resource in `alchemy.run.ts` |
-| relationships | the `env` bindings, typed by binding kind |
-| the prod/staging mapping | `instanceOf`, from the compiled stack |
+| On the diagram                            | Comes from                                                                |
+| ----------------------------------------- | ------------------------------------------------------------------------- |
+| element kind, e.g. `cloudflare_r2_bucket` | the resource's canonical id, `R2.Bucket.Type`                             |
+| shape                                     | the resource name: a `Bucket` is a bucket, a `Queue` is a queue           |
+| colour                                    | alchemy's `@category`, so one product family reads as one group           |
+| icon                                      | the vendor's own icon set in `@likec4/icons`, matched on the service name |
+| `technology`, e.g. `R2`                   | alchemy's `@product`                                                      |
+| description                               | the JSDoc you wrote above the resource in `alchemy.run.ts`                |
+| relationships                             | the `env` bindings, typed by binding kind                                 |
+| the prod/staging mapping                  | `instanceOf`, from the compiled stack                                     |
 
 ### While alchemy is in beta, pin the effect graph
 

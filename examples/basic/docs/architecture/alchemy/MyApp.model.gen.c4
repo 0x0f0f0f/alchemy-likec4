@@ -1,5 +1,5 @@
 // GENERATED — DO NOT EDIT.
-// Stack MyApp: 3 resources, 2 relationships,
+// Stack MyApp: 5 resources, 4 relationships,
 // 4 kinds, reflected from alchemy@2.0.0-beta.77.
 // Regenerate with:  alchemy-likec4 generate --project <dir>
 //
@@ -59,6 +59,9 @@ specification {
   relationship r2_bucket_binding {
     notation 'r2_bucket'
   }
+  relationship service_binding {
+    notation 'service'
+  }
   
   tag storage_databases
   tag workers_compute
@@ -77,6 +80,9 @@ model {
     }
     
     sessions = cloudflare_kv_namespace 'Sessions' {
+      description '
+        Signed-in sessions, read on every request.
+      '
       metadata {
         fqn 'Sessions'
         type 'Cloudflare.KV.Namespace'
@@ -85,11 +91,28 @@ model {
     
     api = cloudflare_worker 'Api' {
       description '
-        The only public entrypoint.
+        The only public entrypoint. Reads photos, writes sessions.
       '
       metadata {
         fqn 'Api'
         type 'Cloudflare.Worker'
+      }
+    }
+    
+    site = cloudflare_worker 'Site' {
+      description '
+        The marketing site and dashboard, server-rendered at the edge.
+      '
+      metadata {
+        fqn 'Site'
+        type 'Cloudflare.Worker'
+      }
+    }
+    
+    site_session = cloudflare_kv_namespace 'SiteSession' {
+      metadata {
+        fqn 'SiteSession'
+        type 'Cloudflare.KV.Namespace'
       }
     }
   }
@@ -97,4 +120,8 @@ model {
   my_app.api -[r2_bucket_binding]-> my_app.photos 'Photos'
   
   my_app.api -[kv_namespace_binding]-> my_app.sessions 'Sessions'
+  
+  my_app.site -[service_binding]-> my_app.api 'API'
+  
+  my_app.site -[kv_namespace_binding]-> my_app.site_session 'SESSION'
 }
