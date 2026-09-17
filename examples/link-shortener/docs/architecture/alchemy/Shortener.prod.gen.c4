@@ -1,8 +1,8 @@
 // GENERATED — DO NOT EDIT.
-// Stack Shortener, stage prod: 7 resources, 8 edges.
-// Regenerate with:  alchemy-likec4 deployment --project <dir> --stage prod
+// Stack Shortener, stage prod: 7 resources.
+// Regenerate with:  alchemy-likec4 generate --project <dir> --stage prod
 //
-// Map nodes onto the logical model from a hand-written file:  extend <node> { instanceOf <element> }
+// No relationships here on purpose: they are inherited from the model through `instanceOf`.
 
 deployment {
   shortener_prod = alchemy_stack 'Shortener (prod)' {
@@ -10,35 +10,35 @@ deployment {
       stage 'prod'
     }
     
-    hot = cloudflare_kv_namespace {
+    instanceOf shortener.hot {
       metadata {
         fqn 'hot'
         type 'Cloudflare.KV.Namespace'
       }
     }
     
-    links = cloudflare_d1_database {
+    instanceOf shortener.links {
       metadata {
         fqn 'links'
         type 'Cloudflare.D1Database'
       }
     }
     
-    clicks = cloudflare_queues_queue {
+    instanceOf shortener.clicks {
       metadata {
         fqn 'clicks'
         type 'Cloudflare.Queues.Queue'
       }
     }
     
-    reports = cloudflare_r2_bucket {
+    instanceOf shortener.reports {
       metadata {
         fqn 'reports'
         type 'Cloudflare.R2.Bucket'
       }
     }
     
-    api = cloudflare_worker {
+    instanceOf shortener.api {
       metadata {
         fqn 'api'
         type 'Cloudflare.Worker'
@@ -46,7 +46,7 @@ deployment {
       }
     }
     
-    redirect = cloudflare_worker {
+    instanceOf shortener.redirect {
       metadata {
         fqn 'redirect'
         type 'Cloudflare.Worker'
@@ -54,7 +54,7 @@ deployment {
       }
     }
     
-    analytics = cloudflare_worker {
+    instanceOf shortener.analytics {
       metadata {
         fqn 'analytics'
         type 'Cloudflare.Worker'
@@ -62,20 +62,4 @@ deployment {
       }
     }
   }
-  
-  shortener_prod.api -[d1_binding]-> shortener_prod.links 'LINKS'
-  
-  shortener_prod.api -[kv_namespace_binding]-> shortener_prod.hot 'HOT'
-  
-  shortener_prod.redirect -[kv_namespace_binding]-> shortener_prod.hot 'HOT'
-  
-  shortener_prod.redirect -[d1_binding]-> shortener_prod.links 'LINKS'
-  
-  shortener_prod.redirect -[queue_binding]-> shortener_prod.clicks 'CLICKS'
-  
-  shortener_prod.analytics -[d1_binding]-> shortener_prod.links 'LINKS'
-  
-  shortener_prod.analytics -[r2_bucket_binding]-> shortener_prod.reports 'REPORTS'
-  
-  shortener_prod.analytics -[durable_object_namespace_binding]-> shortener_prod.api 'COUNTER'
 }
