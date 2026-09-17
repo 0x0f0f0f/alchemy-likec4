@@ -24,7 +24,7 @@ views {
   deployment view prod_topology {
     title 'Cloudflare — production'
     include shortener_prod.**
-    autoLayout LeftRight
+    autoLayout TopBottom 195 90
   }
 
   deployment view both_stages {

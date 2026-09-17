@@ -10,8 +10,8 @@ import { type Baseline, newViolations, reflexion } from "./assert.ts";
 import type { StackGraph } from "./stack.ts";
 
 export const matchers = {
-  toConverge(received: LikeC4Model<any>, graph: StackGraph, baseline?: Baseline) {
-    const r = reflexion(received, graph);
+  toConverge(received: unknown, graph: StackGraph, baseline?: Baseline) {
+    const r = reflexion(received as LikeC4Model<any>, graph);
     const fresh = newViolations(r, baseline);
     const pass = fresh.divergence.length === 0 && fresh.absence.length === 0;
     return {

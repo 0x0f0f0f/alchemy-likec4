@@ -42,12 +42,14 @@
     "example:png": "likec4 export png examples/basic/docs/architecture --flat --notation -o . && mv index.png screenshot.png",
     "test": "bun test",
     "lint": "biome check .",
-    "check": "biome check . && knip",
+    "typecheck": "tsc --noEmit",
+    "check": "biome check . && knip && tsc --noEmit",
     "prepublishOnly": "bun run check && bun run example:generate && bun run example:validate && bun test"
   },
   "files": [
     "src",
-    "examples",
+    "!src/**/*.test.ts",
+    "!src/__snapshots__",
     "index.ts",
     "README.md"
   ],
@@ -64,5 +66,11 @@
     "iac",
     "cloudflare"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/0x0f0f0f/alchemy-likec4.git"
+  },
+  "homepage": "https://github.com/0x0f0f0f/alchemy-likec4#readme",
+  "bugs": "https://github.com/0x0f0f0f/alchemy-likec4/issues"
 }
