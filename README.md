@@ -82,15 +82,19 @@ the Astro site renders as a Worker, because that is what it is once deployed.
 
 ## Supports
 
+Everything that [Alchemy](https://github.com/alchemy-run/alchemy)
+
 - **Clouds**: Cloudflare, AWS, Fly, Hetzner, Railway.
 - **Data**: D1, R2, KV, Durable Objects, Queues, Hyperdrive, plus PlanetScale, Neon, Prisma, Drizzle, plain SQL.
 - **Frontends**: Vite, Astro, Next.js, Nuxt, SvelteKit, TanStack Start, React Router v7, SolidStart, Waku, static sites.
 - **Ops**: GitHub, Git, Docker, Kubernetes, Axiom, BetterAuth, a raw Command resource for everything else.
 - **CLI**: deploy, plan, destroy, drift, dev with hot reload, logs, state, nuke.
 
-# How to
+---
 
-## Add a LikeC4 project to your alchemy repo
+## How to
+
+### Add a LikeC4 project to your alchemy repo
 
 LikeC4 treats any directory holding a `likec4.config.json` as a project, and every `.c4` under
 it, recursively, as part of it. `alchemy-likec4` writes only into such a directory, under
