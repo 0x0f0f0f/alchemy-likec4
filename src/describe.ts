@@ -15,8 +15,13 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 
-/** A JSDoc block, then an optional binding, then `yield* Something("<logicalId>"`. */
-const DESCRIBED = /\/\*\*([\s\S]*?)\*\/\s*(?:(?:const|let|var)\s+\w+\s*=\s*)?yield\*\s*[\w.]+\(\s*["']([^"']+)["']/g;
+/** A JSDoc block, then an optional binding or `return`, then `yield* Something("<logicalId>"`.
+ *  `return yield* …` is how a resource declared inside a branch reaches the stack, so it carries
+ *  prose as often as a bound one does. A binding written inline in another resource's `env` —
+ *  `Cloudflare.Container("Hub", …)` — has no `yield*` and is not matched: requiring it is what
+ *  keeps this from claiming the JSDoc above any call whose first argument is a string. */
+const DESCRIBED =
+  /\/\*\*([\s\S]*?)\*\/\s*(?:(?:const|let|var)\s+\w+\s*=\s*|return\s+)?yield\*\s*[\w.]+\(\s*["']([^"']+)["']/g;
 
 /** JSDoc body → one line of prose. Tag lines are metadata, not description. */
 const prose = (block: string): string =>
