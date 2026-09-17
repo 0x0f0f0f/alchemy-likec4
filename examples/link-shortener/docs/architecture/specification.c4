@@ -1,0 +1,12 @@
+// The user's own vocabulary. Everything infrastructural — the `cloudflare_*` kinds, their shapes,
+// colours, icons and `technology`, and the `*_binding` relationship kinds — is generated into
+// ./alchemy from alchemy itself. Do not redeclare a generated kind: LikeC4 rejects a duplicate.
+specification {
+  element actor {
+    style { shape person; color secondary }
+  }
+
+  // Tags are free-form labels you can filter and style views by.
+  tag hot-path { color green }
+  tag async { color amber }
+}

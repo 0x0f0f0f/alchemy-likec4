@@ -1,0 +1,175 @@
+// GENERATED — DO NOT EDIT.
+// Stack Shortener: 7 resources, 8 relationships,
+// 6 kinds, reflected from alchemy@2.0.0-beta.77.
+// Regenerate with:  alchemy-likec4 generate --project <dir>
+//
+// Relationships live here, not in the deployment: LikeC4 inherits deployment relationships
+// from the logical model, so these reach deployment views through `instanceOf`.
+//
+// Enrich from your own file:  extend <element> { #tag  metadata { … }  link … }
+// `extend` cannot set a description — write one as JSDoc above the resource in your stack.
+
+specification {
+  element cloudflare_d1_database {
+    #storage_databases
+    technology 'D1'
+    notation 'Cloudflare.D1Database'
+    style {
+      shape storage
+      color indigo
+      icon tech:cloudflare-icon
+    }
+  }
+  element cloudflare_kv_namespace {
+    #storage_databases
+    technology 'KV'
+    notation 'Cloudflare.KV.Namespace'
+    style {
+      shape storage
+      color indigo
+      icon tech:cloudflare-icon
+    }
+  }
+  element cloudflare_queues_queue {
+    #storage_databases
+    technology 'Queues'
+    notation 'Cloudflare.Queues.Queue'
+    style {
+      shape queue
+      color indigo
+      icon tech:cloudflare-icon
+    }
+  }
+  element cloudflare_r2_bucket {
+    #storage_databases
+    technology 'R2'
+    notation 'Cloudflare.R2.Bucket'
+    style {
+      shape bucket
+      color indigo
+      icon tech:cloudflare-icon
+    }
+  }
+  element cloudflare_worker {
+    #workers_compute
+    technology 'Workers'
+    notation 'Cloudflare.Worker'
+    style {
+      shape component
+      color amber
+      icon tech:cloudflare-workers-icon
+    }
+  }
+  element alchemy_stack {
+    style {
+      shape rectangle
+      color muted
+      border dashed
+      opacity 10%
+    }
+  }
+  
+  deploymentNode alchemy_stack {
+    notation 'Alchemy stack'
+  }
+  
+  relationship d1_binding {
+    notation 'd1'
+  }
+  relationship durable_object_namespace_binding {
+    notation 'durable_object_namespace'
+  }
+  relationship kv_namespace_binding {
+    notation 'kv_namespace'
+  }
+  relationship queue_binding {
+    notation 'queue'
+  }
+  relationship r2_bucket_binding {
+    notation 'r2_bucket'
+  }
+  
+  tag storage_databases
+  tag workers_compute
+}
+
+model {
+  shortener = alchemy_stack 'Shortener' {
+    hot = cloudflare_kv_namespace {
+      description '
+        Read-through cache. A miss costs one D1 read.
+      '
+      metadata {
+        fqn 'hot'
+        type 'Cloudflare.KV.Namespace'
+      }
+    }
+    
+    links = cloudflare_d1_database {
+      description '
+        Canonical slug to URL mapping.
+      '
+      metadata {
+        fqn 'links'
+        type 'Cloudflare.D1Database'
+      }
+    }
+    
+    clicks = cloudflare_queues_queue {
+      metadata {
+        fqn 'clicks'
+        type 'Cloudflare.Queues.Queue'
+      }
+    }
+    
+    reports = cloudflare_r2_bucket {
+      metadata {
+        fqn 'reports'
+        type 'Cloudflare.R2.Bucket'
+      }
+    }
+    
+    api = cloudflare_worker {
+      description '
+        Creates links and serves the author dashboard.
+      '
+      metadata {
+        fqn 'api'
+        type 'Cloudflare.Worker'
+      }
+    }
+    
+    redirect = cloudflare_worker {
+      description '
+        The only thing on the request path a visitor waits for.
+      '
+      metadata {
+        fqn 'redirect'
+        type 'Cloudflare.Worker'
+      }
+    }
+    
+    analytics = cloudflare_worker {
+      metadata {
+        fqn 'analytics'
+        type 'Cloudflare.Worker'
+      }
+    }
+  }
+  
+  shortener.api -[d1_binding]-> shortener.links 'LINKS'
+  
+  shortener.api -[kv_namespace_binding]-> shortener.hot 'HOT'
+  
+  shortener.redirect -[kv_namespace_binding]-> shortener.hot 'HOT'
+  
+  shortener.redirect -[d1_binding]-> shortener.links 'LINKS'
+  
+  shortener.redirect -[queue_binding]-> shortener.clicks 'CLICKS'
+  
+  shortener.analytics -[d1_binding]-> shortener.links 'LINKS'
+  
+  shortener.analytics -[r2_bucket_binding]-> shortener.reports 'REPORTS'
+  
+  shortener.analytics -[durable_object_namespace_binding]-> shortener.api 'COUNTER'
+}

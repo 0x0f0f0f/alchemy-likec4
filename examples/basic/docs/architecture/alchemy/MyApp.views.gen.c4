@@ -1,0 +1,18 @@
+// GENERATED — DO NOT EDIT.
+// The landscape, and one view per stage. Delete this file and write your own.
+// Regenerate with:  alchemy-likec4 generate --project <dir>
+//
+// `.*` rather than `.**`: the descendants selector omits resources with no relationship.
+
+views {
+  view my_app_landscape {
+    title 'MyApp'
+    include my_app, my_app.*
+  }
+
+  deployment view my_app_prod {
+    title 'MyApp / prod'
+    include my_app_prod, my_app_prod.*
+    autoLayout LeftRight
+  }
+}

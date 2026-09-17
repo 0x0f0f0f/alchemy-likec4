@@ -1,0 +1,57 @@
+name: Check
+
+# No credentials, no cloud: everything here runs from the checkout alone. Push is scoped to main
+# so a PR commit is not checked twice.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: bun install --frozen-lockfile
+      - name: Biome, knip, typecheck
+        run: bun run check
+      - name: Tests
+        run: bun test
+      # The committed icon index must match what @likec4/icons currently ships, or a bump would
+      # silently leave resources without icons.
+      - name: Icon index is in sync with @likec4/icons
+        run: |
+          bun run build:icons
+          git diff --exit-code src/icons.gen.ts
+      - name: Build
+        run: bun run build
+      - name: Package is publishable (publint, are-the-types-wrong)
+        run: bun run check:pack
+      # The built output must run on node, not just bun, and produce the same bytes as the
+      # committed files. This is the step that catches a Bun-only API sneaking into src/.
+      - name: Built CLI runs under node
+        run: |
+          node dist/cli.mjs generate --project examples/basic/docs/architecture --entrypoint examples/basic/alchemy.run.ts --stage prod
+          git diff --exit-code examples
+      - name: Generated examples match their stacks
+        run: |
+          bun run example:generate
+          git diff --exit-code examples
+      - name: LikeC4 validates both example projects
+        run: bun run example:validate
+      # The whole point of generating into the model rather than the deployment: one declaration
+      # draws the edge in both view kinds. This asserts it on the computed model, not the text.
+      - name: Deployment views inherit every binding from the model
+        run: |
+          bunx likec4 export json -o /tmp/views.json examples/link-shortener/docs/architecture
+          bun scripts/assert-views.ts /tmp/views.json

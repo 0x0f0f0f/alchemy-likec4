@@ -1,0 +1,48 @@
+// GENERATED — DO NOT EDIT.
+// Stack MyApp, stage prod: 5 resources.
+// Regenerate with:  alchemy-likec4 generate --project <dir> --stage prod
+//
+// No relationships here on purpose: they are inherited from the model through `instanceOf`.
+
+deployment {
+  my_app_prod = alchemy_stack 'MyApp (prod)' {
+    metadata {
+      stage 'prod'
+    }
+    
+    instanceOf my_app.photos {
+      metadata {
+        fqn 'Photos'
+        type 'Cloudflare.R2.Bucket'
+      }
+    }
+    
+    instanceOf my_app.sessions {
+      metadata {
+        fqn 'Sessions'
+        type 'Cloudflare.KV.Namespace'
+      }
+    }
+    
+    instanceOf my_app.api {
+      metadata {
+        fqn 'Api'
+        type 'Cloudflare.Worker'
+      }
+    }
+    
+    instanceOf my_app.site {
+      metadata {
+        fqn 'Site'
+        type 'Cloudflare.Worker'
+      }
+    }
+    
+    instanceOf my_app.site_session {
+      metadata {
+        fqn 'SiteSession'
+        type 'Cloudflare.KV.Namespace'
+      }
+    }
+  }
+}

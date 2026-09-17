@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import * as Cloudflare from "alchemy/Cloudflare";
 import * as Stack from "alchemy/Stack";
+import { annotationsFor, categoriesFor } from "./annotations.ts";
 import { requiredEnvironment } from "./auth.ts";
 import { bindingKinds, toRelationshipKind } from "./bindings.ts";
-import { buildBindingsSpecification, buildSpecification, toIdentifier, toTag } from "./build.ts";
-import { categoriesFor } from "./categories.ts";
+import { toIdentifier, toTag } from "./build.ts";
 import { discoverProviders, extractResources } from "./extract.ts";
 
 const resources = extractResources(Cloudflare);
@@ -100,43 +100,28 @@ describe("bindingKinds", () => {
   });
 });
 
-describe("buildSpecification", () => {
-  const dsl = buildSpecification(resources, { alchemyVersion: "test", provider: "Cloudflare", categories });
+describe("annotationsFor", () => {
+  const annotations = annotationsFor(
+    "node_modules/alchemy/src/Cloudflare",
+    resources.map((r) => r.type),
+  );
 
-  it("stamps provenance so a stale file is obvious in review", () => {
-    expect(dsl).toInclude("GENERATED — DO NOT EDIT");
-    expect(dsl).toInclude("alchemy@test");
-    expect(dsl).toInclude(`${resources.length} Cloudflare resources`);
+  it("resolves a category for every resource, by finding its declaration", () => {
+    expect(annotations.size).toBe(resources.length);
+    expect([...annotations.values()].filter((a) => a.category).length).toBe(resources.length);
   });
 
-  it("emits one deploymentNode per resource", () => {
-    const count = [...dsl.matchAll(/^ {2}deploymentNode /gm)].length;
-    expect(count).toBe(resources.length);
+  it("reads @product, which is the technology label a consumer would otherwise type by hand", () => {
+    expect(annotations.get("Cloudflare.R2.Bucket")?.product).toBe("R2");
+    expect(annotations.get("Cloudflare.D1Database")?.product).toBe("D1");
+    expect(annotations.get("Cloudflare.KV.Namespace")?.product).toBe("KV");
+    // Nearly every Cloudflare resource carries one; a gap costs a label, never a resource.
+    const withProduct = [...annotations.values()].filter((a) => a.product).length;
+    expect(withProduct / resources.length).toBeGreaterThan(0.95);
   });
 
-  it("tags every kind with alchemy's own category", () => {
-    expect(dsl).toInclude("#storage_databases");
-    expect(dsl).toInclude("tag storage_databases");
-    expect([...dsl.matchAll(/^ {2}tag /gm)].length).toBe(new Set(categories.values()).size);
-  });
-
-  it("emits no styles — styling by tag is the consumer's job", () => {
-    expect(dsl).not.toInclude("style {");
-  });
-
-  it("declares no relationship kinds — those live in bindings.spec.c4", () => {
-    expect(dsl).not.toMatch(/^ {2}relationship /m);
-  });
-});
-
-describe("buildBindingsSpecification", () => {
-  const dsl = buildBindingsSpecification();
-
-  it("emits one relationship kind per binding kind in the schema, and nothing else", () => {
-    expect([...dsl.matchAll(/^ {2}relationship /gm)].length).toBe(bindingKinds().length);
-    expect(dsl).toInclude("relationship d1_binding");
-    expect(dsl).toInclude("relationship durable_object_namespace_binding");
-    expect(dsl).not.toInclude("deploymentNode");
+  it("does not read @see: the first URL in a file is often a sub-feature, not the product", () => {
+    expect(Object.keys(annotations.get("Cloudflare.Worker") ?? {})).not.toContain("docs");
   });
 });
 

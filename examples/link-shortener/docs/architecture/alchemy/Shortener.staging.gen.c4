@@ -1,0 +1,65 @@
+// GENERATED — DO NOT EDIT.
+// Stack Shortener, stage staging: 7 resources.
+// Regenerate with:  alchemy-likec4 generate --project <dir> --stage staging
+//
+// No relationships here on purpose: they are inherited from the model through `instanceOf`.
+
+deployment {
+  shortener_staging = alchemy_stack 'Shortener (staging)' {
+    metadata {
+      stage 'staging'
+    }
+    
+    instanceOf shortener.hot {
+      metadata {
+        fqn 'hot'
+        type 'Cloudflare.KV.Namespace'
+      }
+    }
+    
+    instanceOf shortener.links {
+      metadata {
+        fqn 'links'
+        type 'Cloudflare.D1Database'
+      }
+    }
+    
+    instanceOf shortener.clicks {
+      metadata {
+        fqn 'clicks'
+        type 'Cloudflare.Queues.Queue'
+      }
+    }
+    
+    instanceOf shortener.reports {
+      metadata {
+        fqn 'reports'
+        type 'Cloudflare.R2.Bucket'
+      }
+    }
+    
+    instanceOf shortener.api {
+      metadata {
+        fqn 'api'
+        type 'Cloudflare.Worker'
+        name 'shortener-api'
+      }
+    }
+    
+    instanceOf shortener.redirect {
+      metadata {
+        fqn 'redirect'
+        type 'Cloudflare.Worker'
+        name 'shortener-redirect'
+      }
+    }
+    
+    instanceOf shortener.analytics {
+      metadata {
+        fqn 'analytics'
+        type 'Cloudflare.Worker'
+        name 'shortener-analytics'
+      }
+    }
+  }
+}

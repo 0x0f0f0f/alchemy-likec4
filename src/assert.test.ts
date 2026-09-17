@@ -6,8 +6,8 @@ import { matchers } from "./vitest.ts";
 
 expect.extend(matchers);
 
-const graph = await openStack({ entrypoint: "example/alchemy.run.ts", stage: "prod" });
-const model = await (await LikeC4.fromWorkspace("example")).computedModel();
+const graph = await openStack({ entrypoint: "examples/link-shortener/alchemy.run.ts", stage: "prod" });
+const model = await (await LikeC4.fromWorkspace("examples/link-shortener/docs/architecture")).computedModel();
 
 describe("reflexion", () => {
   it("the example converges: every resource is claimed by an instanceOf", () => {
@@ -40,13 +40,40 @@ describe("reflexion", () => {
   });
 });
 
+describe("relationship reflexion", () => {
+  it("a binding the stack wires that the model does not relate is unwired", () => {
+    const grown: StackGraph = {
+      ...graph,
+      edges: [...graph.edges, { from: "reports", to: "hot", kind: "kv_namespace", sid: "HOT" }],
+    };
+    expect(reflexion(model, grown).unwired).toEqual(["shortener.reports -> shortener.hot"]);
+    expect(() => assertConverges(model, grown)).toThrow("wired, unmodelled:     shortener.reports -> shortener.hot");
+  });
+
+  it("a model relationship the stack no longer wires is unbacked", () => {
+    const cut: StackGraph = { ...graph, edges: graph.edges.filter((e) => e.to !== "clicks") };
+    expect(reflexion(model, cut).unbacked).toEqual(["shortener.redirect -> shortener.clicks"]);
+  });
+
+  it("ignores relationships that touch an element the stack never deployed", () => {
+    // `visitor -> shortener.redirect` is authored, and visitor has no instance, so it is not a
+    // finding. Only edges between two deployed elements are comparable.
+    expect(reflexion(model, graph).unbacked).toEqual([]);
+  });
+});
+
 describe("baseline ratchet", () => {
   const shrunk: StackGraph = { ...graph, resources: graph.resources.filter((r) => r.fqn !== "reports") };
 
   it("freezes today's violations so a build passes tomorrow", () => {
     const baseline = freeze(reflexion(model, shrunk));
     expect(baseline.absence).toEqual(["reports"]);
-    expect(newViolations(reflexion(model, shrunk), baseline)).toEqual({ divergence: [], absence: [] });
+    expect(newViolations(reflexion(model, shrunk), baseline)).toEqual({
+      divergence: [],
+      absence: [],
+      unwired: [],
+      unbacked: [],
+    });
   });
 
   it("still fails on a violation the baseline does not cover", () => {

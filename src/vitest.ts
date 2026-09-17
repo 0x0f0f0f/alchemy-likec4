@@ -10,10 +10,14 @@ import { type Baseline, newViolations, reflexion } from "./assert.ts";
 import type { StackGraph } from "./stack.ts";
 
 export const matchers = {
-  toConverge(received: LikeC4Model<any>, graph: StackGraph, baseline?: Baseline) {
-    const r = reflexion(received, graph);
+  toConverge(received: unknown, graph: StackGraph, baseline?: Baseline) {
+    const r = reflexion(received as LikeC4Model<any>, graph);
     const fresh = newViolations(r, baseline);
-    const pass = fresh.divergence.length === 0 && fresh.absence.length === 0;
+    const pass =
+      fresh.divergence.length === 0 &&
+      fresh.absence.length === 0 &&
+      (fresh.unwired ?? []).length === 0 &&
+      (fresh.unbacked ?? []).length === 0;
     return {
       pass,
       message: () =>
@@ -23,6 +27,8 @@ export const matchers = {
               `${r.stack}: model and stack disagree`,
               ...fresh.divergence.map((f) => `  deployed, unmodelled:  ${f}`),
               ...fresh.absence.map((f) => `  modelled, undeployed:  ${f}`),
+              ...(fresh.unwired ?? []).map((f) => `  wired, unmodelled:     ${f}`),
+              ...(fresh.unbacked ?? []).map((f) => `  modelled, unwired:     ${f}`),
             ].join("\n"),
     };
   },

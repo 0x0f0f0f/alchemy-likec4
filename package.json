@@ -1,29 +1,38 @@
 {
   "name": "alchemy-likec4",
-  "module": "index.ts",
   "type": "module",
   "bin": {
-    "alchemy-likec4": "./src/cli.ts"
+    "alchemy-likec4": "./dist/cli.mjs"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.5",
-    "@types/bun": "latest",
-    "knip": "^6.36.0",
-    "likec4": "1.59.3"
-  },
-  "peerDependencies": {
-    "likec4": "^1.59.3",
-    "typescript": "^7"
-  },
-  "dependencies": {
     "@alchemy.run/frontend-frameworks": "2.0.0-beta.77",
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@biomejs/biome": "2.5.5",
     "@effect/platform-bun": "4.0.0-rc.112",
     "@effect/platform-node": "4.0.0-rc.112",
     "@effect/platform-node-shared": "4.0.0-rc.112",
-    "@likec4/core": "1.59.3",
-    "@likec4/generators": "1.59.3",
+    "@likec4/icons": "1.46.4",
+    "@types/bun": "latest",
     "alchemy": "^2.0.0-beta.77",
-    "effect": "4.0.0-rc.112"
+    "effect": "4.0.0-rc.112",
+    "knip": "^6.36.0",
+    "likec4": "1.59.3",
+    "publint": "^0.3.24",
+    "tsdown": "^0.23.0",
+    "typescript": "^7"
+  },
+  "peerDependencies": {
+    "@alchemy.run/frontend-frameworks": "2.0.0-beta.77",
+    "@effect/platform-bun": "4.0.0-rc.112",
+    "@effect/platform-node": "4.0.0-rc.112",
+    "alchemy": "2.0.0-beta.77",
+    "effect": "4.0.0-rc.112",
+    "likec4": "^1.59.3"
+  },
+  "dependencies": {
+    "@distilled.cloud/cloudflare": "1.0.0-rc.9",
+    "@likec4/core": "1.59.3",
+    "@likec4/generators": "1.59.3"
   },
   "overrides": {
     "effect": "4.0.0-rc.112",
@@ -31,30 +40,37 @@
     "@effect/platform-node-shared": "4.0.0-rc.112",
     "@effect/platform-bun": "4.0.0-rc.112"
   },
-  "version": "0.1.0",
+  "version": "0.77.0",
   "description": "Generate a LikeC4 specification from alchemy's resource registry",
   "scripts": {
-    "generate": "bun run src/cli.ts spec",
-    "validate": "bun run src/cli.ts spec --outdir .validate && likec4 validate --json --no-layout .validate",
-    "example": "likec4 start example --port 5199",
-    "example:generate": "bun run src/cli.ts deployment --entrypoint example/alchemy.run.ts --stage prod && bun run src/cli.ts deployment --entrypoint example/alchemy.run.ts --stage staging",
-    "example:validate": "likec4 validate --json example",
+    "build": "tsdown",
+    "build:icons": "bun run scripts/icons.ts",
+    "example": "likec4 start examples --port 5199",
+    "example:generate": "bun run example:basic && bun run example:shortener",
+    "example:basic": "bun run src/cli.ts generate --project examples/basic/docs/architecture --entrypoint examples/basic/alchemy.run.ts --stage prod",
+    "example:shortener": "bun run src/cli.ts generate --project examples/link-shortener/docs/architecture --entrypoint examples/link-shortener/alchemy.run.ts --stage prod && bun run src/cli.ts generate --project examples/link-shortener/docs/architecture --entrypoint examples/link-shortener/alchemy.run.ts --stage staging",
+    "example:validate": "likec4 validate --json --no-layout examples",
+    "example:png": "likec4 export png examples/link-shortener/docs/architecture --flat -f index -o . && mv index.png shortener.png && likec4 export png examples/basic/docs/architecture --flat -f my_app_prod -o . && mv my_app_prod.png screenshot.png",
     "test": "bun test",
     "lint": "biome check .",
-    "check": "biome check . && knip",
-    "prepublishOnly": "bun run check && bun run generate && bun run example:generate && bun test"
+    "typecheck": "tsc --noEmit",
+    "check": "biome check . && knip && tsc --noEmit",
+    "check:pack": "publint --strict && attw --pack . --profile esm-only",
+    "prepublishOnly": "bun run check && bun run build && bun run check:pack && bun run example:generate && bun run example:validate && bun test"
   },
   "files": [
-    "specs",
-    "src",
-    "example",
-    "index.ts",
+    "dist",
     "README.md"
   ],
   "exports": {
-    ".": "./index.ts",
-    "./vitest": "./src/vitest.ts",
-    "./specs/*": "./specs/*",
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./vitest": {
+      "types": "./dist/vitest.d.mts",
+      "default": "./dist/vitest.mjs"
+    },
     "./package.json": "./package.json"
   },
   "keywords": [
@@ -65,5 +81,19 @@
     "iac",
     "cloudflare"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/0x0f0f0f/alchemy-likec4.git"
+  },
+  "homepage": "https://github.com/0x0f0f0f/alchemy-likec4#readme",
+  "bugs": "https://github.com/0x0f0f0f/alchemy-likec4/issues",
+  "peerDependenciesMeta": {
+    "@alchemy.run/frontend-frameworks": {
+      "optional": true
+    },
+    "@effect/platform-bun": {
+      "optional": true
+    }
+  }
 }
