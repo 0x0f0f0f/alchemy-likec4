@@ -1,0 +1,43 @@
+// Everything here is authored. The resources, their relationships, their styling and the
+// prod/staging mapping are generated into ./alchemy from alchemy.run.ts.
+//
+// `extend` adds tags, metadata, links and relationships to a generated element. It cannot set a
+// description: that is JSDoc above the resource in alchemy.run.ts.
+model {
+  visitor = actor 'Visitor' {
+    description 'Follows a short link'
+  }
+  author = actor 'Author' {
+    description 'Creates and inspects links'
+  }
+
+  visitor -> shortener.redirect 'follows a link'
+  author -> shortener.api 'creates a link'
+
+  extend shortener.redirect {
+    #hot-path
+    metadata {
+      p99 '8ms'
+      slo '99.95'
+    }
+    link https://example.com/runbook 'Runbook'
+  }
+  extend shortener.hot {
+    #hot-path
+  }
+  extend shortener.clicks {
+    #async
+  }
+  extend shortener.analytics {
+    #async
+  }
+}
+
+deployment {
+  // True of the infrastructure, meaningless in the logical model, and not a binding alchemy knows
+  // about — so it lives here, by hand. Deployment relationships are still yours to write; the
+  // generator simply emits none, because it puts every binding in the model instead.
+  shortener_staging.links -> shortener_prod.links 'nightly restore' {
+    technology 'D1 export'
+  }
+}
