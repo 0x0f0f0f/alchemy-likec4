@@ -1,95 +1,49 @@
 // GENERATED — DO NOT EDIT.
-//
 // 13 Fly resources, reflected from alchemy@2.0.0-beta.77.
 // Regenerate with:  bun run generate
 //
-// Every kind below is a resource alchemy can provision, identified by the `.Type` it
-// registers itself under. Unused kinds are harmless — LikeC4 validates a specification
-// with kinds nothing instantiates, so one shared file serves every repo.
-//
-// Factories and bindings are NOT here: `DurableObject`, `Email.SendEmail` and
-// `Website.Astro` are plain functions with no `.Type`. An Astro site IS a worker once
-// deployed; bindings appear below as relationship kinds.
+// Kinds are alchemy's `.Type`s; tags are its `@category`; relationship kinds are the Workers
+// API's binding types. Unused kinds are harmless — LikeC4 validates a specification with
+// kinds nothing instantiates, so one shared file serves every repo.
 
 specification {
-  // ── (root) ──
   deploymentNode fly_app {
     notation 'Fly.App'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode fly_bucket {
     notation 'Fly.Bucket'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode fly_certificate {
     notation 'Fly.Certificate'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode fly_ip_assignment {
     notation 'Fly.IpAssignment'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode fly_machine {
     notation 'Fly.Machine'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode fly_postgres {
     notation 'Fly.Postgres'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode fly_redis {
     notation 'Fly.Redis'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode fly_secret {
     notation 'Fly.Secret'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode fly_secret_key {
     notation 'Fly.SecretKey'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode fly_service {
     notation 'Fly.Service'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode fly_sprite {
     notation 'Fly.Sprite'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode fly_volume_snapshot {
     notation 'Fly.VolumeSnapshot'
-    style {
-      shape rectangle
-    }
   }
-  // ── Website ──
   deploymentNode fly_website_asset_deployment {
     notation 'Fly.Website.AssetDeployment'
-    style {
-      shape rectangle
-    }
   }
 }

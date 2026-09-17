@@ -1,112 +1,58 @@
 // GENERATED — DO NOT EDIT.
-//
 // 16 Hetzner resources, reflected from alchemy@2.0.0-beta.77.
 // Regenerate with:  bun run generate
 //
-// Every kind below is a resource alchemy can provision, identified by the `.Type` it
-// registers itself under. Unused kinds are harmless — LikeC4 validates a specification
-// with kinds nothing instantiates, so one shared file serves every repo.
-//
-// Factories and bindings are NOT here: `DurableObject`, `Email.SendEmail` and
-// `Website.Astro` are plain functions with no `.Type`. An Astro site IS a worker once
-// deployed; bindings appear below as relationship kinds.
+// Kinds are alchemy's `.Type`s; tags are its `@category`; relationship kinds are the Workers
+// API's binding types. Unused kinds are harmless — LikeC4 validates a specification with
+// kinds nothing instantiates, so one shared file serves every repo.
 
 specification {
-  // ── (root) ──
   deploymentNode hetzner_certificate {
     notation 'Hetzner.Certificate'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode hetzner_firewall {
     notation 'Hetzner.Firewall'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode hetzner_floating_ip {
     notation 'Hetzner.FloatingIp'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode hetzner_floating_ip_assignment {
     notation 'Hetzner.FloatingIpAssignment'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode hetzner_image {
     notation 'Hetzner.Image'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode hetzner_load_balancer {
     notation 'Hetzner.LoadBalancer'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode hetzner_network {
     notation 'Hetzner.Network'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode hetzner_placement_group {
     notation 'Hetzner.PlacementGroup'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode hetzner_primary_ip {
     notation 'Hetzner.PrimaryIp'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode hetzner_record_set {
     notation 'Hetzner.RecordSet'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode hetzner_server {
     notation 'Hetzner.Server'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode hetzner_service {
     notation 'Hetzner.Service'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode hetzner_ssh_key {
     notation 'Hetzner.SshKey'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode hetzner_volume {
     notation 'Hetzner.Volume'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode hetzner_volume_attachment {
     notation 'Hetzner.VolumeAttachment'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode hetzner_zone {
     notation 'Hetzner.Zone'
-    style {
-      shape rectangle
-    }
   }
 }
