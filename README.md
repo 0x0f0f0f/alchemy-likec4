@@ -1,12 +1,5 @@
 # alchemy-likec4
 
-> [!WARNING]
-> **Alchemy is in beta and under active development.** Resource declarations, binding shapes and
-> the `alchemy.run.ts` entrypoint contract can change between betas, and so can what this package
-> emits. Every release of `alchemy-likec4` targets **one alchemy 2 beta only** and the version says
-> which: `0.77.x` is built against `alchemy@2.0.0-beta.77`. Match them, regenerate after every
-> alchemy bump, and commit the diff.
-
 ## Automatically generate [LikeC4](https://likec4.dev) specs and diagrams from [alchemy](https://alchemy.run) stacks!
 
 **Why?** You have written your infrastructure with
@@ -77,6 +70,15 @@ and you get this, without deploying anything:
 - **Frontends**: Vite, Astro, Next.js, Nuxt, SvelteKit, TanStack Start, React Router v7, SolidStart, Waku, static sites.
 - **Ops**: GitHub, Git, Docker, Kubernetes, Axiom, BetterAuth, a raw Command resource for everything else.
 - **CLI**: deploy, plan, destroy, drift, dev with hot reload, logs, state, nuke.
+
+# How to
+
+> [!WARNING]
+> **Alchemy is in beta and under active development.** Resource
+> declarations will change between version, Every release of `alchemy-likec4`
+> targets **one alchemy 2 beta only** and the version says which: `0.77.x` is
+> built against `alchemy@2.0.0-beta.77`. Match them and regenerate your diagrams after every
+> alchemy bump!
 
 ## Add a LikeC4 project to your alchemy repo
 
