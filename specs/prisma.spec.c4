@@ -1,88 +1,45 @@
 // GENERATED — DO NOT EDIT.
-//
 // 12 Prisma resources, reflected from alchemy@2.0.0-beta.77.
 // Regenerate with:  bun run generate
 //
-// Every kind below is a resource alchemy can provision, identified by the `.Type` it
-// registers itself under. Unused kinds are harmless — LikeC4 validates a specification
-// with kinds nothing instantiates, so one shared file serves every repo.
-//
-// Factories and bindings are NOT here: `DurableObject`, `Email.SendEmail` and
-// `Website.Astro` are plain functions with no `.Type`. An Astro site IS a worker once
-// deployed; bindings appear below as relationship kinds.
+// Kinds are alchemy's `.Type`s; tags are its `@category`. Unused kinds are harmless — LikeC4
+// validates a specification with kinds nothing instantiates, so one shared file serves every repo.
 
 specification {
-  // ── (root) ──
   deploymentNode prisma_app {
     notation 'Prisma.App'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode prisma_branch {
     notation 'Prisma.Branch'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode prisma_bucket {
     notation 'Prisma.Bucket'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode prisma_bucket_access_key {
     notation 'Prisma.BucketAccessKey'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode prisma_compute {
     notation 'Prisma.Compute'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode prisma_connection {
     notation 'Prisma.Connection'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode prisma_custom_domain {
     notation 'Prisma.CustomDomain'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode prisma_database {
     notation 'Prisma.Database'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode prisma_deployment {
     notation 'Prisma.Deployment'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode prisma_environment_variable {
     notation 'Prisma.EnvironmentVariable'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode prisma_project {
     notation 'Prisma.Project'
-    style {
-      shape rectangle
-    }
   }
   deploymentNode prisma_source_repository {
     notation 'Prisma.SourceRepository'
-    style {
-      shape rectangle
-    }
   }
 }

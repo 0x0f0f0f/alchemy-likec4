@@ -1,0 +1,81 @@
+// GENERATED — DO NOT EDIT.
+// Stack Shortener, stage staging: 7 resources, 8 edges.
+// Regenerate with:  bun run generate deployment
+//
+// Map nodes onto the logical model from a hand-written file:  extend <node> { instanceOf <element> }
+
+deployment {
+  shortener_staging = alchemy_stack 'Shortener (staging)' {
+    metadata {
+      stage 'staging'
+    }
+    
+    hot = cloudflare_kv_namespace {
+      metadata {
+        fqn 'hot'
+        type 'Cloudflare.KV.Namespace'
+      }
+    }
+    
+    links = cloudflare_d1_database {
+      metadata {
+        fqn 'links'
+        type 'Cloudflare.D1Database'
+      }
+    }
+    
+    clicks = cloudflare_queues_queue {
+      metadata {
+        fqn 'clicks'
+        type 'Cloudflare.Queues.Queue'
+      }
+    }
+    
+    reports = cloudflare_r2_bucket {
+      metadata {
+        fqn 'reports'
+        type 'Cloudflare.R2.Bucket'
+      }
+    }
+    
+    api = cloudflare_worker {
+      metadata {
+        fqn 'api'
+        type 'Cloudflare.Worker'
+        name 'shortener-api'
+      }
+    }
+    
+    redirect = cloudflare_worker {
+      metadata {
+        fqn 'redirect'
+        type 'Cloudflare.Worker'
+        name 'shortener-redirect'
+      }
+    }
+    
+    analytics = cloudflare_worker {
+      metadata {
+        fqn 'analytics'
+        type 'Cloudflare.Worker'
+        name 'shortener-analytics'
+      }
+    }
+  }
+  
+  shortener_staging.api -[d1_binding]-> shortener_staging.links 'LINKS'
+  
+  shortener_staging.api -[kv_namespace_binding]-> shortener_staging.hot 'HOT'
+  
+  shortener_staging.redirect -[kv_namespace_binding]-> shortener_staging.hot 'HOT'
+  
+  shortener_staging.redirect -[d1_binding]-> shortener_staging.links 'LINKS'
+  
+  shortener_staging.redirect -[queue_binding]-> shortener_staging.clicks 'CLICKS'
+  
+  shortener_staging.analytics -[d1_binding]-> shortener_staging.links 'LINKS'
+  
+  shortener_staging.analytics -[r2_bucket_binding]-> shortener_staging.reports 'REPORTS'
+  
+  shortener_staging.analytics -[durable_object_namespace_binding]-> shortener_staging.api 'COUNTER'
+}

@@ -15,6 +15,11 @@
  * to be version-pinned. See `overrides` in package.json.
  */
 
+import { dirname } from "node:path";
+
+/** alchemy's package root, wherever the consumer's linker put it — two levels above its entry. */
+export const alchemyDir = (): string => dirname(dirname(Bun.resolveSync("alchemy", process.cwd())));
+
 /** A resource, as alchemy itself defines it. */
 export interface AlchemyResource {
   /** Canonical id, e.g. `Cloudflare.R2.Bucket`. This is `.Type`. */
@@ -46,17 +51,23 @@ const split = (type: string): Pick<AlchemyResource, "provider" | "namespace" | "
   return { provider, namespace: parts.length > 2 ? parts.slice(1, -1).join(".") : undefined, name };
 };
 
+/** A module namespace (`[object Module]` — bun gives it a prototype, so the tag is the test) or an
+ *  object literal: the two shapes a sub-namespace takes. Anything else — a Layer, a Schema, a
+ *  client — is a value, not a namespace, and is not entered. */
+const isNamespaceLike = (v: object): boolean =>
+  Object.prototype.toString.call(v) === "[object Module]" || Object.getPrototypeOf(v) === Object.prototype;
+
 /**
  * Walk a provider namespace and return every resource in it, sorted by canonical id.
- *
- * `maxDepth` 2 covers `Cloudflare.Worker` and `Cloudflare.R2.Bucket`; nothing nests deeper.
  * Deduplicated by `.Type`, because a resource can be re-exported under several paths.
  */
-export const extractResources = (namespace: object, maxDepth = 2): AlchemyResource[] => {
+export const extractResources = (namespace: object): AlchemyResource[] => {
   const found = new Map<string, AlchemyResource>();
+  const seen = new WeakSet<object>();
 
-  const walk = (obj: object, prefix: string, depth: number): void => {
-    if (depth > maxDepth) return;
+  const walk = (obj: object, prefix: string): void => {
+    if (seen.has(obj)) return;
+    seen.add(obj);
     for (const key of Object.getOwnPropertyNames(obj)) {
       const value = plain(obj, key);
       if (!value) continue;
@@ -65,13 +76,13 @@ export const extractResources = (namespace: object, maxDepth = 2): AlchemyResour
       if (isResource(value)) {
         const type = value.Type;
         if (!found.has(type)) found.set(type, { type, exportPath, ...split(type) });
-      } else if (typeof value === "object" && depth < maxDepth) {
-        walk(value, exportPath, depth + 1);
+      } else if (typeof value === "object" && isNamespaceLike(value)) {
+        walk(value, exportPath);
       }
     }
   };
 
-  walk(namespace, "", 0);
+  walk(namespace, "");
   return [...found.values()].sort((a, b) => a.type.localeCompare(b.type));
 };
 
@@ -84,15 +95,13 @@ export interface Provider {
   readonly sourceDir: string;
 }
 
-/** Provider subpaths alchemy exports that are resource namespaces rather than runtime helpers.
- *  Read from the package's own `exports` map, so a provider added upstream is picked up. */
+/** Every top-level subpath alchemy exports, read from its own `exports` map. Which of them is a
+ *  provider is not decided here by name: a provider is a subpath whose module yields resources,
+ *  and `extractResources` is the test. Runtime helpers like `alchemy/Cli` yield none. */
 export const discoverProviders = async (alchemyPkgPath: string): Promise<Provider[]> => {
   const pkg = JSON.parse(await Bun.file(`${alchemyPkgPath}/package.json`).text());
-  const NOT_A_PROVIDER =
-    /^\.$|^\.\/(bin|Alchemist|Auth|Bundle|Cli|Construct|ContentType|Drizzle|Endpoint|Output|Process|Runtime|SQLite|Server|Stack|State|TUI|Test|Util)/;
-
   return Object.keys(pkg.exports ?? {})
-    .filter((k) => k.startsWith("./") && !k.includes("*") && !k.slice(2).includes("/") && !NOT_A_PROVIDER.test(k))
+    .filter((k) => k.startsWith("./") && !k.includes("*") && !k.slice(2).includes("/"))
     .map((k) => k.slice(2))
     .sort()
     .map((name) => ({ name, specifier: `alchemy/${name}`, sourceDir: `${alchemyPkgPath}/src/${name}` }));
