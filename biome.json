@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["src/**", "examples/**/*.ts", "index.ts", "*.json", "!**/__snapshots__"]
+    "includes": ["src/**", "examples/**/*.ts", "index.ts", "*.json", "!**/__snapshots__", "!src/icons.gen.ts"]
   },
   "formatter": {
     "indentStyle": "space",

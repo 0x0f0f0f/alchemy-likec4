@@ -1,15 +1,9 @@
-// The logical vocabulary. Nothing infrastructural is declared here: the `cloudflare_*` kinds and
-// `*_binding` relationship kinds come from ./alchemy, generated from alchemy itself.
+// The user's own vocabulary. Everything infrastructural — the `cloudflare_*` kinds, their shapes,
+// colours, icons and `technology`, and the `*_binding` relationship kinds — is generated into
+// ./alchemy from alchemy itself. Do not redeclare a generated kind: LikeC4 rejects a duplicate.
 specification {
   element actor {
     style { shape person; color secondary }
-  }
-  element system
-  element service {
-    style { shape rectangle }
-  }
-  element store {
-    style { shape storage; color indigo }
   }
 
   // Tags are free-form labels you can filter and style views by.

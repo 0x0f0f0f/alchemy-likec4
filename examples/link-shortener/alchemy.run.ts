@@ -11,17 +11,21 @@ export default Alchemy.Stack(
   // A state store is mandatory; in-memory keeps the fixture off the disk.
   { providers: Cloudflare.providers(), state: Alchemy.inMemoryState() },
   Effect.gen(function* () {
+    /** Read-through cache. A miss costs one D1 read. */
     const hot = yield* Cloudflare.KV.Namespace("hot", { title: "hot-links" });
+    /** Canonical slug to URL mapping. */
     const links = yield* Cloudflare.D1.Database("links");
     const clicks = yield* Cloudflare.Queues.Queue("clicks");
     const reports = yield* Cloudflare.R2.Bucket("reports");
 
+    /** Creates links and serves the author dashboard. */
     const api = yield* Cloudflare.Worker("api", {
       main,
       name: "shortener-api",
       env: { LINKS: links, HOT: hot, REGION: "eu" },
     });
 
+    /** The only thing on the request path a visitor waits for. */
     const redirect = yield* Cloudflare.Worker("redirect", {
       main,
       name: "shortener-redirect",

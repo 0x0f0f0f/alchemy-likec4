@@ -36,11 +36,37 @@ documented as allowed and is a validation error. Check the grammar
   `filteredFiles: 0`. A CI gate written that way passes vacuously. Omit `--file` in CI.
 - Importing `alchemy/Cloudflare` needs the effect peer graph pinned — see `overrides` in
   package.json. Without it you get three different failures in a row.
+- `@likec4/icons` ships aws 307, gcp 216, azure 614, tech 2000, bootstrap 2052 icons as
+  `<pack>:<kebab-name>`. Cloudflare has only four (`cloudflare`, `cloudflare-icon`,
+  `cloudflare-workers`, `cloudflare-workers-icon`), none per service, so Cloudflare resources are
+  told apart by shape and colour. `src/icons.gen.ts` is generated from the directory listing by
+  `bun run build:icons` — never hand-list icons.
+- alchemy's Cloudflare JSDoc carries `@category` (15 values) and `@product` (104 values, the
+  `technology` label). No other provider carries either. `@see` is deliberately unread: it is the
+  first URL in the file and often names a sub-feature rather than the product.
 - `@distilled.cloud/cloudflare/workers` resolves to `.ts` under bun and compiled `.js` under node,
   where the binding type aliases no longer exist. `bindingKinds()` reads the `.d.ts` beside it and
   throws on an empty list, because a silent empty list means a spec with no relationship kinds.
 - `@likec4/config` reaches `isLikeC4Config` only through an entry needing `bundle-require` and
   `esbuild` peers, so the nine config filenames are inlined in `src/project.ts` instead.
+- **Relationship inheritance is one-way**: LikeC4 inherits deployment relationships from the
+  logical model, never the reverse. A relationship in `model` shows in logical views AND in
+  deployment views (between the instances); one in `deployment` shows only in deployment views.
+  Declaring both renders two parallel edges, because one joins instances and the other joins nodes.
+  So every generated binding goes in the model and the deployment carries none.
+- `extend` accepts tags, links, metadata, relationships and nested children. It REJECTS
+  description, technology, title, style and icon. Element prose therefore comes from the generator
+  (JSDoc above the resource in the user's stack), never from the consumer's own file.
+- `include <root>.**` silently drops elements with no relationship; `include <root>.*` keeps them.
+  Generated views use `.*`.
+- `icon` must sit inside `style { }` in a specification kind body. Bare `icon` is model-elements only.
+- A named instance (`api = instanceOf x.api`) is one node inheriting the element's shape, colour,
+  icon and technology. `deployment.nodes()` does NOT return instances — walk `deployment.instances()`.
+- Instance `metadata` REPLACES the element's rather than merging; tags combine.
+- An `element` kind and a `deploymentNode` kind may share a name. The same kind declared twice in
+  one project is a hard error, so generated kind names must not collide with the consumer's.
+- The Builder's `$include` drops `.*` selectors and `$autoLayout`, so views are templated text.
+- Theme colours: the docs list 8, the grammar accepts 11 (adds `sky`, `blue`, `slate`).
 - Deployment views reject `style element.tag = …` / `element.kind = …` (likec4 1.59.3: "element kind
   and tag expressions are not supported in deployment view rules"). Style by node reference instead.
 - Alchemy state (`.alchemy/state/<stack>/<stage>/<id>.json`) carries `resourceType`,
