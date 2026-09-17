@@ -1,0 +1,202 @@
+// A link shortener on Cloudflare — small enough to read in one sitting, and it exercises
+// most of what LikeC4 offers.
+//
+// The `cloudflare_*` deployment kinds and the `*_binding` relationship kinds are NOT declared
+// here. They come from ../specs/cloudflare.spec.c4, generated from alchemy, and are pulled in
+// by `include.paths` in likec4.config.json.
+
+specification {
+  element actor {
+    style { shape person; color secondary }
+  }
+  element system
+  element service {
+    style { shape rectangle }
+  }
+  element store {
+    style { shape storage; color indigo }
+  }
+
+  // Tags are free-form labels you can filter and style views by.
+  tag hot-path { color green }
+  tag async { color amber }
+
+  // Deployment nodes describe the infrastructure hierarchy. The leaves come from the
+  // generated spec; these two are the containers alchemy has no resource for.
+  deploymentNode cf_account {
+    notation 'Cloudflare account'
+    style { color gray }
+  }
+  deploymentNode cf_stage {
+    notation 'Stage'
+    technology 'Alchemy'
+  }
+}
+
+model {
+  visitor = actor 'Visitor' {
+    description 'Follows a short link'
+  }
+  author = actor 'Author' {
+    description 'Creates and inspects links'
+  }
+
+  shortener = system 'Shortener' {
+    link https://example.com/docs 'Runbook'
+
+    redirect = service 'Redirect' {
+      #hot-path
+      technology 'Worker'
+      description 'The only thing on the request path a visitor waits for.'
+      metadata {
+        p99 '8ms'
+        slo '99.95'
+      }
+    }
+
+    api = service 'Link API' {
+      technology 'Worker'
+      description 'Creates links and serves the author dashboard.'
+    }
+
+    analytics = service 'Click analytics' {
+      #async
+      technology 'Queue consumer'
+      description 'Aggregates clicks off the request path.'
+    }
+
+    cache = store 'Hot links' {
+      #hot-path
+      technology 'KV'
+      description 'Read-through cache. A miss costs one D1 read.'
+    }
+
+    links = store 'Links' {
+      technology 'D1'
+      description 'Canonical slug to URL mapping.'
+    }
+
+    clicks = store 'Click events' {
+      #async
+      technology 'Queue'
+    }
+
+    reports = store 'Reports' {
+      technology 'R2'
+      description 'Nightly CSV exports.'
+    }
+
+    // Typed relationships, using the binding kinds from the generated spec. The deployment
+    // model inherits every one of these, so each stage gets them without repeating a line.
+    redirect  -[kv_binding]->    cache   'lookup'
+    redirect  -[d1_binding]->    links   'on cache miss'
+    redirect  -[queue_binding]-> clicks  'enqueue click'
+    api       -[d1_binding]->    links   'create, list'
+    api       -[kv_binding]->    cache   'warm on create'
+    analytics -[d1_binding]->    links   'resolve slug'
+    analytics -[r2_binding]->    reports 'nightly export'
+  }
+
+  // Sourceless form: inside an element body, `-> x` means "this element -> x".
+  visitor -> shortener.redirect 'follows a link'
+  author  -> shortener.api      'creates a link'
+}
+
+deployment {
+  cf_account acct 'Cloudflare' {
+    metadata { account_id 'a1b2c3' }
+
+    cf_stage prod 'Production' {
+      cloudflare_worker      redirect_worker  { instanceOf shortener.redirect }
+      cloudflare_worker      api_worker       { instanceOf shortener.api }
+      cloudflare_worker      analytics_worker { instanceOf shortener.analytics }
+      cloudflare_kv_namespace  hot_kv         { instanceOf shortener.cache }
+      cloudflare_d1_database   links_db       { instanceOf shortener.links }
+      cloudflare_queues_queue  click_queue    { instanceOf shortener.clicks }
+      cloudflare_r2_bucket     reports_bucket { instanceOf shortener.reports }
+    }
+
+    // A second stage is the same shape. Deployment nodes are cheap; the relationships
+    // between the instances are inherited, so this costs seven lines, not fourteen.
+    cf_stage staging 'Staging' {
+      cloudflare_worker      redirect_worker  { instanceOf shortener.redirect }
+      cloudflare_worker      api_worker       { instanceOf shortener.api }
+      cloudflare_worker      analytics_worker { instanceOf shortener.analytics }
+      cloudflare_kv_namespace  hot_kv         { instanceOf shortener.cache }
+      cloudflare_d1_database   links_db       { instanceOf shortener.links }
+      cloudflare_queues_queue  click_queue    { instanceOf shortener.clicks }
+      cloudflare_r2_bucket     reports_bucket { instanceOf shortener.reports }
+    }
+
+    // A deployment-only relationship: true of the infrastructure, meaningless in the
+    // logical model, so it lives here rather than up there.
+    staging.links_db -> prod.links_db 'nightly restore' {
+      technology 'D1 export'
+    }
+  }
+}
+
+views {
+  view index {
+    title 'Shortener — landscape'
+    include *
+    include shortener.*
+  }
+
+  // A scoped view: `of` narrows it to one element and its neighbours.
+  view inside of shortener {
+    title 'Inside the shortener'
+    include *
+    // Style by tag, so the request path stands out from the async side.
+    style element.tag = #hot-path { color green }
+    style element.tag = #async { color amber; opacity 40% }
+  }
+
+  // Filtering with `where` — the modern predicate form.
+  view request_path {
+    title 'Request path only'
+    include shortener.* where tag is #hot-path
+    include visitor -> shortener.redirect
+  }
+
+  deployment view prod_topology {
+    title 'Cloudflare — production'
+    include acct.prod.**
+    style acct.prod._ { color amber }
+    autoLayout LeftRight
+  }
+
+  deployment view both_stages {
+    title 'Both stages'
+    include acct.**
+  }
+
+  // A dynamic view: the steps are authored here and exist only in this view.
+  // `alt` / `opt` are flow-control blocks — they render as UML frames in sequence variant.
+  dynamic view resolve {
+    title 'Resolving a short link'
+    variant sequence
+
+    visitor -> shortener.redirect 'GET /abc123'
+    alt {
+      when 'cached' {
+        shortener.redirect -> shortener.cache 'get(abc123)'
+        shortener.redirect <- shortener.cache 'https://…'
+      }
+      else 'cold' {
+        shortener.redirect -> shortener.cache 'get(abc123)'
+        shortener.redirect <- shortener.cache 'miss'
+        shortener.redirect -> shortener.links 'SELECT url WHERE slug = ?'
+        shortener.redirect <- shortener.links 'https://…'
+        shortener.redirect -> shortener.cache 'put, 1h ttl'
+      }
+    }
+    visitor <- shortener.redirect '302 Location'
+
+    // Off the request path, so the visitor is not waiting on it.
+    opt 'fire and forget' {
+      shortener.redirect -> shortener.clicks 'enqueue {slug, ts, ua}'
+      shortener.clicks -> shortener.analytics 'batch of 100'
+    }
+  }
+}

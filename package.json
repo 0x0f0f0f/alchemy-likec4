@@ -28,12 +28,15 @@
   "scripts": {
     "generate": "bun run index.ts",
     "validate": "bun run index.ts --outdir .validate && likec4 validate --json --no-layout .validate",
+    "example": "likec4 start example --port 5199",
+    "example:validate": "likec4 validate --json example",
     "test": "bun test",
     "prepublishOnly": "bun run generate && bun test"
   },
   "files": [
     "specs",
     "src",
+    "example",
     "index.ts",
     "README.md"
   ],

@@ -69,18 +69,49 @@ instantiates, which is what makes one shared file usable across every repo.
 
 ## Using it
 
+Point a LikeC4 project at the generated specs and use the kinds:
+
+```json
+// likec4.config.json
+{ "name": "my-app", "include": { "paths": ["../specs"] } }
+```
+
 ```likec4
-// your-repo/model.c4
+model {
+  api   = service 'API'
+  links = store   'Links'
+  api -[d1_binding]-> links 'reads'      // relationship kind from the spec
+}
+
 deployment {
   cf_account acct {
     cf_stage prod {
-      cloudflare_worker      catalog_api { instanceOf platform.catalog }
-      cloudflare_r2_bucket   public_bucket
-      cloudflare_d1_database platform_db
+      cloudflare_worker      api_worker { instanceOf api }
+      cloudflare_d1_database links_db   { instanceOf links }
     }
   }
 }
 ```
+
+Every deployment node holds an `instanceOf`. That is the whole trick: relationships are
+declared once in `model` and LikeC4 materialises them between the deployed instances, so a
+second stage costs one line per resource and no relationships at all.
+
+## Example
+
+`example/` is a small link shortener — six views covering element, scoped, filtered,
+deployment and dynamic (with `alt` / `opt` flow control):
+
+```bash
+bun run example           # dev server on :5199
+bun run example:validate
+```
+
+| view | nodes | edges |
+|---|---|---|
+| `prod_topology` | 14 | 7 — the logical relationships, inherited |
+| `both_stages` | 30 | 15 — 7 per stage, plus one deployment-only |
+| `request_path` | 4 | 2 — filtered with `where tag is #hot-path` |
 
 ## Styling
 
