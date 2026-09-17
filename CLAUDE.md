@@ -20,6 +20,8 @@ documented as allowed and is a validation error. Check the grammar
   `filteredFiles: 0`. A CI gate written that way passes vacuously. Omit `--file` in CI.
 - Importing `alchemy/Cloudflare` needs the effect peer graph pinned — see `overrides` in
   package.json. Without it you get three different failures in a row.
+- Deployment views reject `style element.tag = …` / `element.kind = …` (likec4 1.59.3: "element kind
+  and tag expressions are not supported in deployment view rules"). Style by node reference instead.
 - Alchemy state (`.alchemy/state/<stack>/<stage>/<id>.json`) carries `resourceType`,
   `bindings[].data.bindings[]` as `{type,name}`, and `downstream`. That is the whole deployment
   graph, on disk, no credentials needed.
