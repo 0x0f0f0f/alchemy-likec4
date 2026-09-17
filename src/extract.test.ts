@@ -1,8 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import * as Cloudflare from "alchemy/Cloudflare";
 import * as Stack from "alchemy/Stack";
+import { requiredEnvironment } from "./auth.ts";
 import { bindingKinds, toRelationshipKind } from "./bindings.ts";
-import { buildSpecification, toIdentifier, toTag } from "./build.ts";
+import { buildBindingsSpecification, buildSpecification, toIdentifier, toTag } from "./build.ts";
 import { categoriesFor } from "./categories.ts";
 import { discoverProviders, extractResources } from "./extract.ts";
 
@@ -119,24 +120,23 @@ describe("buildSpecification", () => {
     expect([...dsl.matchAll(/^ {2}tag /gm)].length).toBe(new Set(categories.values()).size);
   });
 
-  it("emits one relationship kind per binding kind in the schema", () => {
-    expect([...dsl.matchAll(/^ {2}relationship /gm)].length).toBe(bindingKinds().length);
-    expect(dsl).toInclude("relationship d1_binding");
-    expect(dsl).toInclude("relationship durable_object_namespace_binding");
-  });
-
   it("emits no styles — styling by tag is the consumer's job", () => {
     expect(dsl).not.toInclude("style {");
   });
 
-  it("can be asked for kinds only", () => {
-    const bare = buildSpecification(resources, {
-      alchemyVersion: "test",
-      provider: "Cloudflare",
-      includeRelationships: false,
-    });
-    expect(bare).not.toMatch(/^ {2}relationship /m);
-    expect(bare.length).toBeLessThan(dsl.length);
+  it("declares no relationship kinds — those live in bindings.spec.c4", () => {
+    expect(dsl).not.toMatch(/^ {2}relationship /m);
+  });
+});
+
+describe("buildBindingsSpecification", () => {
+  const dsl = buildBindingsSpecification();
+
+  it("emits one relationship kind per binding kind in the schema, and nothing else", () => {
+    expect([...dsl.matchAll(/^ {2}relationship /gm)].length).toBe(bindingKinds().length);
+    expect(dsl).toInclude("relationship d1_binding");
+    expect(dsl).toInclude("relationship durable_object_namespace_binding");
+    expect(dsl).not.toInclude("deploymentNode");
   });
 });
 
@@ -165,5 +165,14 @@ describe("categoriesFor", () => {
 
   it("returns an empty map rather than throwing when sources are absent", () => {
     expect(categoriesFor("node_modules/alchemy/src/DoesNotExist", ["X"]).size).toBe(0);
+  });
+});
+
+describe("requiredEnvironment", () => {
+  it("reads each auth provider's declared contract rather than a list of names", () => {
+    const vars = requiredEnvironment();
+    expect(vars.map((v) => v.name)).toContain("CLOUDFLARE_ACCOUNT_ID");
+    expect(vars.find((v) => v.name === "CLOUDFLARE_API_TOKEN")?.alternatives).toEqual(["CLOUDFLARE_API_KEY"]);
+    expect(vars.length).toBeGreaterThan(2);
   });
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { buildDeployment } from "./build.ts";
-import { openStack } from "./stack.ts";
+import { deriveGraph, openStack } from "./stack.ts";
 
 // Compiles the example stack — no deploy, no network, no state on disk.
 const graph = await openStack({ entrypoint: "example/alchemy.run.ts", stage: "prod" });
@@ -70,5 +70,32 @@ describe("buildDeployment", () => {
 
   it("declares no kinds — they come from the specification files", () => {
     expect(dsl).not.toInclude("specification {");
+  });
+});
+
+describe("deriveGraph", () => {
+  // A hand-made compiled stack: two Workers, one binding that names its host under a key alchemy
+  // has never used, one value binding, and one binding whose own name happens to be a resource name.
+  const worker = (fqn: string, name: string) =>
+    [fqn, { Type: "Cloudflare.Worker", FQN: fqn, LogicalId: fqn, Props: { name }, Namespace: undefined }] as const;
+  const g = deriveGraph({
+    name: "S",
+    stage: "t",
+    resources: Object.fromEntries([worker("api", "s-api"), worker("edge", "s-edge")]),
+    bindings: {
+      edge: [
+        { sid: "COUNTER", data: { bindings: [{ type: "durable_object_namespace", name: "COUNTER", host: "s-api" }] } },
+        { sid: "REGION", data: { bindings: [{ type: "plain_text", name: "REGION", text: "eu" }] } },
+        { sid: "s-api", data: { bindings: [{ type: "plain_text", name: "s-api", text: "x" }] } },
+      ],
+    },
+  });
+
+  it("joins a host name under any key, not only scriptName", () => {
+    expect(g.edges).toContainEqual({ from: "edge", to: "api", kind: "durable_object_namespace", sid: "COUNTER" });
+  });
+
+  it("never joins on a binding's own name, and a value binding yields nothing", () => {
+    expect(g.edges.length).toBe(1);
   });
 });

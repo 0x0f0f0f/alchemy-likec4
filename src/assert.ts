@@ -10,7 +10,7 @@
  * existing model adopts the check on day one and only ever tightens.
  */
 import type { LikeC4Model } from "likec4/model";
-import { toIdentifier } from "./build.ts";
+import { stackId } from "./build.ts";
 import type { StackGraph } from "./stack.ts";
 
 export interface Reflexion {
@@ -24,7 +24,7 @@ type Model = LikeC4Model<any>;
 
 /** Compare a computed model against a stack graph. Only nodes under that stack's root count. */
 export const reflexion = (model: Model, graph: StackGraph): Reflexion => {
-  const root = toIdentifier(`${graph.name}_${graph.stage}`);
+  const root = stackId(graph);
   const inStack = new Set(graph.resources.map((r) => r.fqn));
 
   const claimed = new Set<string>();

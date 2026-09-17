@@ -1,11 +1,11 @@
 /**
- * Generate the specification files: one `<provider>.spec.c4` per provider alchemy ships, plus
- * `alchemy.spec.c4` for the two container kinds a stack graph needs.
+ * Generate the specification files: one `<provider>.spec.c4` per provider alchemy ships,
+ * `bindings.spec.c4` for the Worker binding kinds, and `alchemy.spec.c4` for the two container
+ * kinds a stack graph needs.
  */
-import { dirname } from "node:path";
-import { buildSpecification, buildStackSpecification } from "./build.ts";
+import { buildBindingsSpecification, buildSpecification, buildStackSpecification } from "./build.ts";
 import { categoriesFor } from "./categories.ts";
-import { type AlchemyResource, discoverProviders, extractResources } from "./extract.ts";
+import { type AlchemyResource, alchemyDir, discoverProviders, extractResources } from "./extract.ts";
 
 export interface GenerateOptions {
   /** @default "specs" */
@@ -28,9 +28,6 @@ export interface GenerateResult {
   /** Subpaths that failed to import. Loud, never silent: a helper and a broken provider must not look the same. */
   readonly skipped: readonly string[];
 }
-
-/** alchemy's package root, wherever the consumer's linker put it. */
-const alchemyDir = () => dirname(dirname(Bun.resolveSync("alchemy", process.cwd())));
 
 export const generateSpecs = async (opts: GenerateOptions = {}): Promise<GenerateResult> => {
   const { outdir = "specs", provider: only } = opts;
@@ -71,18 +68,10 @@ export const generateSpecs = async (opts: GenerateOptions = {}): Promise<Generat
       resources.map((r) => r.type),
     );
     const path = `${outdir}/${name.toLowerCase()}.spec.c4`;
-    await Bun.write(
-      path,
-      buildSpecification(resources, {
-        alchemyVersion,
-        provider: name,
-        categories,
-        // Binding kinds are Cloudflare's; emitting them for AWS would be fiction.
-        includeRelationships: name === "Cloudflare",
-      }),
-    );
+    await Bun.write(path, buildSpecification(resources, { alchemyVersion, provider: name, categories }));
     providers.push({ name, resources: resources.length, categorised: categories.size, path });
   }
+  await Bun.write(`${outdir}/bindings.spec.c4`, buildBindingsSpecification());
   await Bun.write(`${outdir}/alchemy.spec.c4`, buildStackSpecification());
 
   return { alchemyVersion, providers, total: providers.reduce((n, p) => n + p.resources, 0), skipped };
