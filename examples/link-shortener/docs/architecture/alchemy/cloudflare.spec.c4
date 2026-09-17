@@ -1,0 +1,989 @@
+// GENERATED — DO NOT EDIT.
+// 241 Cloudflare resources, reflected from alchemy@2.0.0-beta.77.
+// Regenerate with:  alchemy-likec4 spec --project <dir>
+//
+// Kinds are alchemy's `.Type`s; tags are its `@category`. Unused kinds are harmless — LikeC4
+// validates a specification with kinds nothing instantiates, so one shared file serves every repo.
+
+specification {
+  deploymentNode cloudflare_access_application {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Access.Application'
+  }
+  deploymentNode cloudflare_access_bookmark {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Access.Bookmark'
+  }
+  deploymentNode cloudflare_access_certificate {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Access.Certificate'
+  }
+  deploymentNode cloudflare_access_custom_page {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Access.CustomPage'
+  }
+  deploymentNode cloudflare_access_group {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Access.Group'
+  }
+  deploymentNode cloudflare_access_identity_provider {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Access.IdentityProvider'
+  }
+  deploymentNode cloudflare_access_infrastructure_target {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Access.InfrastructureTarget'
+  }
+  deploymentNode cloudflare_access_key_configuration {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Access.KeyConfiguration'
+  }
+  deploymentNode cloudflare_access_mcp_portal {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Access.McpPortal'
+  }
+  deploymentNode cloudflare_access_organization {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Access.Organization'
+  }
+  deploymentNode cloudflare_access_policy {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Access.Policy'
+  }
+  deploymentNode cloudflare_access_service_token {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Access.ServiceToken'
+  }
+  deploymentNode cloudflare_access_tag {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Access.Tag'
+  }
+  deploymentNode cloudflare_account_account {
+    #account_identity
+    notation 'Cloudflare.Account.Account'
+  }
+  deploymentNode cloudflare_account_member {
+    #account_identity
+    notation 'Cloudflare.Account.Member'
+  }
+  deploymentNode cloudflare_acm_custom_trust_store {
+    #ssl_tls_certificates
+    notation 'Cloudflare.Acm.CustomTrustStore'
+  }
+  deploymentNode cloudflare_acm_total_tls {
+    #ssl_tls_certificates
+    notation 'Cloudflare.Acm.TotalTls'
+  }
+  deploymentNode cloudflare_addressing_address_map {
+    #network
+    notation 'Cloudflare.Addressing.AddressMap'
+  }
+  deploymentNode cloudflare_addressing_bgp_prefix {
+    #network
+    notation 'Cloudflare.Addressing.BgpPrefix'
+  }
+  deploymentNode cloudflare_addressing_prefix {
+    #network
+    notation 'Cloudflare.Addressing.Prefix'
+  }
+  deploymentNode cloudflare_addressing_prefix_delegation {
+    #network
+    notation 'Cloudflare.Addressing.PrefixDelegation'
+  }
+  deploymentNode cloudflare_addressing_service_binding {
+    #network
+    notation 'Cloudflare.Addressing.ServiceBinding'
+  }
+  deploymentNode cloudflare_ai_dataset {
+    #ai
+    notation 'Cloudflare.AI.Dataset'
+  }
+  deploymentNode cloudflare_ai_dynamic_routing {
+    #ai
+    notation 'Cloudflare.AI.DynamicRouting'
+  }
+  deploymentNode cloudflare_ai_evaluation {
+    #ai
+    notation 'Cloudflare.AI.Evaluation'
+  }
+  deploymentNode cloudflare_ai_gateway {
+    #ai
+    notation 'Cloudflare.AI.Gateway'
+  }
+  deploymentNode cloudflare_ai_gateway_provider {
+    #ai
+    notation 'Cloudflare.AI.GatewayProvider'
+  }
+  deploymentNode cloudflare_ai_search {
+    #ai
+    notation 'Cloudflare.AI.Search'
+  }
+  deploymentNode cloudflare_ai_search_namespace {
+    #ai
+    notation 'Cloudflare.AI.SearchNamespace'
+  }
+  deploymentNode cloudflare_ai_search_token {
+    #ai
+    notation 'Cloudflare.AI.SearchToken'
+  }
+  deploymentNode cloudflare_ai_security_custom_topics {
+    #application_security
+    notation 'Cloudflare.AI.Security.CustomTopics'
+  }
+  deploymentNode cloudflare_ai_security_settings {
+    #application_security
+    notation 'Cloudflare.AI.SecuritySettings'
+  }
+  deploymentNode cloudflare_alerting_notification_policy {
+    #observability_analytics
+    notation 'Cloudflare.Alerting.NotificationPolicy'
+  }
+  deploymentNode cloudflare_alerting_silence {
+    #observability_analytics
+    notation 'Cloudflare.Alerting.Silence'
+  }
+  deploymentNode cloudflare_alerting_webhook {
+    #observability_analytics
+    notation 'Cloudflare.Alerting.Webhook'
+  }
+  deploymentNode cloudflare_api_shield_configuration {
+    #application_security
+    notation 'Cloudflare.ApiShield.Configuration'
+  }
+  deploymentNode cloudflare_api_shield_label {
+    #application_security
+    notation 'Cloudflare.ApiShield.Label'
+  }
+  deploymentNode cloudflare_api_shield_operation {
+    #application_security
+    notation 'Cloudflare.ApiShield.Operation'
+  }
+  deploymentNode cloudflare_api_shield_user_schema {
+    #application_security
+    notation 'Cloudflare.ApiShield.UserSchema'
+  }
+  deploymentNode cloudflare_api_token_account_api_token {
+    #account_identity
+    notation 'Cloudflare.ApiToken.AccountApiToken'
+  }
+  deploymentNode cloudflare_api_token_user_api_token {
+    #account_identity
+    notation 'Cloudflare.ApiToken.UserApiToken'
+  }
+  deploymentNode cloudflare_argo_smart_routing {
+    #performance_reliability
+    notation 'Cloudflare.Argo.SmartRouting'
+  }
+  deploymentNode cloudflare_argo_tiered_caching {
+    #performance_reliability
+    notation 'Cloudflare.Argo.TieredCaching'
+  }
+  deploymentNode cloudflare_bot_management_bot_management {
+    #application_security
+    notation 'Cloudflare.BotManagement.BotManagement'
+  }
+  deploymentNode cloudflare_cache_origin_cloud_region {
+    #performance_reliability
+    notation 'Cloudflare.Cache.OriginCloudRegion'
+  }
+  deploymentNode cloudflare_cache_regional_tiered_cache {
+    #performance_reliability
+    notation 'Cloudflare.Cache.RegionalTieredCache'
+  }
+  deploymentNode cloudflare_cache_reserve {
+    #performance_reliability
+    notation 'Cloudflare.Cache.Reserve'
+  }
+  deploymentNode cloudflare_cache_smart_tiered_cache {
+    #performance_reliability
+    notation 'Cloudflare.Cache.SmartTieredCache'
+  }
+  deploymentNode cloudflare_cache_variants {
+    #performance_reliability
+    notation 'Cloudflare.Cache.Variants'
+  }
+  deploymentNode cloudflare_calls_app {
+    #media
+    notation 'Cloudflare.Calls.App'
+  }
+  deploymentNode cloudflare_calls_turn_key {
+    #media
+    notation 'Cloudflare.Calls.TurnKey'
+  }
+  deploymentNode cloudflare_certificate_authorities_hostname_association {
+    #ssl_tls_certificates
+    notation 'Cloudflare.CertificateAuthorities.HostnameAssociation'
+  }
+  deploymentNode cloudflare_client_certificate_client_certificate {
+    #ssl_tls_certificates
+    notation 'Cloudflare.ClientCertificate.ClientCertificate'
+  }
+  deploymentNode cloudflare_cloud_connector_rules {
+    #rules_configuration
+    notation 'Cloudflare.CloudConnector.Rules'
+  }
+  deploymentNode cloudflare_cloudforce_one_scan_config {
+    #observability_analytics
+    notation 'Cloudflare.CloudforceOne.ScanConfig'
+  }
+  deploymentNode cloudflare_connectivity_directory_service {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Connectivity.DirectoryService'
+  }
+  deploymentNode cloudflare_container {
+    #workers_compute
+    notation 'Cloudflare.Container'
+  }
+  deploymentNode cloudflare_content_scanning_content_scanning {
+    #application_security
+    notation 'Cloudflare.ContentScanning.ContentScanning'
+  }
+  deploymentNode cloudflare_content_scanning_expression {
+    #application_security
+    notation 'Cloudflare.ContentScanning.Expression'
+  }
+  deploymentNode cloudflare_custom_certificate_custom_certificate {
+    #ssl_tls_certificates
+    notation 'Cloudflare.CustomCertificate.CustomCertificate'
+  }
+  deploymentNode cloudflare_custom_hostname_custom_hostname {
+    #domains_dns
+    notation 'Cloudflare.CustomHostname.CustomHostname'
+  }
+  deploymentNode cloudflare_custom_hostname_fallback_origin {
+    #domains_dns
+    notation 'Cloudflare.CustomHostname.FallbackOrigin'
+  }
+  deploymentNode cloudflare_custom_nameserver_custom_nameserver {
+    #domains_dns
+    notation 'Cloudflare.CustomNameserver.CustomNameserver'
+  }
+  deploymentNode cloudflare_d1_database {
+    #storage_databases
+    notation 'Cloudflare.D1Database'
+  }
+  deploymentNode cloudflare_ddos_protection_allowlist_entry {
+    #network
+    notation 'Cloudflare.DdosProtection.AllowlistEntry'
+  }
+  deploymentNode cloudflare_ddos_protection_syn_protection_filter {
+    #network
+    notation 'Cloudflare.DdosProtection.SynProtectionFilter'
+  }
+  deploymentNode cloudflare_ddos_protection_syn_protection_rule {
+    #network
+    notation 'Cloudflare.DdosProtection.SynProtectionRule'
+  }
+  deploymentNode cloudflare_ddos_protection_tcp_flow_protection_filter {
+    #network
+    notation 'Cloudflare.DdosProtection.TcpFlowProtectionFilter'
+  }
+  deploymentNode cloudflare_ddos_protection_tcp_flow_protection_rule {
+    #network
+    notation 'Cloudflare.DdosProtection.TcpFlowProtectionRule'
+  }
+  deploymentNode cloudflare_devices_custom_profile {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Devices.CustomProfile'
+  }
+  deploymentNode cloudflare_devices_default_profile {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Devices.DefaultProfile'
+  }
+  deploymentNode cloudflare_devices_dex_test {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Devices.DexTest'
+  }
+  deploymentNode cloudflare_devices_managed_network {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Devices.ManagedNetwork'
+  }
+  deploymentNode cloudflare_devices_posture_integration {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Devices.PostureIntegration'
+  }
+  deploymentNode cloudflare_devices_posture_rule {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Devices.PostureRule'
+  }
+  deploymentNode cloudflare_devices_settings {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Devices.Settings'
+  }
+  deploymentNode cloudflare_diagnostics_endpoint_healthcheck {
+    #observability_analytics
+    notation 'Cloudflare.Diagnostics.EndpointHealthcheck'
+  }
+  deploymentNode cloudflare_dlp_entry {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Dlp.Entry'
+  }
+  deploymentNode cloudflare_dlp_profile {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Dlp.Profile'
+  }
+  deploymentNode cloudflare_dns_account_settings {
+    #domains_dns
+    notation 'Cloudflare.DNS.AccountSettings'
+  }
+  deploymentNode cloudflare_dns_dnssec {
+    #domains_dns
+    notation 'Cloudflare.DNS.Dnssec'
+  }
+  deploymentNode cloudflare_dns_firewall {
+    #domains_dns
+    notation 'Cloudflare.DNS.Firewall'
+  }
+  deploymentNode cloudflare_dns_record {
+    #domains_dns
+    notation 'Cloudflare.DNS.Record'
+  }
+  deploymentNode cloudflare_dns_view {
+    #domains_dns
+    notation 'Cloudflare.DNS.View'
+  }
+  deploymentNode cloudflare_dns_zone_settings {
+    #domains_dns
+    notation 'Cloudflare.DNS.ZoneSettings'
+  }
+  deploymentNode cloudflare_dns_zone_transfer_acl {
+    #domains_dns
+    notation 'Cloudflare.DNS.ZoneTransferAcl'
+  }
+  deploymentNode cloudflare_dns_zone_transfer_incoming {
+    #domains_dns
+    notation 'Cloudflare.DNS.ZoneTransferIncoming'
+  }
+  deploymentNode cloudflare_dns_zone_transfer_outgoing {
+    #domains_dns
+    notation 'Cloudflare.DNS.ZoneTransferOutgoing'
+  }
+  deploymentNode cloudflare_dns_zone_transfer_peer {
+    #domains_dns
+    notation 'Cloudflare.DNS.ZoneTransferPeer'
+  }
+  deploymentNode cloudflare_dns_zone_transfer_tsig {
+    #domains_dns
+    notation 'Cloudflare.DNS.ZoneTransferTsig'
+  }
+  deploymentNode cloudflare_email_address {
+    #email
+    notation 'Cloudflare.Email.Address'
+  }
+  deploymentNode cloudflare_email_allow_policy {
+    #email
+    notation 'Cloudflare.Email.AllowPolicy'
+  }
+  deploymentNode cloudflare_email_block_sender {
+    #email
+    notation 'Cloudflare.Email.BlockSender'
+  }
+  deploymentNode cloudflare_email_catch_all {
+    #email
+    notation 'Cloudflare.Email.CatchAll'
+  }
+  deploymentNode cloudflare_email_domain {
+    #email
+    notation 'Cloudflare.Email.Domain'
+  }
+  deploymentNode cloudflare_email_impersonation_registry_entry {
+    #email
+    notation 'Cloudflare.Email.ImpersonationRegistryEntry'
+  }
+  deploymentNode cloudflare_email_routing {
+    #email
+    notation 'Cloudflare.Email.Routing'
+  }
+  deploymentNode cloudflare_email_rule {
+    #email
+    notation 'Cloudflare.Email.Rule'
+  }
+  deploymentNode cloudflare_email_sending_subdomain {
+    #email
+    notation 'Cloudflare.Email.SendingSubdomain'
+  }
+  deploymentNode cloudflare_email_trusted_domain {
+    #email
+    notation 'Cloudflare.Email.TrustedDomain'
+  }
+  deploymentNode cloudflare_firewall_access_rule {
+    #application_security
+    notation 'Cloudflare.Firewall.AccessRule'
+  }
+  deploymentNode cloudflare_firewall_lockdown {
+    #application_security
+    notation 'Cloudflare.Firewall.Lockdown'
+  }
+  deploymentNode cloudflare_firewall_ua_rule {
+    #application_security
+    notation 'Cloudflare.Firewall.UaRule'
+  }
+  deploymentNode cloudflare_flagship_app {
+    #developer_platform
+    notation 'Cloudflare.Flagship.App'
+  }
+  deploymentNode cloudflare_flagship_flag {
+    #developer_platform
+    notation 'Cloudflare.Flagship.Flag'
+  }
+  deploymentNode cloudflare_fraud_detection_settings {
+    #application_security
+    notation 'Cloudflare.Fraud.DetectionSettings'
+  }
+  deploymentNode cloudflare_gateway_certificate {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Gateway.Certificate'
+  }
+  deploymentNode cloudflare_gateway_configuration {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Gateway.Configuration'
+  }
+  deploymentNode cloudflare_gateway_list {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Gateway.List'
+  }
+  deploymentNode cloudflare_gateway_location {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Gateway.Location'
+  }
+  deploymentNode cloudflare_gateway_logging {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Gateway.Logging'
+  }
+  deploymentNode cloudflare_gateway_proxy_endpoint {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Gateway.ProxyEndpoint'
+  }
+  deploymentNode cloudflare_gateway_rule {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Gateway.Rule'
+  }
+  deploymentNode cloudflare_google_tag_gateway_google_tag_gateway {
+    #performance_reliability
+    notation 'Cloudflare.GoogleTagGateway.GoogleTagGateway'
+  }
+  deploymentNode cloudflare_healthcheck_healthcheck {
+    #performance_reliability
+    notation 'Cloudflare.Healthcheck.Healthcheck'
+  }
+  deploymentNode cloudflare_hostname_tls_setting_hostname_tls_setting {
+    #ssl_tls_certificates
+    notation 'Cloudflare.HostnameTlsSetting.HostnameTlsSetting'
+  }
+  deploymentNode cloudflare_hyperdrive {
+    #storage_databases
+    notation 'Cloudflare.Hyperdrive'
+  }
+  deploymentNode cloudflare_iam_resource_group {
+    #account_identity
+    notation 'Cloudflare.Iam.ResourceGroup'
+  }
+  deploymentNode cloudflare_iam_user_group {
+    #account_identity
+    notation 'Cloudflare.Iam.UserGroup'
+  }
+  deploymentNode cloudflare_iam_user_group_membership {
+    #account_identity
+    notation 'Cloudflare.Iam.UserGroupMembership'
+  }
+  deploymentNode cloudflare_images_signing_key {
+    #media
+    notation 'Cloudflare.Images.SigningKey'
+  }
+  deploymentNode cloudflare_images_variant {
+    #media
+    notation 'Cloudflare.Images.Variant'
+  }
+  deploymentNode cloudflare_intel_indicator_feed {
+    #observability_analytics
+    notation 'Cloudflare.Intel.IndicatorFeed'
+  }
+  deploymentNode cloudflare_intel_indicator_feed_permission {
+    #observability_analytics
+    notation 'Cloudflare.Intel.IndicatorFeedPermission'
+  }
+  deploymentNode cloudflare_keyless_certificate_keyless_certificate {
+    #ssl_tls_certificates
+    notation 'Cloudflare.KeylessCertificate.KeylessCertificate'
+  }
+  deploymentNode cloudflare_kv_namespace {
+    #storage_databases
+    notation 'Cloudflare.KV.Namespace'
+  }
+  deploymentNode cloudflare_leaked_credential_check_detection {
+    #application_security
+    notation 'Cloudflare.LeakedCredentialCheck.Detection'
+  }
+  deploymentNode cloudflare_leaked_credential_check_leaked_credential_check {
+    #application_security
+    notation 'Cloudflare.LeakedCredentialCheck.LeakedCredentialCheck'
+  }
+  deploymentNode cloudflare_load_balancer_load_balancer {
+    #performance_reliability
+    notation 'Cloudflare.LoadBalancer.LoadBalancer'
+  }
+  deploymentNode cloudflare_load_balancer_monitor {
+    #performance_reliability
+    notation 'Cloudflare.LoadBalancer.Monitor'
+  }
+  deploymentNode cloudflare_load_balancer_monitor_group {
+    #performance_reliability
+    notation 'Cloudflare.LoadBalancer.MonitorGroup'
+  }
+  deploymentNode cloudflare_load_balancer_pool {
+    #performance_reliability
+    notation 'Cloudflare.LoadBalancer.Pool'
+  }
+  deploymentNode cloudflare_logpush_job {
+    #observability_analytics
+    notation 'Cloudflare.Logpush.Job'
+  }
+  deploymentNode cloudflare_logs_cmb_config {
+    #observability_analytics
+    notation 'Cloudflare.Logs.CmbConfig'
+  }
+  deploymentNode cloudflare_logs_retention_flag {
+    #observability_analytics
+    notation 'Cloudflare.Logs.RetentionFlag'
+  }
+  deploymentNode cloudflare_magic_cloud_networking_catalog_sync {
+    #network
+    notation 'Cloudflare.MagicCloudNetworking.CatalogSync'
+  }
+  deploymentNode cloudflare_magic_cloud_networking_cloud_integration {
+    #network
+    notation 'Cloudflare.MagicCloudNetworking.CloudIntegration'
+  }
+  deploymentNode cloudflare_magic_cloud_networking_on_ramp {
+    #network
+    notation 'Cloudflare.MagicCloudNetworking.OnRamp'
+  }
+  deploymentNode cloudflare_magic_network_monitoring_config {
+    #network
+    notation 'Cloudflare.MagicNetworkMonitoring.Config'
+  }
+  deploymentNode cloudflare_magic_network_monitoring_rule {
+    #network
+    notation 'Cloudflare.MagicNetworkMonitoring.Rule'
+  }
+  deploymentNode cloudflare_magic_transit_app {
+    #network
+    notation 'Cloudflare.MagicTransit.App'
+  }
+  deploymentNode cloudflare_magic_transit_gre_tunnel {
+    #network
+    notation 'Cloudflare.MagicTransit.GreTunnel'
+  }
+  deploymentNode cloudflare_magic_transit_ipsec_tunnel {
+    #network
+    notation 'Cloudflare.MagicTransit.IpsecTunnel'
+  }
+  deploymentNode cloudflare_magic_transit_site {
+    #network
+    notation 'Cloudflare.MagicTransit.Site'
+  }
+  deploymentNode cloudflare_magic_transit_site_acl {
+    #network
+    notation 'Cloudflare.MagicTransit.SiteAcl'
+  }
+  deploymentNode cloudflare_magic_transit_site_lan {
+    #network
+    notation 'Cloudflare.MagicTransit.SiteLan'
+  }
+  deploymentNode cloudflare_magic_transit_site_wan {
+    #network
+    notation 'Cloudflare.MagicTransit.SiteWan'
+  }
+  deploymentNode cloudflare_magic_transit_static_route {
+    #network
+    notation 'Cloudflare.MagicTransit.StaticRoute'
+  }
+  deploymentNode cloudflare_managed_transforms_managed_transforms {
+    #rules_configuration
+    notation 'Cloudflare.ManagedTransforms.ManagedTransforms'
+  }
+  deploymentNode cloudflare_mtls_certificate_mtls_certificate {
+    #ssl_tls_certificates
+    notation 'Cloudflare.MtlsCertificate.MtlsCertificate'
+  }
+  deploymentNode cloudflare_network_interconnects_settings {
+    #network
+    notation 'Cloudflare.NetworkInterconnects.Settings'
+  }
+  deploymentNode cloudflare_organization_organization {
+    #account_identity
+    notation 'Cloudflare.Organization.Organization'
+  }
+  deploymentNode cloudflare_origin_ca_certificate_origin_ca_certificate {
+    #ssl_tls_certificates
+    notation 'Cloudflare.OriginCaCertificate.OriginCaCertificate'
+  }
+  deploymentNode cloudflare_origin_post_quantum_encryption_origin_post_quantum_encryption {
+    #ssl_tls_certificates
+    notation 'Cloudflare.OriginPostQuantumEncryption.OriginPostQuantumEncryption'
+  }
+  deploymentNode cloudflare_origin_tls_client_auth_certificate {
+    #ssl_tls_certificates
+    notation 'Cloudflare.OriginTlsClientAuth.Certificate'
+  }
+  deploymentNode cloudflare_origin_tls_client_auth_hostname_association {
+    #ssl_tls_certificates
+    notation 'Cloudflare.OriginTlsClientAuth.HostnameAssociation'
+  }
+  deploymentNode cloudflare_origin_tls_client_auth_hostname_certificate {
+    #ssl_tls_certificates
+    notation 'Cloudflare.OriginTlsClientAuth.HostnameCertificate'
+  }
+  deploymentNode cloudflare_origin_tls_client_auth_setting {
+    #ssl_tls_certificates
+    notation 'Cloudflare.OriginTlsClientAuth.Setting'
+  }
+  deploymentNode cloudflare_page_rule_page_rule {
+    #rules_configuration
+    notation 'Cloudflare.PageRule.PageRule'
+  }
+  deploymentNode cloudflare_pages_deployment {
+    #workers_compute
+    notation 'Cloudflare.Pages.Deployment'
+  }
+  deploymentNode cloudflare_pages_domain {
+    #workers_compute
+    notation 'Cloudflare.Pages.Domain'
+  }
+  deploymentNode cloudflare_pages_project {
+    #workers_compute
+    notation 'Cloudflare.Pages.Project'
+  }
+  deploymentNode cloudflare_page_shield_policy {
+    #application_security
+    notation 'Cloudflare.PageShield.Policy'
+  }
+  deploymentNode cloudflare_page_shield_settings {
+    #application_security
+    notation 'Cloudflare.PageShield.Settings'
+  }
+  deploymentNode cloudflare_pipelines_legacy_pipeline {
+    #storage_databases
+    notation 'Cloudflare.Pipelines.LegacyPipeline'
+  }
+  deploymentNode cloudflare_pipelines_pipeline {
+    #storage_databases
+    notation 'Cloudflare.Pipelines.Pipeline'
+  }
+  deploymentNode cloudflare_pipelines_sink {
+    #storage_databases
+    notation 'Cloudflare.Pipelines.Sink'
+  }
+  deploymentNode cloudflare_pipelines_stream {
+    #storage_databases
+    notation 'Cloudflare.Pipelines.Stream'
+  }
+  deploymentNode cloudflare_queues_consumer {
+    #storage_databases
+    notation 'Cloudflare.Queues.Consumer'
+  }
+  deploymentNode cloudflare_queues_queue {
+    #storage_databases
+    notation 'Cloudflare.Queues.Queue'
+  }
+  deploymentNode cloudflare_queues_subscription {
+    #storage_databases
+    notation 'Cloudflare.Queues.Subscription'
+  }
+  deploymentNode cloudflare_r2_bucket {
+    #storage_databases
+    notation 'Cloudflare.R2.Bucket'
+  }
+  deploymentNode cloudflare_r2_bucket_event_notification {
+    #storage_databases
+    notation 'Cloudflare.R2.BucketEventNotification'
+  }
+  deploymentNode cloudflare_r2_bucket_sippy {
+    #storage_databases
+    notation 'Cloudflare.R2.BucketSippy'
+  }
+  deploymentNode cloudflare_r2_data_catalog {
+    #storage_databases
+    notation 'Cloudflare.R2.DataCatalog'
+  }
+  deploymentNode cloudflare_realtime_kit_app {
+    #media
+    notation 'Cloudflare.RealtimeKit.App'
+  }
+  deploymentNode cloudflare_realtime_kit_preset {
+    #media
+    notation 'Cloudflare.RealtimeKit.Preset'
+  }
+  deploymentNode cloudflare_realtime_kit_webhook {
+    #media
+    notation 'Cloudflare.RealtimeKit.Webhook'
+  }
+  deploymentNode cloudflare_regional_hostname_regional_hostname {
+    #domains_dns
+    notation 'Cloudflare.RegionalHostname.RegionalHostname'
+  }
+  deploymentNode cloudflare_registrar_domain {
+    #domains_dns
+    notation 'Cloudflare.Registrar.Domain'
+  }
+  deploymentNode cloudflare_resource_sharing_share {
+    #account_identity
+    notation 'Cloudflare.ResourceSharing.Share'
+  }
+  deploymentNode cloudflare_resource_sharing_share_recipient {
+    #account_identity
+    notation 'Cloudflare.ResourceSharing.ShareRecipient'
+  }
+  deploymentNode cloudflare_resource_sharing_share_resource {
+    #account_identity
+    notation 'Cloudflare.ResourceSharing.ShareResource'
+  }
+  deploymentNode cloudflare_risk_scoring_integration {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.RiskScoring.Integration'
+  }
+  deploymentNode cloudflare_rules_list {
+    #rules_configuration
+    notation 'Cloudflare.Rules.List'
+  }
+  deploymentNode cloudflare_ruleset_ruleset {
+    #rules_configuration
+    notation 'Cloudflare.Ruleset.Ruleset'
+  }
+  deploymentNode cloudflare_rulesets_account_entrypoint {
+    #rules_configuration
+    notation 'Cloudflare.Rulesets.AccountEntrypoint'
+  }
+  deploymentNode cloudflare_rulesets_custom_ruleset {
+    #rules_configuration
+    notation 'Cloudflare.Rulesets.CustomRuleset'
+  }
+  deploymentNode cloudflare_rum_rule {
+    #observability_analytics
+    notation 'Cloudflare.Rum.Rule'
+  }
+  deploymentNode cloudflare_rum_site {
+    #observability_analytics
+    notation 'Cloudflare.Rum.Site'
+  }
+  deploymentNode cloudflare_schema_validation_operation_setting {
+    #application_security
+    notation 'Cloudflare.SchemaValidation.OperationSetting'
+  }
+  deploymentNode cloudflare_schema_validation_schema {
+    #application_security
+    notation 'Cloudflare.SchemaValidation.Schema'
+  }
+  deploymentNode cloudflare_schema_validation_settings {
+    #application_security
+    notation 'Cloudflare.SchemaValidation.Settings'
+  }
+  deploymentNode cloudflare_secrets_store {
+    #storage_databases
+    notation 'Cloudflare.SecretsStore'
+  }
+  deploymentNode cloudflare_secrets_store_secret {
+    #storage_databases
+    notation 'Cloudflare.SecretsStore.Secret'
+  }
+  deploymentNode cloudflare_security_txt_security_txt {
+    #application_security
+    notation 'Cloudflare.SecurityTxt.SecurityTxt'
+  }
+  deploymentNode cloudflare_snippets_rules {
+    #rules_configuration
+    notation 'Cloudflare.Snippets.Rules'
+  }
+  deploymentNode cloudflare_snippets_snippet {
+    #rules_configuration
+    notation 'Cloudflare.Snippets.Snippet'
+  }
+  deploymentNode cloudflare_spectrum_application {
+    #network
+    notation 'Cloudflare.Spectrum.Application'
+  }
+  deploymentNode cloudflare_speed_test_schedule {
+    #performance_reliability
+    notation 'Cloudflare.Speed.TestSchedule'
+  }
+  deploymentNode cloudflare_ssl_certificate_pack {
+    #ssl_tls_certificates
+    notation 'Cloudflare.Ssl.CertificatePack'
+  }
+  deploymentNode cloudflare_ssl_universal_ssl {
+    #ssl_tls_certificates
+    notation 'Cloudflare.Ssl.UniversalSsl'
+  }
+  deploymentNode cloudflare_stream_live_input {
+    #media
+    notation 'Cloudflare.Stream.LiveInput'
+  }
+  deploymentNode cloudflare_stream_live_input_output {
+    #media
+    notation 'Cloudflare.Stream.LiveInputOutput'
+  }
+  deploymentNode cloudflare_stream_signing_key {
+    #media
+    notation 'Cloudflare.Stream.SigningKey'
+  }
+  deploymentNode cloudflare_stream_watermark {
+    #media
+    notation 'Cloudflare.Stream.Watermark'
+  }
+  deploymentNode cloudflare_stream_webhook {
+    #media
+    notation 'Cloudflare.Stream.Webhook'
+  }
+  deploymentNode cloudflare_tags_account_resource_tags {
+    #account_identity
+    notation 'Cloudflare.Tags.AccountResourceTags'
+  }
+  deploymentNode cloudflare_tags_zone_resource_tags {
+    #account_identity
+    notation 'Cloudflare.Tags.ZoneResourceTags'
+  }
+  deploymentNode cloudflare_token_validation_configuration {
+    #application_security
+    notation 'Cloudflare.TokenValidation.Configuration'
+  }
+  deploymentNode cloudflare_token_validation_rule {
+    #application_security
+    notation 'Cloudflare.TokenValidation.Rule'
+  }
+  deploymentNode cloudflare_tunnel_configuration {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Tunnel.Configuration'
+  }
+  deploymentNode cloudflare_tunnel_hostname_route {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Tunnel.HostnameRoute'
+  }
+  deploymentNode cloudflare_tunnel_route {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Tunnel.Route'
+  }
+  deploymentNode cloudflare_tunnel_tunnel {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Tunnel.Tunnel'
+  }
+  deploymentNode cloudflare_tunnel_virtual_network {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Tunnel.VirtualNetwork'
+  }
+  deploymentNode cloudflare_tunnel_warp_connector {
+    #cloudflare_one_zero_trust
+    notation 'Cloudflare.Tunnel.WarpConnector'
+  }
+  deploymentNode cloudflare_turnstile_widget {
+    #application_security
+    notation 'Cloudflare.Turnstile.Widget'
+  }
+  deploymentNode cloudflare_url_normalization_url_normalization {
+    #rules_configuration
+    notation 'Cloudflare.UrlNormalization.UrlNormalization'
+  }
+  deploymentNode cloudflare_vectorize_index {
+    #ai
+    notation 'Cloudflare.VectorizeIndex'
+  }
+  deploymentNode cloudflare_vectorize_metadata_index {
+    #ai
+    notation 'Cloudflare.VectorizeMetadataIndex'
+  }
+  deploymentNode cloudflare_vpc_service_vpc_service {
+    #network
+    notation 'Cloudflare.VpcService.VpcService'
+  }
+  deploymentNode cloudflare_vulnerability_scanner_credential {
+    #application_security
+    notation 'Cloudflare.VulnerabilityScanner.Credential'
+  }
+  deploymentNode cloudflare_vulnerability_scanner_credential_set {
+    #application_security
+    notation 'Cloudflare.VulnerabilityScanner.CredentialSet'
+  }
+  deploymentNode cloudflare_vulnerability_scanner_target_environment {
+    #application_security
+    notation 'Cloudflare.VulnerabilityScanner.TargetEnvironment'
+  }
+  deploymentNode cloudflare_waiting_room_settings {
+    #performance_reliability
+    notation 'Cloudflare.WaitingRoom.Settings'
+  }
+  deploymentNode cloudflare_waiting_room_waiting_room {
+    #performance_reliability
+    notation 'Cloudflare.WaitingRoom.WaitingRoom'
+  }
+  deploymentNode cloudflare_web3_hostname {
+    #domains_dns
+    notation 'Cloudflare.Web3.Hostname'
+  }
+  deploymentNode cloudflare_web3_hostname_content_list {
+    #domains_dns
+    notation 'Cloudflare.Web3.HostnameContentList'
+  }
+  deploymentNode cloudflare_worker {
+    #workers_compute
+    notation 'Cloudflare.Worker'
+  }
+  deploymentNode cloudflare_workers_account_setting {
+    #workers_compute
+    notation 'Cloudflare.Workers.AccountSetting'
+  }
+  deploymentNode cloudflare_workers_dispatch_namespace {
+    #workers_compute
+    notation 'Cloudflare.Workers.DispatchNamespace'
+  }
+  deploymentNode cloudflare_workers_observability_destination {
+    #workers_compute
+    notation 'Cloudflare.Workers.ObservabilityDestination'
+  }
+  deploymentNode cloudflare_workers_route {
+    #workers_compute
+    notation 'Cloudflare.Workers.Route'
+  }
+  deploymentNode cloudflare_workers_subdomain {
+    #workers_compute
+    notation 'Cloudflare.Workers.Subdomain'
+  }
+  deploymentNode cloudflare_workflow {
+    #workers_compute
+    notation 'Cloudflare.Workflow'
+  }
+  deploymentNode cloudflare_zaraz_config {
+    #performance_reliability
+    notation 'Cloudflare.Zaraz.Config'
+  }
+  deploymentNode cloudflare_zone_custom_nameservers {
+    #domains_dns
+    notation 'Cloudflare.Zone.CustomNameservers'
+  }
+  deploymentNode cloudflare_zone_hold {
+    #domains_dns
+    notation 'Cloudflare.Zone.Hold'
+  }
+  deploymentNode cloudflare_zone_setting {
+    #domains_dns
+    notation 'Cloudflare.Zone.Setting'
+  }
+  deploymentNode cloudflare_zone_zone {
+    #domains_dns
+    notation 'Cloudflare.Zone.Zone'
+  }
+  
+  tag account_identity
+  tag ai
+  tag application_security
+  tag cloudflare_one_zero_trust
+  tag developer_platform
+  tag domains_dns
+  tag email
+  tag media
+  tag network
+  tag observability_analytics
+  tag performance_reliability
+  tag rules_configuration
+  tag ssl_tls_certificates
+  tag storage_databases
+  tag workers_compute
+}

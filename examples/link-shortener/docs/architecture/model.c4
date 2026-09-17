@@ -1,0 +1,71 @@
+// A link shortener on Cloudflare — small enough to read in one sitting, and it exercises
+// most of what LikeC4 offers.
+model {
+  visitor = actor 'Visitor' {
+    description 'Follows a short link'
+  }
+  author = actor 'Author' {
+    description 'Creates and inspects links'
+  }
+
+  shortener = system 'Shortener' {
+    link https://example.com/docs 'Runbook'
+
+    redirect = service 'Redirect' {
+      #hot-path
+      technology 'Worker'
+      description 'The only thing on the request path a visitor waits for.'
+      metadata {
+        p99 '8ms'
+        slo '99.95'
+      }
+    }
+
+    api = service 'Link API' {
+      technology 'Worker'
+      description 'Creates links and serves the author dashboard.'
+    }
+
+    analytics = service 'Click analytics' {
+      #async
+      technology 'Worker'
+      description 'Aggregates clicks off the request path.'
+    }
+
+    cache = store 'Hot links' {
+      #hot-path
+      technology 'KV'
+      description 'Read-through cache. A miss costs one D1 read.'
+    }
+
+    links = store 'Links' {
+      technology 'D1'
+      description 'Canonical slug to URL mapping.'
+    }
+
+    clicks = store 'Click events' {
+      #async
+      technology 'Queue'
+    }
+
+    reports = store 'Reports' {
+      technology 'R2'
+      description 'Nightly CSV exports.'
+    }
+
+    // Intent, in the binding kinds the generated spec declares. The generated deployment files
+    // carry the edges alchemy actually wires, between the resources; these are inherited between
+    // the instances inside them. A deployment view shows both, so intent and reality sit side by
+    // side — and a binding in one but not the other is visible at a glance.
+    redirect  -[kv_namespace_binding]-> cache   'lookup'
+    redirect  -[d1_binding]->           links   'on cache miss'
+    redirect  -[queue_binding]->        clicks  'enqueue click'
+    api       -[d1_binding]->           links   'create, list'
+    api       -[kv_namespace_binding]-> cache   'warm on create'
+    analytics -[d1_binding]->           links   'resolve slug'
+    analytics -[r2_bucket_binding]->    reports 'nightly export'
+  }
+
+  visitor -> shortener.redirect 'follows a link'
+  author  -> shortener.api      'creates a link'
+}

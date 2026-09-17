@@ -34,19 +34,18 @@
   "version": "0.1.0",
   "description": "Generate a LikeC4 specification from alchemy's resource registry",
   "scripts": {
-    "generate": "bun run src/cli.ts spec",
-    "validate": "bun run src/cli.ts spec --outdir .validate && likec4 validate --json --no-layout .validate",
     "example": "likec4 start examples --port 5199",
-    "example:generate": "bun run src/cli.ts deployment --entrypoint examples/basic/alchemy.run.ts --stage prod && bun run src/cli.ts deployment --entrypoint examples/link-shortener/alchemy.run.ts --stage prod && bun run src/cli.ts deployment --entrypoint examples/link-shortener/alchemy.run.ts --stage staging",
+    "example:generate": "bun run example:basic && bun run example:shortener",
+    "example:basic": "bun run src/cli.ts spec --project examples/basic/docs/architecture --provider Cloudflare && bun run src/cli.ts deployment --project examples/basic/docs/architecture --entrypoint examples/basic/alchemy.run.ts --stage prod",
+    "example:shortener": "bun run src/cli.ts spec --project examples/link-shortener/docs/architecture && bun run src/cli.ts deployment --project examples/link-shortener/docs/architecture --entrypoint examples/link-shortener/alchemy.run.ts --stage prod && bun run src/cli.ts deployment --project examples/link-shortener/docs/architecture --entrypoint examples/link-shortener/alchemy.run.ts --stage staging",
     "example:validate": "likec4 validate --json --no-layout examples",
+    "example:png": "likec4 export png examples/basic/docs/architecture --flat --notation -o . && mv index.png screenshot.png",
     "test": "bun test",
     "lint": "biome check .",
     "check": "biome check . && knip",
-    "prepublishOnly": "bun run check && bun run generate && bun run example:generate && bun test",
-    "example:png": "likec4 export png examples/basic --flat --notation -o . && mv index.png screenshot.png"
+    "prepublishOnly": "bun run check && bun run example:generate && bun run example:validate && bun test"
   },
   "files": [
-    "specs",
     "src",
     "examples",
     "index.ts",
@@ -55,7 +54,6 @@
   "exports": {
     ".": "./index.ts",
     "./vitest": "./src/vitest.ts",
-    "./specs/*": "./specs/*",
     "./package.json": "./package.json"
   },
   "keywords": [

@@ -1,0 +1,10 @@
+// Everything else is generated into ./alchemy: kinds from the spec, nodes and edges from MyApp.prod.gen.c4.
+views {
+  deployment view index {
+    title 'MyApp — production'
+    include my_app_prod, my_app_prod.**
+    style my_app_prod.photos, my_app_prod.sessions { shape storage; color indigo }
+    style my_app_prod.api { color amber }
+    autoLayout LeftRight
+  }
+}
