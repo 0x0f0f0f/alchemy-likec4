@@ -14,6 +14,12 @@ verified: `include **` and bare `_` standalone are documented and invalid; neste
 documented as allowed and is a validation error. Check the grammar
 (`packages/language-server/src/like-c4.langium`) before trusting a reference page.
 
+## Releasing
+
+- Version is `0.<alchemy beta>.<patch>`: built against `alchemy@2.0.0-beta.77` → publish `0.77.0`.
+  First release is `0.77.0`. Bump the minor with every alchemy beta bump; patch for our own fixes.
+- README.md is for users only. Contributor and release notes live here, not there.
+
 ## Local facts worth not rediscovering
 
 - `likec4 validate --file <path>` with a path that does not match reports **`valid: true`** and
