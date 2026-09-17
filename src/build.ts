@@ -5,6 +5,11 @@
  * technology from its `@product`, relationship kinds from Cloudflare's binding schema, and nodes,
  * edges and descriptions from a compiled stack.
  *
+ * The specification is built and printed SEPARATELY from the model. LikeC4 rejects a kind declared
+ * twice in one project, so a repo with several stacks — alchemy's own shape for an org — cannot
+ * have each stack carry its own copy. One `specification.gen.c4` holds the union of every kind the
+ * run saw; each `<Stack>.model.gen.c4` is a bare `model { }`.
+ *
  * Relationships go in the `model`, never in the `deployment`. LikeC4 inherits deployment
  * relationships from the logical model and never the other way, so a binding declared in the
  * model shows up in logical views AND, through `instanceOf`, in deployment views. Declared in the
@@ -14,7 +19,7 @@
 import { Builder } from "@likec4/core/builder";
 import { generate } from "@likec4/generators/likec4";
 import type { Annotations } from "./annotations.ts";
-import { bindingKinds, toRelationshipKind } from "./bindings.ts";
+import { toRelationshipKind } from "./bindings.ts";
 import { iconFor } from "./icons.ts";
 import type { StackGraph, StackResource } from "./stack.ts";
 import { styleFor } from "./style.ts";
@@ -56,10 +61,6 @@ export const modelId = (graph: Pick<StackGraph, "name">): string => toIdentifier
 export const stackId = (graph: Pick<StackGraph, "name" | "stage">): string =>
   toIdentifier(`${graph.name}_${graph.stage}`);
 
-/** Path of a resource inside a container, e.g. `shortener.api`. */
-const pathOf = (root: string, r: StackResource): string =>
-  [root, ...r.namespace.map(toIdentifier), toIdentifier(r.logicalId)].join(".");
-
 /** Namespace container paths a stack's resources sit on, innermost last. */
 const namespacesOf = (root: string, resources: readonly StackResource[]): ReadonlyMap<string, string> => {
   const out = new Map<string, string>();
@@ -69,20 +70,35 @@ const namespacesOf = (root: string, resources: readonly StackResource[]): Readon
   return out;
 };
 
-export interface BuildOptions {
-  readonly alchemyVersion: string;
-  /** Canonical types to declare kinds for. A superset of the stack's when `--all-kinds`. */
-  readonly kinds: readonly string[];
-  /** Canonical type → what its declaring file says: `@category`, `@product`, `@see`. */
-  readonly annotations: ReadonlyMap<string, Annotations>;
-  /** Logical id → the JSDoc prose above it in the stack. */
-  readonly descriptions: ReadonlyMap<string, string>;
-  /** Declare every Worker binding kind rather than only the ones this stack wires. */
-  readonly allBindings?: boolean;
-}
+/** Whether any of these stacks nests a resource in a namespace. */
+export const hasNamespaces = (graphs: ReadonlyArray<Pick<StackGraph, "resources">>): boolean =>
+  graphs.some((g) => g.resources.some((r) => r.namespace.length > 0));
 
-/** What `Builder.build()` returns: the parsed model the printer takes. */
-type BuiltModel = { specification: { tags: Record<string, unknown> } };
+/**
+ * Path of every resource inside a container, keyed by FQN — e.g. `shortener.api`.
+ *
+ * Sanitising lowercases, so two logical ids that differ only by case land on one identifier:
+ * `Wiki` (an Access application) and `wiki` (the Website in front of it) both become `wiki`. A
+ * logical id IS an alchemy state row, so a consumer with deployed state cannot rename either one.
+ * The canonical type is what tells them apart and it is stable, so the disambiguated id is too.
+ */
+const pathsOf = (root: string, resources: readonly StackResource[]): ReadonlyMap<string, string> => {
+  const base = (r: StackResource) => [root, ...r.namespace.map(toIdentifier), toIdentifier(r.logicalId)].join(".");
+  const shared = new Map<string, number>();
+  for (const r of resources) shared.set(base(r), (shared.get(base(r)) ?? 0) + 1);
+
+  const out = new Map<string, string>();
+  for (const r of resources)
+    out.set(r.fqn, (shared.get(base(r)) as number) > 1 ? `${base(r)}_${toIdentifier(r.type)}` : base(r));
+
+  if (new Set(out.values()).size !== out.size) {
+    const byId = new Map<string, string[]>();
+    for (const [fqn, id] of out) byId.set(id, [...(byId.get(id) ?? []), fqn]);
+    const clash = [...byId].filter(([, fqns]) => fqns.length > 1).map(([id, fqns]) => `${id} ← ${fqns.join(", ")}`);
+    throw new Error(`resource ids collide after sanitising: ${clash.join("; ")}`);
+  }
+  return out;
+};
 
 type ElementHelper = (id: string, props?: object) => { with: (...children: unknown[]) => unknown };
 type ModelHelpers = Record<string, ElementHelper> & {
@@ -90,16 +106,45 @@ type ModelHelpers = Record<string, ElementHelper> & {
   rel: (from: string, to: string, props?: object) => unknown;
 };
 
+/** What `Builder.build()` returns: the parsed model the printer takes. */
+type BuiltModel = {
+  specification: { tags: Record<string, unknown> };
+  elements: unknown;
+  relations: unknown;
+};
+
+/** Compose a Builder into a parsed model. Its helper types are keyed by the kinds declared above,
+ *  which are only known at runtime here, so the composition step is cast rather than inferred. */
+const compose = (builder: unknown, children: unknown[]): BuiltModel => {
+  const b = builder as {
+    builder: { with: (input: unknown) => { build: () => BuiltModel } };
+    model: ModelHelpers;
+  };
+  return b.builder.with(b.model.model(...children)).build();
+};
+
+export interface SpecificationOptions {
+  readonly alchemyVersion: string;
+  /** Canonical types to declare kinds for — the union across every stack in the run. */
+  readonly kinds: readonly string[];
+  /** Canonical type → what its declaring file says: `@category`, `@product`. */
+  readonly annotations: ReadonlyMap<string, Annotations>;
+  /** Binding kinds to declare as relationship kinds — the union across every stack. */
+  readonly bindings: readonly string[];
+  /** Whether any stack nests resources in a namespace. */
+  readonly namespaces: boolean;
+}
+
 /**
- * The specification and the logical model, in one file: the vocabulary and the stack that uses it.
+ * The vocabulary, in a file of its own: one `element` kind per resource type, styled from its
+ * category and given the vendor's icon, plus the container kinds and one `relationship` per
+ * binding kind.
  *
- * One `element` kind per resource type, styled from its category and given the vendor's icon, plus
- * a `deploymentNode alchemy_stack` for the deployment file's root. Then one element per resource
- * and one relationship per binding.
+ * Written once per project rather than once per stack, because LikeC4 rejects a kind declared
+ * twice and a monorepo has as many stacks as it has composition roots.
  */
-export const buildModel = (graph: StackGraph, opts: BuildOptions): string => {
-  const { alchemyVersion, kinds, annotations, descriptions, allBindings } = opts;
-  const root = modelId(graph);
+export const buildSpecification = (opts: SpecificationOptions): string => {
+  const { alchemyVersion, kinds, annotations, bindings, namespaces } = opts;
 
   const tags = new Set<string>();
   const elements: Record<string, object> = {};
@@ -118,71 +163,105 @@ export const buildModel = (graph: StackGraph, opts: BuildOptions): string => {
   }
   // A stack is a boundary, not a thing, so it is a faint dashed group.
   elements[STACK_KIND] = { style: { shape: "rectangle", color: "muted", opacity: 10, border: "dashed" } };
-  const namespaces = namespacesOf(root, graph.resources);
-  if (namespaces.size > 0) elements[NAMESPACE_KIND] = { style: { shape: "rectangle", color: "muted", opacity: 10 } };
-
-  const bindings = allBindings
-    ? bindingKinds()
-    : [...new Set(graph.edges.filter((e) => e.kind !== "prop").map((e) => e.kind))].sort();
-  const relationships = Object.fromEntries(bindings.map((b) => [toRelationshipKind(b), { notation: b }]));
+  if (namespaces) elements[NAMESPACE_KIND] = { style: { shape: "rectangle", color: "muted", opacity: 10 } };
 
   const b = Builder.forSpecification({
     elements,
     deployments: {
       [STACK_KIND]: { notation: "Alchemy stack" },
-      ...(namespaces.size > 0 ? { [NAMESPACE_KIND]: {} } : {}),
+      ...(namespaces ? { [NAMESPACE_KIND]: {} } : {}),
     },
-    relationships,
+    relationships: Object.fromEntries([...bindings].sort().map((k) => [toRelationshipKind(k), { notation: k }])),
     tags: Object.fromEntries([...tags].sort().map((t) => [t, {}])),
   });
-  const h = b.model as unknown as ModelHelpers;
-
-  const byFqn = new Map(graph.resources.map((r) => [r.fqn, pathOf(root, r)]));
-  if (new Set(byFqn.values()).size !== byFqn.size) throw new Error("resource ids collide after sanitising");
-
-  // Children are declared relative to the container they sit in.
-  const local = (path: string) => path.slice(root.length + 1);
-  const children: unknown[] = [
-    ...[...namespaces].map(([id, title]) => (h[NAMESPACE_KIND] as ElementHelper)(local(id), { title })),
-    ...graph.resources.map((r) => {
-      const description = descriptions.get(r.logicalId);
-      return (h[toIdentifier(r.type)] as ElementHelper)(local(pathOf(root, r)), {
-        title: r.logicalId,
-        ...(description ? { description } : {}),
-        metadata: { fqn: r.fqn, type: r.type },
-      });
-    }),
-    ...graph.edges.map((e) =>
-      h.rel(byFqn.get(e.from) as string, byFqn.get(e.to) as string, {
-        ...(e.sid ? { title: e.sid } : {}),
-        ...(e.kind === "prop" ? {} : { kind: toRelationshipKind(e.kind) }),
-      }),
-    ),
-  ];
-
-  // The Builder's helper types are keyed by the kinds declared above, which are only known at
-  // runtime here, so the composition step is cast rather than inferred.
-  const compose = b.builder.with as unknown as (input: unknown) => { build: () => BuiltModel };
-  const built = compose(
-    h.model((h[STACK_KIND] as ElementHelper)(root, { title: graph.name }).with(...children)),
-  ).build();
+  const built = compose(b, []);
   // The Builder assigns each tag a palette colour (`tomato`, `grass`, …) the DSL does not accept.
   // No colour is right anyway: styling by tag is the consumer's.
   for (const tag of Object.values(built.specification.tags)) delete (tag as { color?: string }).color;
 
   return generated(
     [
-      `Stack ${graph.name}: ${graph.resources.length} resources, ${graph.edges.length} relationships,`,
-      `${Object.keys(elements).length} kinds, reflected from alchemy@${alchemyVersion}.`,
-      "Regenerate with:  alchemy-likec4 generate --project <dir>",
+      `${Object.keys(elements).length} kinds and ${bindings.length} binding kinds,`,
+      `reflected from alchemy@${alchemyVersion}.`,
+      "Regenerate with:  alchemy-likec4 generate --project <dir> --entrypoint <stack> …",
       "",
-      "Relationships live here, not in the deployment: LikeC4 inherits deployment relationships",
-      "from the logical model, so these reach deployment views through `instanceOf`.",
+      "One file for the whole project: LikeC4 rejects a kind declared twice, so the stacks that",
+      "use these kinds carry none of their own.",
       "",
       "Enrich from your own file:  extend <element> { #tag  metadata { … }  link … }",
       "`extend` cannot set a description — write one as JSDoc above the resource in your stack.",
     ],
-    print(built),
+    print({ specification: built.specification }),
+  );
+};
+
+export interface ModelOptions {
+  /** Canonical types this stack uses. They must be declared in the project's specification. */
+  readonly kinds: readonly string[];
+  /** Binding kinds this stack wires. */
+  readonly bindings: readonly string[];
+  /** Logical id → the JSDoc prose above it in the stack. */
+  readonly descriptions: ReadonlyMap<string, string>;
+}
+
+/**
+ * One stack as a `model { }` block: one element per resource and one relationship per binding.
+ *
+ * The Builder is given the kinds STRIPPED of style, tags and technology. It resolves a kind's
+ * style onto each element it builds, and the printer emits whatever an element carries — so a
+ * styled kind here would inline a redundant `style { … }` on every element. The real declarations
+ * live in `buildSpecification`, and the elements reference them by kind name at parse time.
+ */
+export const buildModel = (graph: StackGraph, opts: ModelOptions): string => {
+  const { kinds, bindings, descriptions } = opts;
+  const root = modelId(graph);
+  const namespaces = namespacesOf(root, graph.resources);
+
+  const b = Builder.forSpecification({
+    elements: Object.fromEntries([
+      ...kinds.map((type) => [toIdentifier(type), {}] as const),
+      [STACK_KIND, {}] as const,
+      ...(namespaces.size > 0 ? [[NAMESPACE_KIND, {}] as const] : []),
+    ]),
+    deployments: {},
+    relationships: Object.fromEntries(bindings.map((k) => [toRelationshipKind(k), {}])),
+    tags: {},
+  });
+  const h = b.model as unknown as ModelHelpers;
+
+  const paths = pathsOf(root, graph.resources);
+  // Children are declared relative to the container they sit in.
+  const local = (path: string) => path.slice(root.length + 1);
+  const children: unknown[] = [
+    ...[...namespaces].map(([id, title]) => (h[NAMESPACE_KIND] as ElementHelper)(local(id), { title })),
+    ...graph.resources.map((r) => {
+      const description = descriptions.get(r.logicalId);
+      return (h[toIdentifier(r.type)] as ElementHelper)(local(paths.get(r.fqn) as string), {
+        title: r.logicalId,
+        ...(description ? { description } : {}),
+        metadata: { fqn: r.fqn, type: r.type },
+      });
+    }),
+    ...graph.edges.map((e) =>
+      h.rel(paths.get(e.from) as string, paths.get(e.to) as string, {
+        ...(e.sid ? { title: e.sid } : {}),
+        ...(e.kind === "prop" ? {} : { kind: toRelationshipKind(e.kind) }),
+      }),
+    ),
+  ];
+
+  const built = compose(b, [(h[STACK_KIND] as ElementHelper)(root, { title: graph.name }).with(...children)]);
+
+  return generated(
+    [
+      `Stack ${graph.name}: ${graph.resources.length} resources, ${graph.edges.length} relationships.`,
+      "Kinds are declared once for the whole project, in specification.gen.c4.",
+      "Regenerate with:  alchemy-likec4 generate --project <dir> --entrypoint <stack> …",
+      "",
+      "Relationships live here, not in the deployment: LikeC4 inherits deployment relationships",
+      "from the logical model, so these reach deployment views through `instanceOf`.",
+    ],
+    print({ elements: built.elements, relations: built.relations }),
   );
 };
 
@@ -200,13 +279,15 @@ export const buildDeployment = (graph: StackGraph): string => {
   const root = stackId(graph);
   const model = modelId(graph);
   const namespaces = namespacesOf(root, graph.resources);
+  const here = pathsOf(root, graph.resources);
+  const there = pathsOf(model, graph.resources);
 
   const elements = [
     { id: root, kind: STACK_KIND, title: `${graph.name} (${graph.stage})`, metadata: { stage: graph.stage } },
     ...[...namespaces].map(([id, title]) => ({ id, kind: NAMESPACE_KIND, title })),
     ...graph.resources.map((r) => ({
-      id: pathOf(root, r),
-      element: pathOf(model, r),
+      id: here.get(r.fqn) as string,
+      element: there.get(r.fqn) as string,
       metadata: { fqn: r.fqn, type: r.type, ...(r.name ? { name: r.name } : {}) },
     })),
   ];

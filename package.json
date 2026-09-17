@@ -40,13 +40,13 @@
     "@effect/platform-node-shared": "4.0.0-rc.112",
     "@effect/platform-bun": "4.0.0-rc.112"
   },
-  "version": "0.77.0",
+  "version": "0.77.1",
   "description": "Generate a LikeC4 specification from alchemy's resource registry",
   "scripts": {
     "build": "tsdown",
     "build:icons": "bun run scripts/icons.ts",
     "example": "likec4 start examples --port 5199",
-    "example:generate": "bun run example:basic && bun run example:shortener",
+    "example:generate": "bun run example:basic && bun run example:shortener && bun run example:monorepo",
     "example:basic": "bun run src/cli.ts generate --project examples/basic/docs/architecture --entrypoint examples/basic/alchemy.run.ts --stage prod",
     "example:shortener": "bun run src/cli.ts generate --project examples/link-shortener/docs/architecture --entrypoint examples/link-shortener/alchemy.run.ts --stage prod && bun run src/cli.ts generate --project examples/link-shortener/docs/architecture --entrypoint examples/link-shortener/alchemy.run.ts --stage staging",
     "example:validate": "likec4 validate --json --no-layout examples",
@@ -56,7 +56,8 @@
     "typecheck": "tsc --noEmit",
     "check": "biome check . && knip && tsc --noEmit",
     "check:pack": "publint --strict && attw --pack . --profile esm-only",
-    "prepublishOnly": "bun run check && bun run build && bun run example:generate && bun run example:validate && bun test"
+    "prepublishOnly": "bun run check && bun run build && bun run example:generate && bun run example:validate && bun test",
+    "example:monorepo": "bun run src/cli.ts generate --project examples/monorepo/docs/architecture --entrypoint examples/basic/alchemy.run.ts --entrypoint examples/link-shortener/alchemy.run.ts --stage prod"
   },
   "files": [
     "dist",

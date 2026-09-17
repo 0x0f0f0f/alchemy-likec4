@@ -102,14 +102,15 @@ it, recursively, as part of it. `alchemy-likec4` writes only into such a directo
 
 ```
 docs/architecture/
-├─ likec4.config.json     # name, optional styles — this file makes it a project
-├─ specification.c4       # your own element kinds and tags — actors, systems
-├─ mine.c4                # your actors, your relationships, your `extend` blocks
-├─ views.c4               # the views you care about
-└─ alchemy/               # GENERATED — every alchemy-likec4 run rewrites it
-   ├─ MyApp.model.gen.c4  # the kinds your stack uses, and your stack as a model
-   ├─ MyApp.prod.gen.c4   # each resource as a deployed instance, one file per stage
-   └─ MyApp.views.gen.c4  # a landscape view, and one per stage
+├─ likec4.config.json         # name, optional styles — this file makes it a project
+├─ specification.c4           # your own element kinds and tags — actors, systems
+├─ mine.c4                    # your actors, your relationships, your `extend` blocks
+├─ views.c4                   # the views you care about
+└─ alchemy/                   # GENERATED — every alchemy-likec4 run rewrites it
+   ├─ specification.gen.c4    # every kind your stacks use, styled and iconed — one per project
+   ├─ MyApp.model.gen.c4      # your stack as a model: one element per resource, one edge per binding
+   ├─ MyApp.prod.gen.c4       # each resource as a deployed instance, one file per stage
+   └─ MyApp.views.gen.c4      # a landscape view, and one per stage
 ```
 
 Every file outside `alchemy/` is optional. The `examples/basic` project in this repo contains
@@ -146,18 +147,45 @@ bun add -d alchemy-likec4
 bunx alchemy-likec4 generate --project docs/architecture --stage prod
 ```
 
-One command writes three files into `docs/architecture/alchemy/`:
+One command writes into `docs/architecture/alchemy/`:
 
-| File                     | Contents                                                                                                  |
-| ------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `<Stack>.model.gen.c4`   | the element kinds your stack uses, styled and iconed, and one element per resource with its relationships |
-| `<Stack>.<stage>.gen.c4` | each resource as a deployed instance, one file per stage                                                  |
-| `<Stack>.views.gen.c4`   | a landscape view and one deployment view per stage                                                        |
+| File                     | Contents                                                                                    |
+| ------------------------ | --------------------------------------------------------------------------------------------- |
+| `specification.gen.c4`   | every element kind your stacks use, styled and iconed, and one relationship kind per binding — **one per project** |
+| `<Stack>.model.gen.c4`   | one element per resource, with its relationships                                            |
+| `<Stack>.<stage>.gen.c4` | each resource as a deployed instance, one file per stage                                    |
+| `<Stack>.views.gen.c4`   | a landscape view and one deployment view per stage                                          |
 
 Run it again with `--stage staging` to add a stage. Nothing else is touched, and the views file
-picks up every stage it finds. `--entrypoint path/to/alchemy.run.ts` reads another stack.
-`--all-kinds` declares every resource kind alchemy ships instead of only the ones you use, which
-is useful for browsing and noisy for everything else.
+picks up every stage it finds. `--all-kinds` declares every resource kind alchemy ships instead of
+only the ones you use, which is useful for browsing and noisy for everything else.
+
+### A monorepo: many stacks, one project
+
+A repo has one stack per composition root, and LikeC4 rejects a kind declared twice in a project —
+so the stacks share one specification, and that means generating them together. `--entrypoint`
+repeats:
+
+```bash
+bunx alchemy-likec4 generate --project docs/architecture \
+  --entrypoint apps/auth/alchemy.run.ts \
+  --entrypoint apps/api/alchemy.run.ts \
+  --entrypoint apps/web/alchemy.run.ts \
+  --stage prod
+```
+
+`specification.gen.c4` is then the union of every kind the run saw, rewritten whole on each run, and
+each stack gets its own `model` / `<stage>` / `views` files. Pass **every** entrypoint: a stack left
+out keeps its files but loses its kinds from the shared specification, and the CLI says so.
+
+One `model {}` for the whole org is also what lets you draw the edges between stacks — a cross-stack
+`Worker.ref` is not something the compiled stack records, so it stays yours to write:
+
+```likec4
+model {
+  api.gateway -> lake.worker 'service binding'
+}
+```
 
 `--project` is required, and anything that is not a LikeC4 project is refused. To create one, make
 the directory and put a config file in it:
@@ -264,6 +292,8 @@ stack does not back.
 - [`examples/basic`](examples/basic) — one Worker, one bucket, one KV namespace. Its LikeC4 project
   is a single file, `likec4.config.json`, and everything in the second screenshot comes from the
   stack.
+- [`examples/monorepo`](examples/monorepo) — both stacks above in ONE project, generated in one run:
+  one `specification.gen.c4`, two models, two landscapes.
 - [`examples/link-shortener`](examples/link-shortener) — two stages, two actors, eight bindings.
   The first screenshot is its `index` view. Hand-written: two actors, four `extend` blocks, a
   cross-stage restore edge, and five views including a sequence diagram.
@@ -320,6 +350,10 @@ The deployment carries no relationships. It does not need to.
   and no relationship kinds.
 - `DurableObject`, `Email.SendEmail` and `Website.Astro` are factory functions with no `.Type`, so
   they are not kinds. An Astro site _is_ a `cloudflare_worker` once deployed.
+- A cross-stack `Cloudflare.Worker.ref` is invisible: the reference is not a resource of the stack
+  that holds it, so no node and no edge is derived. Write that edge yourself.
+- Two logical ids that differ only by case (`Vault` and `vault`) both sanitise to one identifier, so
+  the canonical type is appended to each: `vault_cloudflare_access_application`, `vault_cloudflare_worker`.
 - Deployment views cannot style by tag or kind (likec4 1.59.3). Style by node reference. Model
   views can style by tag.
 - Only Cloudflare carries `@category` and `@product`, so other providers get shapes from the

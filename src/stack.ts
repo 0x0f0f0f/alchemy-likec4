@@ -66,7 +66,8 @@ interface NamespaceNode {
 
 export interface Binding {
   readonly sid: string;
-  readonly data: { readonly bindings: ReadonlyArray<Record<string, unknown> & { readonly type: string }> };
+  /** Absent `bindings` on a Container / Durable Object binding, whose `data` is a namespace handle. */
+  readonly data?: { readonly bindings?: ReadonlyArray<Record<string, unknown> & { readonly type: string }> };
 }
 
 const namespacePath = (ns: NamespaceNode | undefined): string[] => {
@@ -104,17 +105,24 @@ export const deriveGraph = (stack: CompiledStack): StackGraph => {
 
   for (const r of Object.values(stack.resources)) {
     // Bindings first: they carry the kind, and each is walked on its own so the edge is attributed
-    // to the right `env` key.
+    // to the right `env` key. `data.bindings` is absent on a Container or Durable Object binding,
+    // whose `data` is `{ durableObjects: { namespaceId } }` — the resource is still a node, it
+    // just wires nothing here.
     for (const b of stack.bindings[r.FQN] ?? []) {
-      for (const wire of b.data.bindings) {
+      for (const wire of b.data?.bindings ?? []) {
+        // A binding whose VALUE is an Output — `secret.text`, a mapped attribute, the `access:`
+        // prop — arrives as an unresolved Output proxy wrapping the whole wire, so `wire.type` is
+        // another Output rather than a string and no field of it can be read as text. The
+        // reference is still walkable, so the edge survives; only its kind is unknown until deploy.
+        const kind = typeof wire.type === "string" ? wire.type : undefined;
         const targets = upstream(wire);
         // Nothing to walk: join every string field but the binding's own identity against the
-        // resources' names.
-        if (targets.length === 0)
+        // resources' names. Only on a wire that is a plain object — a proxy has no readable fields.
+        if (targets.length === 0 && kind !== undefined)
           for (const [key, value] of Object.entries(wire))
             if (key !== "type" && key !== "name" && typeof value === "string" && byName.has(value))
               targets.push(byName.get(value) as string);
-        for (const to of targets) add({ from: r.FQN, to, kind: wire.type, sid: b.sid });
+        for (const to of targets) add({ from: r.FQN, to, kind: kind ?? "prop", sid: b.sid });
       }
     }
     // Then plain prop references a binding did not already cover.
