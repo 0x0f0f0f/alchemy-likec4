@@ -60,7 +60,7 @@ export const buildSpecification = (resources: readonly AlchemyResource[], opts: 
   return generated(
     [
       `${resources.length} ${provider} resources, reflected from alchemy@${alchemyVersion}.`,
-      "Regenerate with:  bun run generate",
+      "Regenerate with:  alchemy-likec4 spec --project <dir>",
       "",
       "Kinds are alchemy's `.Type`s; tags are its `@category`. Unused kinds are harmless — LikeC4",
       "validates a specification with kinds nothing instantiates, so one shared file serves every repo.",
@@ -76,7 +76,7 @@ export const buildBindingsSpecification = (): string => {
   return generated(
     [
       `${kinds.length} Worker binding kinds, from the Workers API schema in @distilled.cloud/cloudflare.`,
-      "Regenerate with:  bun run generate",
+      "Regenerate with:  alchemy-likec4 spec --project <dir>",
     ],
     generate(Builder.forSpecification({ relationships }).builder.build()),
   );
@@ -136,7 +136,7 @@ export const buildDeployment = (graph: StackGraph): string => {
   return generated(
     [
       `Stack ${graph.name}, stage ${graph.stage}: ${graph.resources.length} resources, ${graph.edges.length} edges.`,
-      "Regenerate with:  bun run generate deployment",
+      `Regenerate with:  alchemy-likec4 deployment --project <dir> --stage ${graph.stage}`,
       "",
       "Map nodes onto the logical model from a hand-written file:  extend <node> { instanceOf <element> }",
     ],
