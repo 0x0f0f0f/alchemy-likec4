@@ -1,0 +1,4 @@
+specification {
+  deploymentNode alchemy_stack
+  deploymentNode alchemy_namespace
+}

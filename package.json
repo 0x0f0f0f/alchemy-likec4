@@ -2,6 +2,9 @@
   "name": "alchemy-likec4",
   "module": "index.ts",
   "type": "module",
+  "bin": {
+    "alchemy-likec4": "./src/cli.ts"
+  },
   "devDependencies": {
     "@likec4/generators": "1.59.3",
     "@types/bun": "latest",
@@ -27,12 +30,13 @@
   "version": "0.1.0",
   "description": "Generate a LikeC4 specification from alchemy's resource registry",
   "scripts": {
-    "generate": "bun run index.ts",
-    "validate": "bun run index.ts --outdir .validate && likec4 validate --json --no-layout .validate",
+    "generate": "bun run src/cli.ts spec",
+    "validate": "bun run src/cli.ts spec --outdir .validate && likec4 validate --json --no-layout .validate",
     "example": "likec4 start example --port 5199",
+    "example:generate": "bun run src/cli.ts deployment --entrypoint example/alchemy.run.ts --stage prod && bun run src/cli.ts deployment --entrypoint example/alchemy.run.ts --stage staging",
     "example:validate": "likec4 validate --json example",
     "test": "bun test",
-    "prepublishOnly": "bun run generate && bun test"
+    "prepublishOnly": "bun run generate && bun run example:generate && bun test"
   },
   "files": [
     "specs",
@@ -42,6 +46,7 @@
     "README.md"
   ],
   "exports": {
+    ".": "./index.ts",
     "./specs/*": "./specs/*",
     "./package.json": "./package.json"
   },

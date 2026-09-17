@@ -1,84 +1,17 @@
-#!/usr/bin/env bun
 /**
- * Generate LikeC4 specifications from alchemy's resource registry — one `.c4` per provider.
+ * alchemy-likec4 — LikeC4 from alchemy.
  *
- *   bun run generate                      # every provider alchemy exports
- *   bun run generate --provider Cloudflare
- *   bun run generate --outdir specs --no-relationships
+ * Two halves. The specification: every resource kind alchemy can provision, reflected from the
+ * package. The deployment model: a stack's actual resources and bindings, compiled from its
+ * entrypoint without deploying. Both are built with LikeC4's own Builder and printed with its
+ * own generator; nothing is typed by hand.
+ *
+ *   import { openStack, buildDeployment } from "alchemy-likec4";
+ *   await Bun.write("infra.gen.c4", buildDeployment(await openStack({ stage: "prod" })));
  */
-import { buildSpecification } from "./src/build.ts";
-import { categoriesFor } from "./src/categories.ts";
-import { type AlchemyResource, discoverProviders, extractResources } from "./src/extract.ts";
-
-const ALCHEMY = "node_modules/alchemy";
-
-const flag = (name: string): string | undefined => {
-  const i = Bun.argv.indexOf(name);
-  return i !== -1 ? Bun.argv[i + 1] : undefined;
-};
-const has = (name: string) => Bun.argv.includes(name);
-
-const outdir = flag("--outdir") ?? "specs";
-const only = flag("--provider");
-const includeRelationships = !has("--no-relationships");
-
-const alchemyVersion: string = JSON.parse(await Bun.file(`${ALCHEMY}/package.json`).text()).version;
-const namespaces = await discoverProviders(ALCHEMY);
-
-// Collect across every namespace FIRST, then group by the provider named in each resource's
-// canonical type. Namespaces re-export each other — alchemy/AWS exposes the four Kubernetes
-// resources for EKS — so the namespace a resource was found in is not its owner. The `.Type`
-// is the identity, so it decides which file the kind belongs in, and deduplication is global.
-const all = new Map<string, AlchemyResource>();
-const sourceDirs = new Map<string, string>();
-const skipped: string[] = [];
-
-for (const ns of namespaces) {
-  let mod: object;
-  try {
-    mod = (await import(ns.specifier)) as object;
-  } catch (error) {
-    // Loudly, never silently: a short spec and a missing spec must not look the same.
-    skipped.push(`${ns.name} (import failed: ${String((error as Error).message).slice(0, 60)})`);
-    continue;
-  }
-  const found = extractResources(mod);
-  if (found.length === 0) continue; // a runtime helper (Cli, State, …), not a provider
-  sourceDirs.set(ns.name, ns.sourceDir);
-  for (const r of found) if (!all.has(r.type)) all.set(r.type, r);
-}
-
-const byProvider = new Map<string, AlchemyResource[]>();
-for (const r of all.values()) {
-  if (only && r.provider !== only) continue;
-  (byProvider.get(r.provider) ?? byProvider.set(r.provider, []).get(r.provider)!).push(r);
-}
-
-let total = 0;
-for (const [provider, resources] of [...byProvider].sort(([a], [b]) => a.localeCompare(b))) {
-  resources.sort((a, b) => a.type.localeCompare(b.type));
-  const sourceDir = sourceDirs.get(provider) ?? `${ALCHEMY}/src/${provider}`;
-  const categories = categoriesFor(
-    sourceDir,
-    resources.map((r) => r.type),
-  );
-
-  const dsl = buildSpecification(resources, {
-    alchemyVersion,
-    provider,
-    categories,
-    // Binding kinds are Cloudflare's; emitting them for AWS would be fiction.
-    includeRelationships: includeRelationships && provider === "Cloudflare",
-  });
-
-  const path = `${outdir}/${provider.toLowerCase()}.spec.c4`;
-  await Bun.write(path, dsl);
-  total += resources.length;
-  console.log(
-    `  ${provider.padEnd(12)} ${String(resources.length).padStart(4)} resources  ` +
-      `${String(categories.size).padStart(4)} categorised  → ${path}`,
-  );
-}
-
-console.log(`\n${total} resources across ${byProvider.size} providers (alchemy@${alchemyVersion})`);
-if (skipped.length > 0) console.log(`skipped: ${skipped.join(", ")}`);
+export { bindingKinds, toRelationshipKind } from "./src/bindings.ts";
+export { buildDeployment, buildSpecification, buildStackSpecification, toIdentifier, toTag } from "./src/build.ts";
+export { categoriesFor } from "./src/categories.ts";
+export { type AlchemyResource, discoverProviders, extractResources } from "./src/extract.ts";
+export { type GenerateOptions, type GenerateResult, generateSpecs } from "./src/generate.ts";
+export { type OpenOptions, openStack, type StackEdge, type StackGraph, stackGraph, type StackResource } from "./src/stack.ts";
