@@ -57,6 +57,24 @@ documented as allowed and is a validation error. Check the grammar
 - `extend` accepts tags, links, metadata, relationships and nested children. It REJECTS
   description, technology, title, style and icon. Element prose therefore comes from the generator
   (JSDoc above the resource in the user's stack), never from the consumer's own file.
+- The printer takes a PARTIAL parsed model, which is what makes the spec/model split possible:
+  `generate({ specification })` prints `specification { }` alone, `generate({ elements, relations })`
+  prints `model { }` alone. Verified against 1.59.3.
+- The Builder resolves a kind's style ONTO each element it builds, and the printer emits whatever an
+  element carries. So `buildModel` is given the kinds stripped of style, tags and technology —
+  otherwise every element inlines a redundant `style { }` and the spec is no longer the one place
+  styling is declared.
+- A kind declared twice in one project is a hard error (`Duplicate element kind`, also for
+  `deploymentNode`, `RelationshipKind` and `tag`). That is why the specification is one file per
+  PROJECT, union of every stack in the run, and why `--entrypoint` repeats.
+- Two logical ids that differ only by case sanitise to one identifier. Both are alchemy state rows a
+  consumer cannot rename, so `pathsOf` appends the sanitised canonical type to each of a colliding
+  group — a pure function of `(logicalId, type)`, so the id is stable and both the model and the
+  deployment derive the same one.
+- A binding's `data.bindings` is absent on a Container / Durable Object binding (`data` is
+  `{ durableObjects: { namespaceId } }`), and a binding whose VALUE is an Output arrives as a proxy
+  wrapping the whole wire — `wire.type` is then an Output, not a string, and interpolating it throws.
+  Both are guarded in `deriveGraph`; neither has a fixture that is not hand-made.
 - `include <root>.**` silently drops elements with no relationship; `include <root>.*` keeps them.
   Generated views use `.*`.
 - `icon` must sit inside `style { }` in a specification kind body. Bare `icon` is model-elements only.

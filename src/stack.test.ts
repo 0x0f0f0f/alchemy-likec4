@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { buildDeployment, buildModel, buildViews } from "./build.ts";
+import { buildDeployment, buildModel, buildSpecification, buildViews } from "./build.ts";
 import { deriveGraph, openStack } from "./stack.ts";
 
 // Compiles the example stack — no deploy, no network, no state on disk.
@@ -76,12 +76,13 @@ describe("buildDeployment", () => {
   });
 });
 
-describe("buildModel", () => {
-  const dsl = buildModel(graph, {
+describe("buildSpecification", () => {
+  const dsl = buildSpecification({
     alchemyVersion: "test",
     kinds: [...new Set(graph.resources.map((r) => r.type))],
     annotations: new Map([["Cloudflare.Worker", { category: "Workers & Compute", product: "Workers" }]]),
-    descriptions: new Map([["api", "Creates links."]]),
+    bindings: [...new Set(graph.edges.map((e) => e.kind))],
+    namespaces: false,
   });
 
   it("declares one element kind per used resource type, and nothing else", () => {
@@ -103,6 +104,38 @@ describe("buildModel", () => {
     expect(dsl).toInclude("technology 'Workers'");
   });
 
+  it("declares only the binding kinds these stacks wire", () => {
+    const declared = [...dsl.matchAll(/^ {2}relationship (\w+)/gm)].map((m) => m[1]);
+    expect(declared).toContain("d1_binding");
+    expect(declared).not.toContain("hyperdrive_binding");
+  });
+
+  it("holds no model: the stacks that use these kinds are separate files", () => {
+    expect(dsl).not.toInclude("model {");
+  });
+
+  it("omits the namespace container kind when nothing is namespaced", () => {
+    expect(dsl).not.toInclude("alchemy_namespace");
+  });
+});
+
+describe("buildModel", () => {
+  const dsl = buildModel(graph, {
+    kinds: [...new Set(graph.resources.map((r) => r.type))],
+    bindings: [...new Set(graph.edges.map((e) => e.kind))],
+    descriptions: new Map([["api", "Creates links."]]),
+  });
+
+  it("declares no kinds: they are the project's, in specification.gen.c4", () => {
+    expect(dsl).not.toInclude("specification {");
+    expect(dsl).not.toInclude("element cloudflare_worker {");
+  });
+
+  it("inlines no style, so a kind's styling has exactly one declaration", () => {
+    expect(dsl).not.toInclude("style {");
+    expect(dsl).not.toInclude("shape component");
+  });
+
   it("carries the JSDoc from the stack as the description", () => {
     expect(dsl).toInclude("Creates links.");
   });
@@ -111,12 +144,6 @@ describe("buildModel", () => {
     expect(dsl).toInclude("shortener.analytics -[durable_object_namespace_binding]-> shortener.api 'COUNTER'");
     expect(dsl).toInclude("-[d1_binding]->");
     expect([...dsl.matchAll(/^ {2}shortener\.\w+ -/gm)].length).toBe(graph.edges.length);
-  });
-
-  it("declares only the binding kinds this stack wires", () => {
-    const declared = [...dsl.matchAll(/^ {2}relationship (\w+)/gm)].map((m) => m[1]);
-    expect(declared).toContain("d1_binding");
-    expect(declared).not.toContain("hyperdrive_binding");
   });
 });
 
@@ -161,5 +188,73 @@ describe("deriveGraph", () => {
 
   it("never joins on a binding's own name, and a value binding yields nothing", () => {
     expect(g.edges.length).toBe(1);
+  });
+});
+
+describe("ids that differ only by case", () => {
+  // An Access application `Vault` in front of a Website `vault` — both spellings are alchemy state
+  // rows a consumer cannot rename, and both sanitise to `vault`.
+  const resource = (logicalId: string, type: string) => ({
+    type,
+    fqn: logicalId,
+    logicalId,
+    namespace: [] as string[],
+    name: undefined,
+  });
+  const kinds = (rs: ReadonlyArray<{ type: string }>) => [...new Set(rs.map((r) => r.type))];
+  const g = {
+    name: "V",
+    stage: "prod",
+    resources: [resource("Vault", "Cloudflare.Access.Application"), resource("vault", "Cloudflare.Worker")],
+    edges: [],
+  };
+
+  it("disambiguates by canonical type instead of refusing to build", () => {
+    const dsl = buildModel(g, { kinds: kinds(g.resources), bindings: [], descriptions: new Map() });
+    expect(dsl).toInclude("vault_cloudflare_access_application");
+    expect(dsl).toInclude("vault_cloudflare_worker");
+  });
+
+  it("gives the deployment the same ids, so instanceOf resolves", () => {
+    const dsl = buildDeployment(g);
+    expect(dsl).toInclude("instanceOf v.vault_cloudflare_worker");
+    expect(dsl).toInclude("instanceOf v.vault_cloudflare_access_application");
+  });
+
+  it("leaves an id alone when nothing collides with it", () => {
+    const one = [resource("vault", "Cloudflare.Worker")];
+    const dsl = buildModel({ ...g, resources: one }, { kinds: kinds(one), bindings: [], descriptions: new Map() });
+    expect(dsl).toInclude("vault = cloudflare_worker");
+    expect(dsl).not.toInclude("vault_cloudflare_worker");
+  });
+});
+
+describe("bindings a stack can carry that are not wires", () => {
+  const worker = (fqn: string, name: string) =>
+    [fqn, { Type: "Cloudflare.Worker", FQN: fqn, LogicalId: fqn, Props: { name }, Namespace: undefined }] as const;
+
+  it("skips a binding whose data holds no wires, rather than throwing", () => {
+    // A Container / Durable Object binding: `data` is a namespace handle, with no `bindings` array.
+    const g = deriveGraph({
+      name: "S",
+      stage: "t",
+      resources: Object.fromEntries([worker("api", "s-api")]),
+      bindings: { api: [{ sid: "HUB", data: { durableObjects: { namespaceId: {} } } } as never] },
+    });
+    expect(g.edges).toEqual([]);
+  });
+
+  it("does not string-match a wire whose kind is an unresolved Output", () => {
+    // `secret.text` and the `access:` prop arrive as an Output proxy wrapping the whole wire: the
+    // kind is not a string, and no field of it can be read as one. Interpolating it used to throw.
+    const g = deriveGraph({
+      name: "S",
+      stage: "t",
+      resources: Object.fromEntries([worker("api", "s-api"), worker("edge", "s-edge")]),
+      bindings: {
+        edge: [{ sid: "SECRET", data: { bindings: [{ type: {}, name: "SECRET", host: "s-api" }] } } as never],
+      },
+    });
+    expect(g.edges).toEqual([]);
   });
 });
