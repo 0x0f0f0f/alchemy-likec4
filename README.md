@@ -1,5 +1,7 @@
 # alchemy-likec4
 
+[alchemy-likec4](https://github.com/0x0f0f0f/alchemy-likec4) Automatically generate [LikeC4](https://likec4.dev) specs and diagrams from [alchemy](https://alchemy.run) stacks!
+
 ![The link-shortener example, production stage, as LikeC4 renders it from the alchemy stack](prod_topology.png)
 
 > [!WARNING]
@@ -8,8 +10,6 @@
 > targets **one alchemy 2 beta only** and the version says which: `0.77.x` is
 > built against `alchemy@2.0.0-beta.77`. Match them and regenerate your diagrams after every
 > alchemy bump!
-
-## Automatically generate [LikeC4](https://likec4.dev) specs and diagrams from [alchemy](https://alchemy.run) stacks!
 
 **Why?** You have written your infrastructure with
 [Alchemy](https://alchemy.run)

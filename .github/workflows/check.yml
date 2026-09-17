@@ -1,0 +1,33 @@
+name: Check
+
+# No credentials, no cloud: everything here runs from the checkout alone. Push is scoped to main
+# so a PR commit is not checked twice.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+      - run: bun install --frozen-lockfile
+      - name: Biome, knip, typecheck
+        run: bun run check
+      - name: Tests
+        run: bun test
+      - name: Generated examples match their stacks
+        run: |
+          bun run example:generate
+          git diff --exit-code examples
+          test -z "$(git status --porcelain examples)"
+      - name: LikeC4 validates both example projects
+        run: bun run example:validate

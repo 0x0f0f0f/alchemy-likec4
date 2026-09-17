@@ -29,6 +29,10 @@ export const toTag = (category: string): string =>
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_|_$/g, "");
 
+// The Builder's parsed model and the generator's input type disagree on whether `project.styles`
+// is optional. Same data; one cast.
+const print = (model: unknown): string => generate(model as Parameters<typeof generate>[0]);
+
 /** The printer has no comment support, so provenance is a plain prefix. */
 const generated = (about: readonly string[], dsl: string): string =>
   ["// GENERATED — DO NOT EDIT.", ...about.map((l) => (l ? `// ${l}` : "//")), "", dsl].join("\n");
@@ -65,7 +69,7 @@ export const buildSpecification = (resources: readonly AlchemyResource[], opts: 
       "Kinds are alchemy's `.Type`s; tags are its `@category`. Unused kinds are harmless — LikeC4",
       "validates a specification with kinds nothing instantiates, so one shared file serves every repo.",
     ],
-    generate(built),
+    print(built),
   );
 };
 
@@ -78,7 +82,7 @@ export const buildBindingsSpecification = (): string => {
       `${kinds.length} Worker binding kinds, from the Workers API schema in @distilled.cloud/cloudflare.`,
       "Regenerate with:  alchemy-likec4 spec --project <dir>",
     ],
-    generate(Builder.forSpecification({ relationships }).builder.build()),
+    print(Builder.forSpecification({ relationships }).builder.build()),
   );
 };
 
@@ -89,7 +93,7 @@ const STACK_KINDS = { alchemy_stack: {}, alchemy_namespace: {} } as const;
 export const buildStackSpecification = (): string =>
   generated(
     ["The containers a stack graph needs that no alchemy resource provides."],
-    generate(Builder.forSpecification({ deployments: STACK_KINDS }).builder.build()),
+    print(Builder.forSpecification({ deployments: STACK_KINDS }).builder.build()),
   );
 
 /** Root id of a stack's deployment nodes. The stage is in it so one file per stage can share a project. */
@@ -140,6 +144,6 @@ export const buildDeployment = (graph: StackGraph): string => {
       "",
       "Map nodes onto the logical model from a hand-written file:  extend <node> { instanceOf <element> }",
     ],
-    generate({ deployments: { elements, relations } } as Parameters<typeof generate>[0]),
+    print({ deployments: { elements, relations } }),
   );
 };
