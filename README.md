@@ -3,7 +3,6 @@
 [LikeC4](https://likec4.dev) from [alchemy](https://alchemy.run). Two halves, nothing typed by hand:
 
 - **The specification** — every resource kind alchemy can provision, reflected from the package.
-  1,057 kinds across 13 providers from `alchemy@2.0.0-beta.77`.
 - **The deployment model** — a stack's actual resources and bindings, compiled from its
   entrypoint without deploying it. No credentials, no network, no state.
 
@@ -33,8 +32,8 @@ Three more things are derived, not curated:
 
 | | from | as |
 |---|---|---|
-| **Tags** | alchemy's `@category` JSDoc (15 groups for Cloudflare) | `#storage_databases` on each kind |
-| **Relationship kinds** | the Workers API binding schema in `@distilled.cloud/cloudflare` (40 kinds) | `d1_binding`, `kv_namespace_binding`, … |
+| **Tags** | alchemy's `@category` JSDoc | `#storage_databases` on each kind |
+| **Relationship kinds** | the Workers API binding schema in `@distilled.cloud/cloudflare` | `d1_binding`, `kv_namespace_binding`, … in `bindings.spec.c4` |
 | **Providers** | whichever `alchemy/*` subpaths yield resources | one file each |
 
 There are no styles. Styling by tag is the consumer's, in their own `.c4`.

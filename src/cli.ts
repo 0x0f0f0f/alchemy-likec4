@@ -6,6 +6,7 @@
  * A thin shell over the library — the same `effect/unstable/cli` alchemy's own CLI is built on.
  */
 import { dirname } from "node:path";
+import { DEFAULT_ENTRYPOINT } from "alchemy/Alchemist";
 import { PlatformServices, runMain } from "alchemy/Util/PlatformServices";
 import * as Effect from "effect/Effect";
 import * as Option from "effect/Option";
@@ -46,7 +47,7 @@ const deployment = Command.make(
   {
     entrypoint: Flag.string("entrypoint").pipe(
       Flag.withDescription("Stack entrypoint"),
-      Flag.withDefault("alchemy.run.ts"),
+      Flag.withDefault(DEFAULT_ENTRYPOINT),
     ),
     stage: Flag.string("stage").pipe(Flag.withDescription("Stage; only names derived from it change"), Flag.optional),
     out: Flag.string("out").pipe(

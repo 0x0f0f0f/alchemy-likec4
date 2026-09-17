@@ -2,9 +2,8 @@
 // 8 Docker resources, reflected from alchemy@2.0.0-beta.77.
 // Regenerate with:  bun run generate
 //
-// Kinds are alchemy's `.Type`s; tags are its `@category`; relationship kinds are the Workers
-// API's binding types. Unused kinds are harmless — LikeC4 validates a specification with
-// kinds nothing instantiates, so one shared file serves every repo.
+// Kinds are alchemy's `.Type`s; tags are its `@category`. Unused kinds are harmless — LikeC4
+// validates a specification with kinds nothing instantiates, so one shared file serves every repo.
 
 specification {
   deploymentNode docker_container {
