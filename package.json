@@ -31,7 +31,7 @@
     "@effect/platform-node-shared": "4.0.0-rc.112",
     "@effect/platform-bun": "4.0.0-rc.112"
   },
-  "version": "0.1.0",
+  "version": "0.77.0",
   "description": "Generate a LikeC4 specification from alchemy's resource registry",
   "scripts": {
     "example": "likec4 start examples --port 5199",
