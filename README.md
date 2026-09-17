@@ -1,44 +1,137 @@
 # alchemy-likec4
 
-[LikeC4](https://likec4.dev) from [alchemy](https://alchemy.run). Two halves, nothing typed by hand:
+## Automatically generate [LikeC4](https://likec4.dev) specs and diagrams from [alchemy](https://alchemy.run) stacks!
 
-- **The specification** — every resource kind alchemy can provision, reflected from the package.
-- **The deployment model** — a stack's actual resources and bindings, compiled from its
-  entrypoint without deploying it. No credentials, no network, no state.
+**Why?** You have written your infrastructure with
+[Alchemy](https://alchemy.run)
+([Github](https://github.com/alchemy-run/alchemy)), and you need a good way to
+document your software architecture. This package lets you auto-generate [LikeC4](https://github.com/likec4/likec4) diagrams, specifications and deployment models from your alchemy stack.
 
-Both are built with LikeC4's own Builder and printed with its own generator.
+**What is alchemy?** [Alchemy](https://alchemy.run) is infrastructure as code
+written in pure [Effect](https://effect.website). Your cloud is one TypeScript
+program: the resources, the code that runs on them, and the wires between them,
+all in a single `yield*` chain.
+
+**What is LikeC4?** LikeC4 is a modeling language for describing software
+architecture and tools to generate diagrams from the model.
+
+From this stack (`examples/basic/alchemy.run.ts`):
+
+```ts
+import * as Alchemy from "alchemy";
+import * as Cloudflare from "alchemy/Cloudflare";
+import * as Effect from "effect/Effect";
+
+export default Alchemy.Stack(
+  "MyApp",
+  { providers: Cloudflare.providers(), state: Alchemy.inMemoryState() },
+  Effect.gen(function* () {
+    const Photos = yield* Cloudflare.R2.Bucket("Photos");
+    const Sessions = yield* Cloudflare.KV.Namespace("Sessions");
+    const api = yield* Cloudflare.Worker("Api", {
+      main: "./src/worker.ts",
+      env: { Photos, Sessions },
+    });
+    return { url: api.url };
+  }),
+);
+```
+
+run this:
+
+```bash
+alchemy-likec4 deployment --entrypoint examples/basic/alchemy.run.ts --stage prod   # → MyApp.prod.gen.c4
+likec4 export png examples/basic --notation                                        # → index.png
+```
+
+with one hand-written view (`examples/basic/basic.c4`):
+
+```likec4
+views {
+  deployment view index {
+    title 'MyApp — production'
+    include my_app_prod, my_app_prod.**
+    style my_app_prod.photos, my_app_prod.sessions { shape storage; color indigo }
+    style my_app_prod.api { color amber }
+    autoLayout LeftRight
+  }
+}
+```
+
+and you get this, without deploying anything:
+
+![MyApp — production](screenshot.png)
+
+## Supports
+
+- **Clouds**: Cloudflare, AWS, Fly, Hetzner, Railway. AWS.
+- **Data**: D1, R2, KV, Durable Objects, Queues, Hyperdrive, plus PlanetScale, Neon, Prisma, Drizzle, plain SQL.
+- **Frontends**: Vite, Astro, Next.js, Nuxt, SvelteKit, TanStack Start, React Router v7, SolidStart, Waku, static sites.
+- **Ops**: GitHub, Git, Docker, Kubernetes, Axiom, BetterAuth, a raw Command resource for everything else.
+- **CLI**: deploy, plan, destroy, drift, dev with hot reload, logs, state, nuke.
+
+## How to.
+
+Take your existing alchemy project and
+
+Install the package as a dev dependency (we recommend using `bun` for Alchemy.)
 
 ```bash
 bun add -d alchemy-likec4
-alchemy-likec4 spec                                        # → specs/<provider>.spec.c4
-alchemy-likec4 deployment --stage prod                     # → <Stack>.prod.gen.c4, beside alchemy.run.ts
 ```
 
-Or from a script:
+Generate the [LikeC4 specification](https://likec4.dev/dsl/specification/) for the providers that you use into `specs/<provider>.spec.c4`:
+
+```bash
+alchemy-likec4 spec
+```
+
+<!-- TODO beside alchemy.run.ts ? bro what -->
+
+Generate the deployment model `<Stack>.prod.gen.c4, beside alchemy.run.ts`
+
+```bash
+alchemy-likec4 deployment --stage prod
+```
+
+### How to (from a script)
 
 ```ts
 import { openStack, buildDeployment } from "alchemy-likec4";
-await Bun.write("infra.gen.c4", buildDeployment(await openStack({ stage: "prod" })));
+await Bun.write(
+  "infra.gen.c4",
+  buildDeployment(await openStack({ stage: "prod" })),
+);
 ```
 
-## The specification
+---
 
-Every alchemy resource carries the canonical id it registers itself under —
-`R2.Bucket.Type === "Cloudflare.R2.Bucket"` — and nothing else in the namespace does. That is
-both the predicate and the identity. Each becomes a `deploymentNode` kind, flattened to a legal
-identifier with the provider kept: `cloudflare_r2_bucket`.
+## Examples
 
-Three more things are derived, not curated:
+<!-- TODO link -->
 
-| | from | as |
-|---|---|---|
-| **Tags** | alchemy's `@category` JSDoc | `#storage_databases` on each kind |
-| **Relationship kinds** | the Workers API binding schema in `@distilled.cloud/cloudflare` | `d1_binding`, `kv_namespace_binding`, … in `bindings.spec.c4` |
-| **Providers** | whichever `alchemy/*` subpaths yield resources | one file each |
+See [the `examples/` directory]()
 
-There are no styles. Styling by tag is the consumer's, in their own `.c4`.
+---
 
-## The deployment model
+## How it works.
+
+### Specification
+
+`alchemy-likec4` generates a specification and a deployment model with LikeC4's own `Builder` AST emitter.
+
+Every alchemy resource carries the canonical id, so each becomes a
+`deploymentNode` in the `.c4` specification files.
+
+Alchemy resource names are flattened to snake case: `Cloudflare.R2.Bucket`
+`cloudflare_r2_bucket`.
+
+Specifications for all provider resources are auto-derived from alchemy,
+Resource Categories become tags in LikeC4 (e.g. `#storage_databases`), and
+LikeC4 Relationship kinds (arrows/edges in the diagram, e.g. binding a D1 to a
+worker is `d1_binding`) are also derived for Cloudflare bindings.
+
+### The deployment model
 
 `alchemy.run.ts` is imported and its body run under placeholder services, so every
 `yield* Cloudflare.Worker(...)` is a registry insert. Resources keep symbolic props;
@@ -57,55 +150,6 @@ deployment {
 }
 ```
 
-Two consequences of deriving edges from references rather than from a list:
-
-- A value binding (`plain_text`, `secret_text`, `json`) references nothing, so it yields no edge
-  and its value is never read.
-- A Durable Object binding is a plain value naming its host `scriptName`, not a resource, so
-  alchemy's own dependency graph omits it. A name-join against each Worker's `name` closes that
-  gap — the one edge in the example that alchemy itself does not record.
-
-Building a provider layer resolves credentials even though compiling never calls an API.
-Placeholders are set when the Cloudflare variables are absent; real ones are left alone.
-
-## Putting them together
-
-Kinds live in the generated spec, nodes in the generated deployment file, and the one thing that
-has to be authored — which logical element a resource realises — in your own file, via `extend`:
-
-```json
-// likec4.config.json
-{ "name": "my-app", "include": { "paths": ["node_modules/alchemy-likec4/specs"] } }
-```
-
-```likec4
-model {
-  api   = service 'API'
-  links = store   'Links'
-  api -[d1_binding]-> links 'reads'
-}
-
-deployment {
-  extend shortener_prod.api   { instanceOf api }
-  extend shortener_prod.links { instanceOf links }
-}
-```
-
-A deployment view then shows both: the edges alchemy wires, between the resources, and the edges
-you intended, inherited between the instances inside them. A binding in one but not the other is
-visible at a glance.
-
-## Example
-
-`example/` is a link shortener — `alchemy.run.ts` is the stack, `shortener.c4` the logical model,
-mapping and six views; `Shortener.<stage>.gen.c4` are generated.
-
-```bash
-bun run example:generate     # regenerate both stages
-bun run example              # dev server on :5199
-bun run example:validate
-```
-
 ## Known limits
 
 - Physical identifiers (bucket ids, worker URLs) exist only after a deploy; the compiled stack
@@ -113,6 +157,6 @@ bun run example:validate
 - Only Cloudflare carries `@category` and binding kinds, so other providers emit untagged kinds
   and no relationship kinds.
 - `DurableObject`, `Email.SendEmail` and `Website.Astro` are factory functions with no `.Type`, so
-  they are not kinds. An Astro site *is* a `cloudflare_worker` once deployed.
+  they are not kinds. An Astro site _is_ a `cloudflare_worker` once deployed.
 - Alchemy is a beta with no schema guarantee. Every derived list is snapshot-tested so a bump that
   changes shape fails in review instead of silently emitting less.

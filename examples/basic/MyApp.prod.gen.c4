@@ -1,0 +1,38 @@
+// GENERATED — DO NOT EDIT.
+// Stack MyApp, stage prod: 3 resources, 2 edges.
+// Regenerate with:  bun run generate deployment
+//
+// Map nodes onto the logical model from a hand-written file:  extend <node> { instanceOf <element> }
+
+deployment {
+  my_app_prod = alchemy_stack 'MyApp (prod)' {
+    metadata {
+      stage 'prod'
+    }
+    
+    photos = cloudflare_r2_bucket 'Photos' {
+      metadata {
+        fqn 'Photos'
+        type 'Cloudflare.R2.Bucket'
+      }
+    }
+    
+    sessions = cloudflare_kv_namespace 'Sessions' {
+      metadata {
+        fqn 'Sessions'
+        type 'Cloudflare.KV.Namespace'
+      }
+    }
+    
+    api = cloudflare_worker 'Api' {
+      metadata {
+        fqn 'Api'
+        type 'Cloudflare.Worker'
+      }
+    }
+  }
+  
+  my_app_prod.api -[r2_bucket_binding]-> my_app_prod.photos 'Photos'
+  
+  my_app_prod.api -[kv_namespace_binding]-> my_app_prod.sessions 'Sessions'
+}
