@@ -1,9 +1,10 @@
 // A link shortener on Cloudflare — small enough to read in one sitting, and it exercises
 // most of what LikeC4 offers.
 //
-// The `cloudflare_*` deployment kinds and the `*_binding` relationship kinds are NOT declared
-// here. They come from ../specs/cloudflare.spec.c4, generated from alchemy, and are pulled in
-// by `include.paths` in likec4.config.json.
+// Nothing infrastructural is declared here. The `cloudflare_*` kinds and `*_binding`
+// relationship kinds come from ../specs (generated from alchemy, pulled in by `include.paths`
+// in likec4.config.json). The deployment nodes come from Shortener.<stage>.gen.c4, generated
+// from alchemy.run.ts. This file owns the logical model, the mapping, and the views.
 
 specification {
   element actor {
@@ -20,17 +21,6 @@ specification {
   // Tags are free-form labels you can filter and style views by.
   tag hot-path { color green }
   tag async { color amber }
-
-  // Deployment nodes describe the infrastructure hierarchy. The leaves come from the
-  // generated spec; these two are the containers alchemy has no resource for.
-  deploymentNode cf_account {
-    notation 'Cloudflare account'
-    style { color gray }
-  }
-  deploymentNode cf_stage {
-    notation 'Stage'
-    technology 'Alchemy'
-  }
 }
 
 model {
@@ -61,7 +51,7 @@ model {
 
     analytics = service 'Click analytics' {
       #async
-      technology 'Queue consumer'
+      technology 'Worker'
       description 'Aggregates clicks off the request path.'
     }
 
@@ -86,53 +76,46 @@ model {
       description 'Nightly CSV exports.'
     }
 
-    // Typed relationships, using the binding kinds from the generated spec. The deployment
-    // model inherits every one of these, so each stage gets them without repeating a line.
-    redirect  -[kv_binding]->    cache   'lookup'
-    redirect  -[d1_binding]->    links   'on cache miss'
-    redirect  -[queue_binding]-> clicks  'enqueue click'
-    api       -[d1_binding]->    links   'create, list'
-    api       -[kv_binding]->    cache   'warm on create'
-    analytics -[d1_binding]->    links   'resolve slug'
-    analytics -[r2_binding]->    reports 'nightly export'
+    // Intent, in the binding kinds the generated spec declares. The generated deployment files
+    // carry the edges alchemy actually wires, between the resources; these are inherited between
+    // the instances inside them. A deployment view shows both, so intent and reality sit side by
+    // side — and a binding in one but not the other is visible at a glance.
+    redirect  -[kv_namespace_binding]-> cache   'lookup'
+    redirect  -[d1_binding]->           links   'on cache miss'
+    redirect  -[queue_binding]->        clicks  'enqueue click'
+    api       -[d1_binding]->           links   'create, list'
+    api       -[kv_namespace_binding]-> cache   'warm on create'
+    analytics -[d1_binding]->           links   'resolve slug'
+    analytics -[r2_bucket_binding]->    reports 'nightly export'
   }
 
-  // Sourceless form: inside an element body, `-> x` means "this element -> x".
   visitor -> shortener.redirect 'follows a link'
   author  -> shortener.api      'creates a link'
 }
 
 deployment {
-  cf_account acct 'Cloudflare' {
-    metadata { account_id 'a1b2c3' }
+  // The mapping — the one thing about deployment that has to be authored, because alchemy
+  // does not know which logical element a resource realises. Everything else is generated.
+  extend shortener_prod.redirect  { instanceOf shortener.redirect }
+  extend shortener_prod.api       { instanceOf shortener.api }
+  extend shortener_prod.analytics { instanceOf shortener.analytics }
+  extend shortener_prod.hot       { instanceOf shortener.cache }
+  extend shortener_prod.links     { instanceOf shortener.links }
+  extend shortener_prod.clicks    { instanceOf shortener.clicks }
+  extend shortener_prod.reports   { instanceOf shortener.reports }
 
-    cf_stage prod 'Production' {
-      cloudflare_worker      redirect_worker  { instanceOf shortener.redirect }
-      cloudflare_worker      api_worker       { instanceOf shortener.api }
-      cloudflare_worker      analytics_worker { instanceOf shortener.analytics }
-      cloudflare_kv_namespace  hot_kv         { instanceOf shortener.cache }
-      cloudflare_d1_database   links_db       { instanceOf shortener.links }
-      cloudflare_queues_queue  click_queue    { instanceOf shortener.clicks }
-      cloudflare_r2_bucket     reports_bucket { instanceOf shortener.reports }
-    }
+  extend shortener_staging.redirect  { instanceOf shortener.redirect }
+  extend shortener_staging.api       { instanceOf shortener.api }
+  extend shortener_staging.analytics { instanceOf shortener.analytics }
+  extend shortener_staging.hot       { instanceOf shortener.cache }
+  extend shortener_staging.links     { instanceOf shortener.links }
+  extend shortener_staging.clicks    { instanceOf shortener.clicks }
+  extend shortener_staging.reports   { instanceOf shortener.reports }
 
-    // A second stage is the same shape. Deployment nodes are cheap; the relationships
-    // between the instances are inherited, so this costs seven lines, not fourteen.
-    cf_stage staging 'Staging' {
-      cloudflare_worker      redirect_worker  { instanceOf shortener.redirect }
-      cloudflare_worker      api_worker       { instanceOf shortener.api }
-      cloudflare_worker      analytics_worker { instanceOf shortener.analytics }
-      cloudflare_kv_namespace  hot_kv         { instanceOf shortener.cache }
-      cloudflare_d1_database   links_db       { instanceOf shortener.links }
-      cloudflare_queues_queue  click_queue    { instanceOf shortener.clicks }
-      cloudflare_r2_bucket     reports_bucket { instanceOf shortener.reports }
-    }
-
-    // A deployment-only relationship: true of the infrastructure, meaningless in the
-    // logical model, so it lives here rather than up there.
-    staging.links_db -> prod.links_db 'nightly restore' {
-      technology 'D1 export'
-    }
+  // True of the infrastructure, meaningless in the logical model, and not a binding alchemy
+  // knows about — so it lives here, by hand.
+  shortener_staging.links -> shortener_prod.links 'nightly restore' {
+    technology 'D1 export'
   }
 }
 
@@ -161,14 +144,14 @@ views {
 
   deployment view prod_topology {
     title 'Cloudflare — production'
-    include acct.prod.**
-    style acct.prod._ { color amber }
+    include shortener_prod.**
     autoLayout LeftRight
   }
 
   deployment view both_stages {
     title 'Both stages'
-    include acct.**
+    include shortener_prod.**
+    include shortener_staging.**
   }
 
   // A dynamic view: the steps are authored here and exist only in this view.

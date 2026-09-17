@@ -1,141 +1,118 @@
 # alchemy-likec4
 
-Generates a [LikeC4](https://likec4.dev) `specification` from [alchemy](https://alchemy.run)'s
-resource registry, so the architecture vocabulary cannot drift from the IaC that provisions it.
+[LikeC4](https://likec4.dev) from [alchemy](https://alchemy.run). Two halves, nothing typed by hand:
+
+- **The specification** — every resource kind alchemy can provision, reflected from the package.
+- **The deployment model** — a stack's actual resources and bindings, compiled from its
+  entrypoint without deploying it. No credentials, no network, no state.
+
+Both are built with LikeC4's own Builder and printed with its own generator.
 
 ```bash
-bun install
-bun run generate                       # → specs/*.c4, one per provider
-bun run generate --provider Cloudflare # just one
-bun run validate                       # generate, then likec4 validate
-bun test
+bun add -d alchemy-likec4
+alchemy-likec4 spec                                        # → specs/<provider>.spec.c4
+alchemy-likec4 deployment --stage prod                     # → <Stack>.prod.gen.c4, beside alchemy.run.ts
 ```
 
-1,057 resources across 13 providers from `alchemy@2.0.0-beta.77` — AWS 715, Cloudflare 241,
-Railway 22, Hetzner 16, Fly 13, Prisma 12, and the rest.
-
-## How it finds resources
-
-Runtime reflection, not source scanning. Every alchemy resource carries the canonical id it
-registers itself under:
+Or from a script:
 
 ```ts
-R2.Bucket.Type === "Cloudflare.R2.Bucket"
+import { openStack, buildDeployment } from "alchemy-likec4";
+await Bun.write("infra.gen.c4", buildDeployment(await openStack({ stage: "prod" })));
 ```
 
-Nothing else in the namespace does — a `Provider`, an `Error` or a `Binding` has no own
-properties at all — so `.Type` is both the predicate and the identity:
+## The specification
 
-```ts
-const isResource = (v) => typeof v === "function" && typeof v?.Type === "string";
+Every alchemy resource carries the canonical id it registers itself under —
+`R2.Bucket.Type === "Cloudflare.R2.Bucket"` — and nothing else in the namespace does. That is
+both the predicate and the identity. Each becomes a `deploymentNode` kind, flattened to a legal
+identifier with the provider kept: `cloudflare_r2_bucket`.
+
+Three more things are derived, not curated:
+
+| | from | as |
+|---|---|---|
+| **Tags** | alchemy's `@category` JSDoc | `#storage_databases` on each kind |
+| **Relationship kinds** | the Workers API binding schema in `@distilled.cloud/cloudflare` | `d1_binding`, `kv_namespace_binding`, … in `bindings.spec.c4` |
+| **Providers** | whichever `alchemy/*` subpaths yield resources | one file each |
+
+There are no styles. Styling by tag is the consumer's, in their own `.c4`.
+
+## The deployment model
+
+`alchemy.run.ts` is imported and its body run under placeholder services, so every
+`yield* Cloudflare.Worker(...)` is a registry insert. Resources keep symbolic props;
+dependencies are recovered by walking them: a prop holding another resource is an edge, and a
+Worker's `env` bindings give each edge its kind.
+
+```likec4
+deployment {
+  shortener_prod = alchemy_stack 'Shortener (prod)' {
+    api = cloudflare_worker {
+      metadata { fqn 'api'  type 'Cloudflare.Worker'  name 'shortener-api' }
+    }
+    links = cloudflare_d1_database { … }
+  }
+  shortener_prod.api -[d1_binding]-> shortener_prod.links 'LINKS'
+}
 ```
 
-**Why not scan the source.** Resources are declared three different ways
-(`Resource<T>("id")`, `export const XTypeId = "id"`, and a bare string literal) and no single
-pattern is complete: scanning `src` finds 233, scanning `.d.ts` finds 39, and each misses
-resources the other catches. The module object has no such problem.
+Two consequences of deriving edges from references rather than from a list:
 
-**The cost.** Importing `alchemy/Cloudflare` pulls the whole effect peer graph, which has to be
-version-pinned — see `overrides` in `package.json`. A future alchemy or effect bump may need
-re-pinning before the generator runs.
+- A value binding (`plain_text`, `secret_text`, `json`) references nothing, so it yields no edge
+  and its value is never read.
+- A Durable Object binding is a plain value naming its host `scriptName`, not a resource, so
+  alchemy's own dependency graph omits it. A name-join against each Worker's `name` closes that
+  gap — the one edge in the example that alchemy itself does not record.
 
-## Naming
+Building a provider layer resolves credentials even though compiling never calls an API.
+Placeholders are set when the Cloudflare variables are absent; real ones are left alone.
 
-LikeC4 identifiers cannot contain dots (dots are FQN separators), so the canonical id is not a
-legal identifier. Types are flattened to snake_case with the provider kept:
+## Putting them together
 
-| alchemy | LikeC4 |
-|---|---|
-| `Cloudflare.R2.Bucket` | `cloudflare_r2_bucket` |
-| `Cloudflare.D1Database` | `cloudflare_d1_database` |
-| `Cloudflare.Access.Application` | `cloudflare_access_application` |
-
-The provider prefix stays because a bare `bucket` collides the day a second provider is
-generated — and AWS has one.
-
-## What it emits
-
-- **One `deploymentNode` kind per resource**, grouped by alchemy's own `@category` where it has
-  one, each carrying its canonical id as `notation` and a shape/colour/icon derived from that
-  category.
-- **12 `relationship` kinds** for bindings — `service_binding`, `durable_object_binding`,
-  `r2_binding`, … These are hand-listed on purpose: alchemy models a binding as a property of a
-  Worker's `env`, not as a resource, so there is nothing to reflect over.
-- **A provenance header** with the alchemy version and resource count, so a stale file is
-  obvious in review.
-
-Unused kinds are harmless — LikeC4 validates a specification containing kinds nothing
-instantiates, which is what makes one shared file usable across every repo.
-
-## Using it
-
-Point a LikeC4 project at the generated specs and use the kinds:
+Kinds live in the generated spec, nodes in the generated deployment file, and the one thing that
+has to be authored — which logical element a resource realises — in your own file, via `extend`:
 
 ```json
 // likec4.config.json
-{ "name": "my-app", "include": { "paths": ["../specs"] } }
+{ "name": "my-app", "include": { "paths": ["node_modules/alchemy-likec4/specs"] } }
 ```
 
 ```likec4
 model {
   api   = service 'API'
   links = store   'Links'
-  api -[d1_binding]-> links 'reads'      // relationship kind from the spec
+  api -[d1_binding]-> links 'reads'
 }
 
 deployment {
-  cf_account acct {
-    cf_stage prod {
-      cloudflare_worker      api_worker { instanceOf api }
-      cloudflare_d1_database links_db   { instanceOf links }
-    }
-  }
+  extend shortener_prod.api   { instanceOf api }
+  extend shortener_prod.links { instanceOf links }
 }
 ```
 
-Every deployment node holds an `instanceOf`. That is the whole trick: relationships are
-declared once in `model` and LikeC4 materialises them between the deployed instances, so a
-second stage costs one line per resource and no relationships at all.
+A deployment view then shows both: the edges alchemy wires, between the resources, and the edges
+you intended, inherited between the instances inside them. A binding in one but not the other is
+visible at a glance.
 
 ## Example
 
-`example/` is a small link shortener — six views covering element, scoped, filtered,
-deployment and dynamic (with `alt` / `opt` flow control):
+`example/` is a link shortener — `alchemy.run.ts` is the stack, `shortener.c4` the logical model,
+mapping and six views; `Shortener.<stage>.gen.c4` are generated.
 
 ```bash
-bun run example           # dev server on :5199
+bun run example:generate     # regenerate both stages
+bun run example              # dev server on :5199
 bun run example:validate
 ```
 
-| view | nodes | edges |
-|---|---|---|
-| `prod_topology` | 14 | 7 — the logical relationships, inherited |
-| `both_stages` | 30 | 15 — 7 per stage, plus one deployment-only |
-| `request_path` | 4 | 2 — filtered with `where tag is #hot-path` |
+## Known limits
 
-## Styling
-
-Styles come from alchemy's `@category` JSDoc — 15 curated groups for Cloudflare. A resource is
-matched to its declaring file by searching for its canonical `.Type` string, not by guessing a
-path from the export name: guessing resolves 205/241, finding the declaration resolves 241/241.
-Export and file names diverge often enough to matter (`Alerting.NotificationWebhook` declares
-`Cloudflare.Alerting.Webhook`).
-
-This is the only place the package reads source instead of reflecting, and it is limited to
-decoration. A category that fails to resolve costs a default style; it can never cost a missing
-resource. Only Cloudflare uses `@category` today — other providers emit unstyled kinds.
-
-## Ownership across namespaces
-
-Namespaces re-export each other: `alchemy/AWS` exposes the four Kubernetes resources for EKS.
-So the namespace a resource is *found* in is not its owner — the canonical type is. Resources
-are collected across every namespace, deduplicated globally by `.Type`, then grouped into files
-by the provider their type names. Without this, `kubernetes_deployment` is declared twice and
-the model does not validate.
-
-## Known gaps
-
-- `DurableObject`, `Email.SendEmail` and `Website.Astro` are plain factory functions with no
-  `.Type`, so they are not deployment nodes. Bindings become relationship kinds; an Astro site
-  **is** a `cloudflare_worker` once deployed, which is the honest modelling anyway.
-- Only Cloudflare carries `@category`, so only Cloudflare gets styled.
+- Physical identifiers (bucket ids, worker URLs) exist only after a deploy; the compiled stack
+  carries names, not ids.
+- Only Cloudflare carries `@category` and binding kinds, so other providers emit untagged kinds
+  and no relationship kinds.
+- `DurableObject`, `Email.SendEmail` and `Website.Astro` are factory functions with no `.Type`, so
+  they are not kinds. An Astro site *is* a `cloudflare_worker` once deployed.
+- Alchemy is a beta with no schema guarantee. Every derived list is snapshot-tested so a bump that
+  changes shape fails in review instead of silently emitting less.

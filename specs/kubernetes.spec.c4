@@ -1,40 +1,21 @@
 // GENERATED — DO NOT EDIT.
-//
 // 4 Kubernetes resources, reflected from alchemy@2.0.0-beta.77.
 // Regenerate with:  bun run generate
 //
-// Every kind below is a resource alchemy can provision, identified by the `.Type` it
-// registers itself under. Unused kinds are harmless — LikeC4 validates a specification
-// with kinds nothing instantiates, so one shared file serves every repo.
-//
-// Factories and bindings are NOT here: `DurableObject`, `Email.SendEmail` and
-// `Website.Astro` are plain functions with no `.Type`. An Astro site IS a worker once
-// deployed; bindings appear below as relationship kinds.
+// Kinds are alchemy's `.Type`s; tags are its `@category`. Unused kinds are harmless — LikeC4
+// validates a specification with kinds nothing instantiates, so one shared file serves every repo.
 
 specification {
-  // ── (root) ──
-  deploymentNode kubernetes_deployment { // exported as EKS.Deployment
+  deploymentNode kubernetes_deployment {
     notation 'Kubernetes.Deployment'
-    style {
-      shape rectangle
-    }
   }
-  deploymentNode kubernetes_helm_chart { // exported as EKS.HelmChart
+  deploymentNode kubernetes_helm_chart {
     notation 'Kubernetes.HelmChart'
-    style {
-      shape rectangle
-    }
   }
-  deploymentNode kubernetes_job { // exported as EKS.Job
+  deploymentNode kubernetes_job {
     notation 'Kubernetes.Job'
-    style {
-      shape rectangle
-    }
   }
-  deploymentNode kubernetes_manifest { // exported as EKS.Manifest
+  deploymentNode kubernetes_manifest {
     notation 'Kubernetes.Manifest'
-    style {
-      shape rectangle
-    }
   }
 }

@@ -1,0 +1,126 @@
+// GENERATED — DO NOT EDIT.
+// 40 Worker binding kinds, from the Workers API schema in @distilled.cloud/cloudflare.
+// Regenerate with:  bun run generate
+
+specification {
+  relationship ai_binding {
+    notation 'ai'
+  }
+  relationship ai_search_binding {
+    notation 'ai_search'
+  }
+  relationship ai_search_namespace_binding {
+    notation 'ai_search_namespace'
+  }
+  relationship analytics_engine_binding {
+    notation 'analytics_engine'
+  }
+  relationship artifacts_binding {
+    notation 'artifacts'
+  }
+  relationship assets_binding {
+    notation 'assets'
+  }
+  relationship browser_binding {
+    notation 'browser'
+  }
+  relationship d1_binding {
+    notation 'd1'
+  }
+  relationship data_blob_binding {
+    notation 'data_blob'
+  }
+  relationship dispatch_namespace_binding {
+    notation 'dispatch_namespace'
+  }
+  relationship durable_object_namespace_binding {
+    notation 'durable_object_namespace'
+  }
+  relationship flagship_binding {
+    notation 'flagship'
+  }
+  relationship hyperdrive_binding {
+    notation 'hyperdrive'
+  }
+  relationship images_binding {
+    notation 'images'
+  }
+  relationship inherit_binding {
+    notation 'inherit'
+  }
+  relationship json_binding {
+    notation 'json'
+  }
+  relationship kv_namespace_binding {
+    notation 'kv_namespace'
+  }
+  relationship logfwdr_binding {
+    notation 'logfwdr'
+  }
+  relationship media_binding {
+    notation 'media'
+  }
+  relationship mtls_certificate_binding {
+    notation 'mtls_certificate'
+  }
+  relationship pipelines_binding {
+    notation 'pipelines'
+  }
+  relationship plain_text_binding {
+    notation 'plain_text'
+  }
+  relationship queue_binding {
+    notation 'queue'
+  }
+  relationship r2_bucket_binding {
+    notation 'r2_bucket'
+  }
+  relationship ratelimit_binding {
+    notation 'ratelimit'
+  }
+  relationship secret_key_binding {
+    notation 'secret_key'
+  }
+  relationship secret_text_binding {
+    notation 'secret_text'
+  }
+  relationship secrets_store_secret_binding {
+    notation 'secrets_store_secret'
+  }
+  relationship send_email_binding {
+    notation 'send_email'
+  }
+  relationship service_binding {
+    notation 'service'
+  }
+  relationship stream_binding {
+    notation 'stream'
+  }
+  relationship text_blob_binding {
+    notation 'text_blob'
+  }
+  relationship unsafe_hello_world_binding {
+    notation 'unsafe_hello_world'
+  }
+  relationship vectorize_binding {
+    notation 'vectorize'
+  }
+  relationship version_metadata_binding {
+    notation 'version_metadata'
+  }
+  relationship vpc_network_binding {
+    notation 'vpc_network'
+  }
+  relationship vpc_service_binding {
+    notation 'vpc_service'
+  }
+  relationship wasm_module_binding {
+    notation 'wasm_module'
+  }
+  relationship worker_loader_binding {
+    notation 'worker_loader'
+  }
+  relationship workflow_binding {
+    notation 'workflow'
+  }
+}
