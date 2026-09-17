@@ -1,0 +1,1913 @@
+// GENERATED — DO NOT EDIT.
+//
+// 241 Cloudflare resources, reflected from alchemy@2.0.0-beta.77.
+// Regenerate with:  bun run generate
+//
+// Every kind below is a resource alchemy can provision, identified by the `.Type` it
+// registers itself under. Unused kinds are harmless — LikeC4 validates a specification
+// with kinds nothing instantiates, so one shared file serves every repo.
+//
+// Bindings are NOT here. alchemy models a binding as a property of a Worker's `env`
+// rather than a resource, so `Cloudflare.DurableObject` and `Cloudflare.Email.SendEmail`
+// have no `.Type`. They appear below as relationship kinds instead.
+
+specification {
+  // ── (root) ──
+  deploymentNode cloudflare_container {
+    notation 'Cloudflare.Container'
+    style {
+      shape component
+      color amber
+      icon tech:cloudflare-workers
+    }
+  }
+  deploymentNode cloudflare_d1_database { //  (exported as D1.Database)
+    notation 'Cloudflare.D1Database'
+    style {
+      shape storage
+      color indigo
+      icon tech:sqlite
+    }
+  }
+  deploymentNode cloudflare_hyperdrive { //  (exported as Hyperdrive.Connection)
+    notation 'Cloudflare.Hyperdrive'
+    style {
+      shape storage
+      color indigo
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_secrets_store { //  (exported as SecretsStore.Store)
+    notation 'Cloudflare.SecretsStore'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_vectorize_index { //  (exported as Vectorize.Index)
+    notation 'Cloudflare.VectorizeIndex'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_vectorize_metadata_index { //  (exported as Vectorize.MetadataIndex)
+    notation 'Cloudflare.VectorizeMetadataIndex'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_worker {
+    notation 'Cloudflare.Worker'
+    style {
+      shape component
+      color amber
+      icon tech:cloudflare-workers
+    }
+  }
+  deploymentNode cloudflare_workflow { //  (exported as WorkflowResource)
+    notation 'Cloudflare.Workflow'
+    style {
+      shape component
+      color amber
+      icon tech:cloudflare-workers
+    }
+  }
+  // ── Access ──
+  deploymentNode cloudflare_access_application {
+    notation 'Cloudflare.Access.Application'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_access_bookmark {
+    notation 'Cloudflare.Access.Bookmark'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_access_certificate {
+    notation 'Cloudflare.Access.Certificate'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_access_custom_page {
+    notation 'Cloudflare.Access.CustomPage'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_access_group {
+    notation 'Cloudflare.Access.Group'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_access_identity_provider {
+    notation 'Cloudflare.Access.IdentityProvider'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_access_infrastructure_target {
+    notation 'Cloudflare.Access.InfrastructureTarget'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_access_key_configuration {
+    notation 'Cloudflare.Access.KeyConfiguration'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_access_mcp_portal {
+    notation 'Cloudflare.Access.McpPortal'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_access_organization {
+    notation 'Cloudflare.Access.Organization'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_access_policy {
+    notation 'Cloudflare.Access.Policy'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_access_service_token {
+    notation 'Cloudflare.Access.ServiceToken'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_access_tag {
+    notation 'Cloudflare.Access.Tag'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  // ── Account ──
+  deploymentNode cloudflare_account_account {
+    notation 'Cloudflare.Account.Account'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_account_member {
+    notation 'Cloudflare.Account.Member'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Acm ──
+  deploymentNode cloudflare_acm_custom_trust_store {
+    notation 'Cloudflare.Acm.CustomTrustStore'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_acm_total_tls {
+    notation 'Cloudflare.Acm.TotalTls'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Addressing ──
+  deploymentNode cloudflare_addressing_address_map {
+    notation 'Cloudflare.Addressing.AddressMap'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_addressing_bgp_prefix {
+    notation 'Cloudflare.Addressing.BgpPrefix'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_addressing_prefix {
+    notation 'Cloudflare.Addressing.Prefix'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_addressing_prefix_delegation {
+    notation 'Cloudflare.Addressing.PrefixDelegation'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_addressing_service_binding {
+    notation 'Cloudflare.Addressing.ServiceBinding'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── AI ──
+  deploymentNode cloudflare_ai_dataset {
+    notation 'Cloudflare.AI.Dataset'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_ai_dynamic_routing { //  (exported as AI.GatewayDynamicRouting)
+    notation 'Cloudflare.AI.DynamicRouting'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_ai_evaluation {
+    notation 'Cloudflare.AI.Evaluation'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_ai_gateway {
+    notation 'Cloudflare.AI.Gateway'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_ai_gateway_provider {
+    notation 'Cloudflare.AI.GatewayProvider'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_ai_search { //  (exported as AI.SearchInstance)
+    notation 'Cloudflare.AI.Search'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_ai_search_namespace {
+    notation 'Cloudflare.AI.SearchNamespace'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_ai_search_token {
+    notation 'Cloudflare.AI.SearchToken'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_ai_security_settings {
+    notation 'Cloudflare.AI.SecuritySettings'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── AI.Security ──
+  deploymentNode cloudflare_ai_security_custom_topics { //  (exported as AI.CustomTopics)
+    notation 'Cloudflare.AI.Security.CustomTopics'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Alerting ──
+  deploymentNode cloudflare_alerting_notification_policy {
+    notation 'Cloudflare.Alerting.NotificationPolicy'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_alerting_silence {
+    notation 'Cloudflare.Alerting.Silence'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_alerting_webhook { //  (exported as Alerting.NotificationWebhook)
+    notation 'Cloudflare.Alerting.Webhook'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── ApiShield ──
+  deploymentNode cloudflare_api_shield_configuration {
+    notation 'Cloudflare.ApiShield.Configuration'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_api_shield_label {
+    notation 'Cloudflare.ApiShield.Label'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_api_shield_operation {
+    notation 'Cloudflare.ApiShield.Operation'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_api_shield_user_schema {
+    notation 'Cloudflare.ApiShield.UserSchema'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  // ── ApiToken ──
+  deploymentNode cloudflare_api_token_account_api_token {
+    notation 'Cloudflare.ApiToken.AccountApiToken'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_api_token_user_api_token {
+    notation 'Cloudflare.ApiToken.UserApiToken'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  // ── Argo ──
+  deploymentNode cloudflare_argo_smart_routing {
+    notation 'Cloudflare.Argo.SmartRouting'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_argo_tiered_caching {
+    notation 'Cloudflare.Argo.TieredCaching'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── BotManagement ──
+  deploymentNode cloudflare_bot_management_bot_management {
+    notation 'Cloudflare.BotManagement.BotManagement'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  // ── Cache ──
+  deploymentNode cloudflare_cache_origin_cloud_region {
+    notation 'Cloudflare.Cache.OriginCloudRegion'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_cache_regional_tiered_cache {
+    notation 'Cloudflare.Cache.RegionalTieredCache'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_cache_reserve {
+    notation 'Cloudflare.Cache.Reserve'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_cache_smart_tiered_cache {
+    notation 'Cloudflare.Cache.SmartTieredCache'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_cache_variants {
+    notation 'Cloudflare.Cache.Variants'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Calls ──
+  deploymentNode cloudflare_calls_app {
+    notation 'Cloudflare.Calls.App'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_calls_turn_key {
+    notation 'Cloudflare.Calls.TurnKey'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── CertificateAuthorities ──
+  deploymentNode cloudflare_certificate_authorities_hostname_association {
+    notation 'Cloudflare.CertificateAuthorities.HostnameAssociation'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── ClientCertificate ──
+  deploymentNode cloudflare_client_certificate_client_certificate {
+    notation 'Cloudflare.ClientCertificate.ClientCertificate'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── CloudConnector ──
+  deploymentNode cloudflare_cloud_connector_rules {
+    notation 'Cloudflare.CloudConnector.Rules'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── CloudforceOne ──
+  deploymentNode cloudflare_cloudforce_one_scan_config {
+    notation 'Cloudflare.CloudforceOne.ScanConfig'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Connectivity ──
+  deploymentNode cloudflare_connectivity_directory_service {
+    notation 'Cloudflare.Connectivity.DirectoryService'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── ContentScanning ──
+  deploymentNode cloudflare_content_scanning_content_scanning {
+    notation 'Cloudflare.ContentScanning.ContentScanning'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_content_scanning_expression {
+    notation 'Cloudflare.ContentScanning.Expression'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── CustomCertificate ──
+  deploymentNode cloudflare_custom_certificate_custom_certificate {
+    notation 'Cloudflare.CustomCertificate.CustomCertificate'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── CustomHostname ──
+  deploymentNode cloudflare_custom_hostname_custom_hostname {
+    notation 'Cloudflare.CustomHostname.CustomHostname'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_custom_hostname_fallback_origin {
+    notation 'Cloudflare.CustomHostname.FallbackOrigin'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── CustomNameserver ──
+  deploymentNode cloudflare_custom_nameserver_custom_nameserver {
+    notation 'Cloudflare.CustomNameserver.CustomNameserver'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── DdosProtection ──
+  deploymentNode cloudflare_ddos_protection_allowlist_entry { //  (exported as DdosProtection.DdosAllowlistEntry)
+    notation 'Cloudflare.DdosProtection.AllowlistEntry'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_ddos_protection_syn_protection_filter {
+    notation 'Cloudflare.DdosProtection.SynProtectionFilter'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_ddos_protection_syn_protection_rule {
+    notation 'Cloudflare.DdosProtection.SynProtectionRule'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_ddos_protection_tcp_flow_protection_filter {
+    notation 'Cloudflare.DdosProtection.TcpFlowProtectionFilter'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_ddos_protection_tcp_flow_protection_rule {
+    notation 'Cloudflare.DdosProtection.TcpFlowProtectionRule'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Devices ──
+  deploymentNode cloudflare_devices_custom_profile { //  (exported as Devices.DeviceCustomProfile)
+    notation 'Cloudflare.Devices.CustomProfile'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_devices_default_profile { //  (exported as Devices.DeviceDefaultProfile)
+    notation 'Cloudflare.Devices.DefaultProfile'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_devices_dex_test { //  (exported as Devices.DeviceDexTest)
+    notation 'Cloudflare.Devices.DexTest'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_devices_managed_network { //  (exported as Devices.DeviceManagedNetwork)
+    notation 'Cloudflare.Devices.ManagedNetwork'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_devices_posture_integration { //  (exported as Devices.DevicePostureIntegration)
+    notation 'Cloudflare.Devices.PostureIntegration'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_devices_posture_rule { //  (exported as Devices.DevicePostureRule)
+    notation 'Cloudflare.Devices.PostureRule'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_devices_settings { //  (exported as Devices.DeviceSettings)
+    notation 'Cloudflare.Devices.Settings'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Diagnostics ──
+  deploymentNode cloudflare_diagnostics_endpoint_healthcheck {
+    notation 'Cloudflare.Diagnostics.EndpointHealthcheck'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Dlp ──
+  deploymentNode cloudflare_dlp_entry {
+    notation 'Cloudflare.Dlp.Entry'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_dlp_profile {
+    notation 'Cloudflare.Dlp.Profile'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── DNS ──
+  deploymentNode cloudflare_dns_account_settings { //  (exported as DNS.AccountDnsSettings)
+    notation 'Cloudflare.DNS.AccountSettings'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_dns_dnssec {
+    notation 'Cloudflare.DNS.Dnssec'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_dns_firewall {
+    notation 'Cloudflare.DNS.Firewall'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_dns_record {
+    notation 'Cloudflare.DNS.Record'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_dns_view {
+    notation 'Cloudflare.DNS.View'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_dns_zone_settings { //  (exported as DNS.ZoneDnsSettings)
+    notation 'Cloudflare.DNS.ZoneSettings'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_dns_zone_transfer_acl {
+    notation 'Cloudflare.DNS.ZoneTransferAcl'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_dns_zone_transfer_incoming {
+    notation 'Cloudflare.DNS.ZoneTransferIncoming'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_dns_zone_transfer_outgoing {
+    notation 'Cloudflare.DNS.ZoneTransferOutgoing'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_dns_zone_transfer_peer {
+    notation 'Cloudflare.DNS.ZoneTransferPeer'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_dns_zone_transfer_tsig {
+    notation 'Cloudflare.DNS.ZoneTransferTsig'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  // ── Email ──
+  deploymentNode cloudflare_email_address {
+    notation 'Cloudflare.Email.Address'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_email_allow_policy {
+    notation 'Cloudflare.Email.AllowPolicy'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_email_block_sender {
+    notation 'Cloudflare.Email.BlockSender'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_email_catch_all {
+    notation 'Cloudflare.Email.CatchAll'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_email_domain {
+    notation 'Cloudflare.Email.Domain'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_email_impersonation_registry_entry {
+    notation 'Cloudflare.Email.ImpersonationRegistryEntry'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_email_routing {
+    notation 'Cloudflare.Email.Routing'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_email_rule {
+    notation 'Cloudflare.Email.Rule'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_email_sending_subdomain {
+    notation 'Cloudflare.Email.SendingSubdomain'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_email_trusted_domain {
+    notation 'Cloudflare.Email.TrustedDomain'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  // ── Firewall ──
+  deploymentNode cloudflare_firewall_access_rule {
+    notation 'Cloudflare.Firewall.AccessRule'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_firewall_lockdown {
+    notation 'Cloudflare.Firewall.Lockdown'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_firewall_ua_rule {
+    notation 'Cloudflare.Firewall.UaRule'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Flagship ──
+  deploymentNode cloudflare_flagship_app {
+    notation 'Cloudflare.Flagship.App'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_flagship_flag {
+    notation 'Cloudflare.Flagship.Flag'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Fraud ──
+  deploymentNode cloudflare_fraud_detection_settings {
+    notation 'Cloudflare.Fraud.DetectionSettings'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Gateway ──
+  deploymentNode cloudflare_gateway_certificate {
+    notation 'Cloudflare.Gateway.Certificate'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_gateway_configuration {
+    notation 'Cloudflare.Gateway.Configuration'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_gateway_list {
+    notation 'Cloudflare.Gateway.List'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_gateway_location {
+    notation 'Cloudflare.Gateway.Location'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_gateway_logging {
+    notation 'Cloudflare.Gateway.Logging'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_gateway_proxy_endpoint {
+    notation 'Cloudflare.Gateway.ProxyEndpoint'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_gateway_rule {
+    notation 'Cloudflare.Gateway.Rule'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  // ── GoogleTagGateway ──
+  deploymentNode cloudflare_google_tag_gateway_google_tag_gateway {
+    notation 'Cloudflare.GoogleTagGateway.GoogleTagGateway'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Healthcheck ──
+  deploymentNode cloudflare_healthcheck_healthcheck {
+    notation 'Cloudflare.Healthcheck.Healthcheck'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── HostnameTlsSetting ──
+  deploymentNode cloudflare_hostname_tls_setting_hostname_tls_setting {
+    notation 'Cloudflare.HostnameTlsSetting.HostnameTlsSetting'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Iam ──
+  deploymentNode cloudflare_iam_resource_group {
+    notation 'Cloudflare.Iam.ResourceGroup'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_iam_user_group {
+    notation 'Cloudflare.Iam.UserGroup'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_iam_user_group_membership {
+    notation 'Cloudflare.Iam.UserGroupMembership'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Images ──
+  deploymentNode cloudflare_images_signing_key {
+    notation 'Cloudflare.Images.SigningKey'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_images_variant {
+    notation 'Cloudflare.Images.Variant'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Intel ──
+  deploymentNode cloudflare_intel_indicator_feed {
+    notation 'Cloudflare.Intel.IndicatorFeed'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_intel_indicator_feed_permission {
+    notation 'Cloudflare.Intel.IndicatorFeedPermission'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── KeylessCertificate ──
+  deploymentNode cloudflare_keyless_certificate_keyless_certificate {
+    notation 'Cloudflare.KeylessCertificate.KeylessCertificate'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── KV ──
+  deploymentNode cloudflare_kv_namespace {
+    notation 'Cloudflare.KV.Namespace'
+    style {
+      shape storage
+      color indigo
+      icon tech:cloudflare
+    }
+  }
+  // ── LeakedCredentialCheck ──
+  deploymentNode cloudflare_leaked_credential_check_detection { //  (exported as LeakedCredentialCheck.LeakedCredentialDetection)
+    notation 'Cloudflare.LeakedCredentialCheck.Detection'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_leaked_credential_check_leaked_credential_check {
+    notation 'Cloudflare.LeakedCredentialCheck.LeakedCredentialCheck'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── LoadBalancer ──
+  deploymentNode cloudflare_load_balancer_load_balancer {
+    notation 'Cloudflare.LoadBalancer.LoadBalancer'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_load_balancer_monitor {
+    notation 'Cloudflare.LoadBalancer.Monitor'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_load_balancer_monitor_group {
+    notation 'Cloudflare.LoadBalancer.MonitorGroup'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_load_balancer_pool {
+    notation 'Cloudflare.LoadBalancer.Pool'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Logpush ──
+  deploymentNode cloudflare_logpush_job {
+    notation 'Cloudflare.Logpush.Job'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Logs ──
+  deploymentNode cloudflare_logs_cmb_config { //  (exported as LogsControl.CmbConfig)
+    notation 'Cloudflare.Logs.CmbConfig'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_logs_retention_flag { //  (exported as LogsControl.LogsRetentionFlag)
+    notation 'Cloudflare.Logs.RetentionFlag'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── MagicCloudNetworking ──
+  deploymentNode cloudflare_magic_cloud_networking_catalog_sync {
+    notation 'Cloudflare.MagicCloudNetworking.CatalogSync'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_magic_cloud_networking_cloud_integration {
+    notation 'Cloudflare.MagicCloudNetworking.CloudIntegration'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_magic_cloud_networking_on_ramp {
+    notation 'Cloudflare.MagicCloudNetworking.OnRamp'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── MagicNetworkMonitoring ──
+  deploymentNode cloudflare_magic_network_monitoring_config {
+    notation 'Cloudflare.MagicNetworkMonitoring.Config'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_magic_network_monitoring_rule {
+    notation 'Cloudflare.MagicNetworkMonitoring.Rule'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── MagicTransit ──
+  deploymentNode cloudflare_magic_transit_app { //  (exported as MagicTransit.MagicApp)
+    notation 'Cloudflare.MagicTransit.App'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_magic_transit_gre_tunnel {
+    notation 'Cloudflare.MagicTransit.GreTunnel'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_magic_transit_ipsec_tunnel {
+    notation 'Cloudflare.MagicTransit.IpsecTunnel'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_magic_transit_site { //  (exported as MagicTransit.MagicSite)
+    notation 'Cloudflare.MagicTransit.Site'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_magic_transit_site_acl { //  (exported as MagicTransit.MagicSiteAcl)
+    notation 'Cloudflare.MagicTransit.SiteAcl'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_magic_transit_site_lan { //  (exported as MagicTransit.MagicSiteLan)
+    notation 'Cloudflare.MagicTransit.SiteLan'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_magic_transit_site_wan { //  (exported as MagicTransit.MagicSiteWan)
+    notation 'Cloudflare.MagicTransit.SiteWan'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_magic_transit_static_route { //  (exported as MagicTransit.MagicStaticRoute)
+    notation 'Cloudflare.MagicTransit.StaticRoute'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── ManagedTransforms ──
+  deploymentNode cloudflare_managed_transforms_managed_transforms {
+    notation 'Cloudflare.ManagedTransforms.ManagedTransforms'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── MtlsCertificate ──
+  deploymentNode cloudflare_mtls_certificate_mtls_certificate {
+    notation 'Cloudflare.MtlsCertificate.MtlsCertificate'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── NetworkInterconnects ──
+  deploymentNode cloudflare_network_interconnects_settings { //  (exported as NetworkInterconnects.NetworkInterconnectSettings)
+    notation 'Cloudflare.NetworkInterconnects.Settings'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Organization ──
+  deploymentNode cloudflare_organization_organization {
+    notation 'Cloudflare.Organization.Organization'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── OriginCaCertificate ──
+  deploymentNode cloudflare_origin_ca_certificate_origin_ca_certificate {
+    notation 'Cloudflare.OriginCaCertificate.OriginCaCertificate'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── OriginPostQuantumEncryption ──
+  deploymentNode cloudflare_origin_post_quantum_encryption_origin_post_quantum_encryption {
+    notation 'Cloudflare.OriginPostQuantumEncryption.OriginPostQuantumEncryption'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── OriginTlsClientAuth ──
+  deploymentNode cloudflare_origin_tls_client_auth_certificate {
+    notation 'Cloudflare.OriginTlsClientAuth.Certificate'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_origin_tls_client_auth_hostname_association {
+    notation 'Cloudflare.OriginTlsClientAuth.HostnameAssociation'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_origin_tls_client_auth_hostname_certificate {
+    notation 'Cloudflare.OriginTlsClientAuth.HostnameCertificate'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_origin_tls_client_auth_setting {
+    notation 'Cloudflare.OriginTlsClientAuth.Setting'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── PageRule ──
+  deploymentNode cloudflare_page_rule_page_rule {
+    notation 'Cloudflare.PageRule.PageRule'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Pages ──
+  deploymentNode cloudflare_pages_deployment {
+    notation 'Cloudflare.Pages.Deployment'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_pages_domain {
+    notation 'Cloudflare.Pages.Domain'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_pages_project {
+    notation 'Cloudflare.Pages.Project'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── PageShield ──
+  deploymentNode cloudflare_page_shield_policy {
+    notation 'Cloudflare.PageShield.Policy'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_page_shield_settings {
+    notation 'Cloudflare.PageShield.Settings'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Pipelines ──
+  deploymentNode cloudflare_pipelines_legacy_pipeline {
+    notation 'Cloudflare.Pipelines.LegacyPipeline'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_pipelines_pipeline {
+    notation 'Cloudflare.Pipelines.Pipeline'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_pipelines_sink {
+    notation 'Cloudflare.Pipelines.Sink'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_pipelines_stream {
+    notation 'Cloudflare.Pipelines.Stream'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Queues ──
+  deploymentNode cloudflare_queues_consumer {
+    notation 'Cloudflare.Queues.Consumer'
+    style {
+      shape queue
+      color indigo
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_queues_queue {
+    notation 'Cloudflare.Queues.Queue'
+    style {
+      shape queue
+      color indigo
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_queues_subscription {
+    notation 'Cloudflare.Queues.Subscription'
+    style {
+      shape queue
+      color indigo
+      icon tech:cloudflare
+    }
+  }
+  // ── R2 ──
+  deploymentNode cloudflare_r2_bucket {
+    notation 'Cloudflare.R2.Bucket'
+    style {
+      shape storage
+      color indigo
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_r2_bucket_event_notification {
+    notation 'Cloudflare.R2.BucketEventNotification'
+    style {
+      shape storage
+      color indigo
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_r2_bucket_sippy {
+    notation 'Cloudflare.R2.BucketSippy'
+    style {
+      shape storage
+      color indigo
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_r2_data_catalog {
+    notation 'Cloudflare.R2.DataCatalog'
+    style {
+      shape storage
+      color indigo
+      icon tech:cloudflare
+    }
+  }
+  // ── RealtimeKit ──
+  deploymentNode cloudflare_realtime_kit_app {
+    notation 'Cloudflare.RealtimeKit.App'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_realtime_kit_preset {
+    notation 'Cloudflare.RealtimeKit.Preset'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_realtime_kit_webhook {
+    notation 'Cloudflare.RealtimeKit.Webhook'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── RegionalHostname ──
+  deploymentNode cloudflare_regional_hostname_regional_hostname {
+    notation 'Cloudflare.RegionalHostname.RegionalHostname'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Registrar ──
+  deploymentNode cloudflare_registrar_domain {
+    notation 'Cloudflare.Registrar.Domain'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── ResourceSharing ──
+  deploymentNode cloudflare_resource_sharing_share {
+    notation 'Cloudflare.ResourceSharing.Share'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_resource_sharing_share_recipient {
+    notation 'Cloudflare.ResourceSharing.ShareRecipient'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_resource_sharing_share_resource {
+    notation 'Cloudflare.ResourceSharing.ShareResource'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── RiskScoring ──
+  deploymentNode cloudflare_risk_scoring_integration {
+    notation 'Cloudflare.RiskScoring.Integration'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Rules ──
+  deploymentNode cloudflare_rules_list {
+    notation 'Cloudflare.Rules.List'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Ruleset ──
+  deploymentNode cloudflare_ruleset_ruleset {
+    notation 'Cloudflare.Ruleset.Ruleset'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Rulesets ──
+  deploymentNode cloudflare_rulesets_account_entrypoint { //  (exported as Ruleset.AccountEntrypoint)
+    notation 'Cloudflare.Rulesets.AccountEntrypoint'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_rulesets_custom_ruleset { //  (exported as Ruleset.CustomRuleset)
+    notation 'Cloudflare.Rulesets.CustomRuleset'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Rum ──
+  deploymentNode cloudflare_rum_rule {
+    notation 'Cloudflare.Rum.Rule'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_rum_site {
+    notation 'Cloudflare.Rum.Site'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── SchemaValidation ──
+  deploymentNode cloudflare_schema_validation_operation_setting {
+    notation 'Cloudflare.SchemaValidation.OperationSetting'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_schema_validation_schema { //  (exported as SchemaValidation.SchemaValidationSchema)
+    notation 'Cloudflare.SchemaValidation.Schema'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_schema_validation_settings {
+    notation 'Cloudflare.SchemaValidation.Settings'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── SecretsStore ──
+  deploymentNode cloudflare_secrets_store_secret {
+    notation 'Cloudflare.SecretsStore.Secret'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── SecurityTxt ──
+  deploymentNode cloudflare_security_txt_security_txt {
+    notation 'Cloudflare.SecurityTxt.SecurityTxt'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Snippets ──
+  deploymentNode cloudflare_snippets_rules { //  (exported as Snippets.SnippetRules)
+    notation 'Cloudflare.Snippets.Rules'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_snippets_snippet {
+    notation 'Cloudflare.Snippets.Snippet'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Spectrum ──
+  deploymentNode cloudflare_spectrum_application {
+    notation 'Cloudflare.Spectrum.Application'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Speed ──
+  deploymentNode cloudflare_speed_test_schedule {
+    notation 'Cloudflare.Speed.TestSchedule'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Ssl ──
+  deploymentNode cloudflare_ssl_certificate_pack {
+    notation 'Cloudflare.Ssl.CertificatePack'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_ssl_universal_ssl {
+    notation 'Cloudflare.Ssl.UniversalSsl'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Stream ──
+  deploymentNode cloudflare_stream_live_input {
+    notation 'Cloudflare.Stream.LiveInput'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_stream_live_input_output {
+    notation 'Cloudflare.Stream.LiveInputOutput'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_stream_signing_key {
+    notation 'Cloudflare.Stream.SigningKey'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_stream_watermark {
+    notation 'Cloudflare.Stream.Watermark'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_stream_webhook {
+    notation 'Cloudflare.Stream.Webhook'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Tags ──
+  deploymentNode cloudflare_tags_account_resource_tags {
+    notation 'Cloudflare.Tags.AccountResourceTags'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_tags_zone_resource_tags {
+    notation 'Cloudflare.Tags.ZoneResourceTags'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── TokenValidation ──
+  deploymentNode cloudflare_token_validation_configuration { //  (exported as TokenValidation.TokenConfiguration)
+    notation 'Cloudflare.TokenValidation.Configuration'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_token_validation_rule {
+    notation 'Cloudflare.TokenValidation.Rule'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Tunnel ──
+  deploymentNode cloudflare_tunnel_configuration {
+    notation 'Cloudflare.Tunnel.Configuration'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_tunnel_hostname_route {
+    notation 'Cloudflare.Tunnel.HostnameRoute'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_tunnel_route {
+    notation 'Cloudflare.Tunnel.Route'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_tunnel_tunnel {
+    notation 'Cloudflare.Tunnel.Tunnel'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_tunnel_virtual_network {
+    notation 'Cloudflare.Tunnel.VirtualNetwork'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_tunnel_warp_connector {
+    notation 'Cloudflare.Tunnel.WarpConnector'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Turnstile ──
+  deploymentNode cloudflare_turnstile_widget {
+    notation 'Cloudflare.Turnstile.Widget'
+    style {
+      shape rectangle
+      color red
+      icon tech:cloudflare
+    }
+  }
+  // ── UrlNormalization ──
+  deploymentNode cloudflare_url_normalization_url_normalization {
+    notation 'Cloudflare.UrlNormalization.UrlNormalization'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── VpcService ──
+  deploymentNode cloudflare_vpc_service_vpc_service {
+    notation 'Cloudflare.VpcService.VpcService'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── VulnerabilityScanner ──
+  deploymentNode cloudflare_vulnerability_scanner_credential { //  (exported as VulnerabilityScanner.VulnScannerCredential)
+    notation 'Cloudflare.VulnerabilityScanner.Credential'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_vulnerability_scanner_credential_set { //  (exported as VulnerabilityScanner.VulnScannerCredentialSet)
+    notation 'Cloudflare.VulnerabilityScanner.CredentialSet'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_vulnerability_scanner_target_environment { //  (exported as VulnerabilityScanner.VulnScannerTargetEnvironment)
+    notation 'Cloudflare.VulnerabilityScanner.TargetEnvironment'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── WaitingRoom ──
+  deploymentNode cloudflare_waiting_room_settings {
+    notation 'Cloudflare.WaitingRoom.Settings'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_waiting_room_waiting_room {
+    notation 'Cloudflare.WaitingRoom.WaitingRoom'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Web3 ──
+  deploymentNode cloudflare_web3_hostname {
+    notation 'Cloudflare.Web3.Hostname'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_web3_hostname_content_list {
+    notation 'Cloudflare.Web3.HostnameContentList'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Workers ──
+  deploymentNode cloudflare_workers_account_setting { //  (exported as AccountSetting)
+    notation 'Cloudflare.Workers.AccountSetting'
+    style {
+      shape component
+      color amber
+      icon tech:cloudflare-workers
+    }
+  }
+  deploymentNode cloudflare_workers_dispatch_namespace { //  (exported as WorkersForPlatforms.DispatchNamespace)
+    notation 'Cloudflare.Workers.DispatchNamespace'
+    style {
+      shape component
+      color amber
+      icon tech:cloudflare-workers
+    }
+  }
+  deploymentNode cloudflare_workers_observability_destination { //  (exported as ObservabilityDestination)
+    notation 'Cloudflare.Workers.ObservabilityDestination'
+    style {
+      shape component
+      color amber
+      icon tech:cloudflare-workers
+    }
+  }
+  deploymentNode cloudflare_workers_route { //  (exported as WorkerRoute)
+    notation 'Cloudflare.Workers.Route'
+    style {
+      shape component
+      color amber
+      icon tech:cloudflare-workers
+    }
+  }
+  deploymentNode cloudflare_workers_subdomain { //  (exported as Subdomain)
+    notation 'Cloudflare.Workers.Subdomain'
+    style {
+      shape component
+      color amber
+      icon tech:cloudflare-workers
+    }
+  }
+  // ── Zaraz ──
+  deploymentNode cloudflare_zaraz_config {
+    notation 'Cloudflare.Zaraz.Config'
+    style {
+      shape rectangle
+      icon tech:cloudflare
+    }
+  }
+  // ── Zone ──
+  deploymentNode cloudflare_zone_custom_nameservers {
+    notation 'Cloudflare.Zone.CustomNameservers'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_zone_hold {
+    notation 'Cloudflare.Zone.Hold'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_zone_setting {
+    notation 'Cloudflare.Zone.Setting'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+  deploymentNode cloudflare_zone_zone {
+    notation 'Cloudflare.Zone.Zone'
+    style {
+      shape rectangle
+      color green
+      icon tech:cloudflare
+    }
+  }
+
+  // ── bindings ──
+  relationship service_binding {
+    title 'Service binding'
+    description 'Worker-to-Worker, in-account, no public hop'
+  }
+  relationship durable_object_binding {
+    title 'Durable Object'
+    description 'DO namespace, addressed by getByName'
+  }
+  relationship r2_binding {
+    title 'R2'
+    description 'Native bucket binding'
+  }
+  relationship d1_binding {
+    title 'D1'
+    description 'SQL database binding'
+  }
+  relationship kv_binding {
+    title 'KV'
+    description 'Key-value namespace binding'
+  }
+  relationship queue_binding {
+    title 'Queue'
+    description 'Producer binding'
+  }
+  relationship workflow_binding {
+    title 'Workflow'
+    description 'Workflow instance control'
+  }
+  relationship container_binding {
+    title 'Container'
+    description 'Container application, held by a DO'
+  }
+  relationship email_binding {
+    title 'Email'
+    description 'Cloudflare Email Sending'
+  }
+  relationship ai_binding {
+    title 'AI'
+    description 'Workers AI'
+  }
+  relationship secret {
+    title 'Secret'
+    description 'Encrypted Worker secret'
+  }
+  relationship var {
+    title 'Var'
+    description 'Plain Worker variable'
+  }
+}

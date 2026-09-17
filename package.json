@@ -1,0 +1,32 @@
+{
+  "name": "alchemy-likec4",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "likec4": "1.59.3"
+  },
+  "peerDependencies": {
+    "typescript": "^7"
+  },
+  "dependencies": {
+    "@effect/platform-bun": "4.0.0-rc.112",
+    "@effect/platform-node": "4.0.0-rc.112",
+    "@effect/platform-node-shared": "4.0.0-rc.112",
+    "alchemy": "^2.0.0-beta.77",
+    "effect": "4.0.0-rc.112"
+  },
+  "overrides": {
+    "effect": "4.0.0-rc.112",
+    "@effect/platform-node": "4.0.0-rc.112",
+    "@effect/platform-node-shared": "4.0.0-rc.112",
+    "@effect/platform-bun": "4.0.0-rc.112"
+  },
+  "version": "0.1.0",
+  "description": "Generate a LikeC4 specification from alchemy's resource registry",
+  "scripts": {
+    "generate": "bun run index.ts",
+    "validate": "bun run index.ts --out .validate/cloudflare.spec.c4 && likec4 validate --json --no-layout .validate",
+    "test": "bun test"
+  }
+}
