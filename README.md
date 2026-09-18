@@ -164,12 +164,7 @@ Run it again with `--stage staging` to add a stage. Nothing else is touched, and
 picks up every stage it finds. `--all-kinds` declares every resource kind alchemy ships instead of
 only the ones you use, which is useful for browsing and noisy for everything else.
 
-### Tell one stack from another
-
-A stack is drawn twice: as the boundary around its resources, and — since its view is scoped — as
-one closed box wherever a diagram spans stacks. Resources take their styling from their kind, but
-every stack shares one kind, so the only place that knows what a stack *is* is the stack itself.
-It says so in the JSDoc above its own declaration:
+A stack takes its description, and optionally an icon and colour, from the JSDoc above it:
 
 ```ts
 /**
@@ -180,21 +175,6 @@ It says so in the JSDoc above its own declaration:
  */
 export default Alchemy.Stack("MyApp", { … });
 ```
-
-```likec4
-my_app = alchemy_stack 'MyApp' {
-  description 'Photos in, sessions out: the whole product, on four Cloudflare resources.'
-  style {
-    color blue
-    icon tech:cloudflare-workers-icon
-  }
-}
-```
-
-The description is the same channel resources already use — JSDoc above the declaration — and
-without it the stack is the one box in the diagram with nothing but a title. `@color` takes a theme
-colour or one you declared yourself (`specification { color brand #F38020 }`); `@icon` takes any
-icon LikeC4 bundles. Both are optional.
 
 ### A monorepo: many stacks, one project
 

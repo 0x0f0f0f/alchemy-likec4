@@ -10,7 +10,7 @@ import {
   buildViews,
   crossStackRelations,
 } from "./build.ts";
-import { stackProse } from "./describe.ts";
+import { descriptionsFor, stackProse } from "./describe.ts";
 import { deriveGraph, openStack } from "./stack.ts";
 
 // Compiles the example stack — no deploy, no network, no state on disk.
@@ -384,6 +384,14 @@ describe("a ref reached through another resource", () => {
 
 describe("what a stack says about itself", () => {
   const prose = stackProse("examples/basic/alchemy.run.ts");
+
+  it("does not bleed into the resource below it", () => {
+    // The stack's block sits above `export default`, which is not a binding — so a lazy body
+    // backtracked past its terminator and swallowed the file down to the next block.
+    const photos = descriptionsFor("examples/basic/alchemy.run.ts").get("Photos");
+    expect(photos).toBe("Original uploads, never served directly.");
+    expect(photos).not.toInclude("export default");
+  });
 
   it("reads the JSDoc above the stack, which no `yield*` ever matched", () => {
     expect(prose.description).toInclude("Photos in, sessions out");
