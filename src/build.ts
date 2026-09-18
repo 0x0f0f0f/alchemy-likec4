@@ -306,9 +306,13 @@ export const crossStackRelations = (graphs: readonly StackGraph[]): CrossStack =
   const unresolved: string[] = [];
   for (const g of graphs)
     for (const e of g.crossEdges) {
+      const from = index.get(g.name)?.get(e.from) as string;
       const to = index.get(e.stack)?.get(e.id);
       if (to === undefined) unresolved.push(`${g.name}/${e.from} → ${e.stack}/${e.id}`);
-      else relations.push({ from: index.get(g.name)?.get(e.from) as string, to, kind: e.kind, sid: e.sid });
+      // A ref that resolves to its own holder is not a relationship, and LikeC4 rejects the
+      // self-edge outright ("Invalid parent-child relationship"). `deriveGraph` guards the
+      // in-stack edges the same way.
+      else if (to !== from) relations.push({ from, to, kind: e.kind, sid: e.sid });
     }
   relations.sort((a, b) => `${a.from}|${a.to}|${a.sid}`.localeCompare(`${b.from}|${b.to}|${b.sid}`));
   return { relations, unresolved };

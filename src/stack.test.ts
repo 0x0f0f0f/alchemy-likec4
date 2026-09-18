@@ -1,4 +1,6 @@
 import { describe, expect, it } from "bun:test";
+import * as Output from "alchemy/Output";
+import * as Ref from "alchemy/Ref";
 import {
   buildCrossStack,
   buildDeployment,
@@ -320,5 +322,45 @@ describe("bindings a stack can carry that are not wires", () => {
       },
     });
     expect(g.edges).toEqual([]);
+  });
+});
+
+describe("a ref reached through another resource", () => {
+  // A resource object is a proxy over a plain object literal, so a walk that treats plain data as
+  // a container descends into a bound resource's props and claims its refs as its own.
+  const worker = (fqn: string, Props: object) => ({
+    Type: "Cloudflare.Worker",
+    FQN: fqn,
+    LogicalId: fqn,
+    Props,
+    Namespace: undefined,
+  });
+  const elsewhere = Output.of(Ref.ref("Api", { stack: "MyApp" }, "Cloudflare.Worker") as never);
+
+  it("belongs to the resource that holds it, not to everything that binds that resource", () => {
+    const gateway = worker("gateway", { env: { PHOTOS: elsewhere } });
+    const front = worker("front", { env: { GATEWAY: gateway } });
+    const edge = worker("edge", { env: { FRONT: front } });
+    const g = deriveGraph({
+      name: "P",
+      stage: "t",
+      resources: { gateway, front, edge },
+      bindings: {
+        gateway: [{ sid: "PHOTOS", data: { bindings: [{ type: "service", name: "PHOTOS", service: elsewhere }] } }],
+      } as never,
+    });
+    expect(g.crossEdges).toEqual([
+      { from: "gateway", stack: "MyApp", id: "Api", type: "Cloudflare.Worker", kind: "service", sid: "PHOTOS" },
+    ]);
+  });
+
+  it("draws no self-edge, which LikeC4 rejects as an invalid parent-child relationship", () => {
+    // `a` binds `b`; `b` refs `a` with no stack, so the ref means this stack.
+    const b = worker("b", { env: { A: Output.of(Ref.ref("a", {}, "Cloudflare.Worker") as never) } });
+    const a = worker("a", { env: { B: b } });
+    const g = deriveGraph({ name: "P", stage: "t", resources: { a, b }, bindings: {} });
+    const { relations } = crossStackRelations([g]);
+    expect(relations.map((r) => `${r.from} -> ${r.to}`)).toEqual(["p.b -> p.a"]);
+    expect(buildCrossStack(crossStackRelations([g]))).not.toInclude("p.a -> p.a");
   });
 });
