@@ -41,11 +41,12 @@ specification {
     }
   }
   element alchemy_stack {
+    notation 'Alchemy stack'
     style {
       shape rectangle
       color muted
       border dashed
-      opacity 10%
+      opacity 30%
     }
   }
   

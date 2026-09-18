@@ -166,14 +166,24 @@ export const buildSpecification = (opts: SpecificationOptions): string => {
     };
   }
   // A stack is a boundary, not a thing, so it is a faint dashed group.
-  elements[STACK_KIND] = { style: { shape: "rectangle", color: "muted", opacity: 10, border: "dashed" } };
-  if (namespaces) elements[NAMESPACE_KIND] = { style: { shape: "rectangle", color: "muted", opacity: 10 } };
+  // A stack is drawn twice: as the boundary around its own resources, and — since `buildViews`
+  // scopes a view to it — as one closed box in a diagram that spans stacks. Dashed keeps it
+  // reading as a boundary; the fill has to stay solid enough that the closed box is not a ghost.
+  elements[STACK_KIND] = {
+    notation: "Alchemy stack",
+    style: { shape: "rectangle", color: "muted", opacity: 30, border: "dashed" },
+  };
+  if (namespaces)
+    elements[NAMESPACE_KIND] = {
+      notation: "Nested resources",
+      style: { shape: "rectangle", color: "muted", opacity: 20 },
+    };
 
   const b = Builder.forSpecification({
     elements,
     deployments: {
       [STACK_KIND]: { notation: "Alchemy stack" },
-      ...(namespaces ? { [NAMESPACE_KIND]: {} } : {}),
+      ...(namespaces ? { [NAMESPACE_KIND]: { notation: "Nested resources" } } : {}),
     },
     relationships: Object.fromEntries([...bindings].sort().map((k) => [toRelationshipKind(k), { notation: k }])),
     tags: Object.fromEntries([...tags].sort().map((t) => [t, {}])),
@@ -392,9 +402,10 @@ export const buildDeployment = (graph: StackGraph): string => {
 export const buildViews = (graph: Pick<StackGraph, "name">, stages: readonly string[]): string => {
   const model = modelId(graph);
   const body = [
-    `  view ${model}_landscape {`,
-    `    title '${graph.name}'`,
-    `    include ${model}, ${model}.*`,
+    `  view ${model}_landscape of ${model} {`,
+    `    title '${graph.name} / Overview'`,
+    "    order 1",
+    `    include *, ${model}.**`,
     "  }",
     ...[...stages].sort().flatMap((stage) => {
       const root = stackId({ name: graph.name, stage });
@@ -402,7 +413,7 @@ export const buildViews = (graph: Pick<StackGraph, "name">, stages: readonly str
         "",
         `  deployment view ${root} {`,
         `    title '${graph.name} / ${stage}'`,
-        `    include ${root}, ${root}.*`,
+        `    include ${root}, ${root}.*, ${root}.**`,
         "    autoLayout LeftRight",
         "  }",
       ];
@@ -410,10 +421,18 @@ export const buildViews = (graph: Pick<StackGraph, "name">, stages: readonly str
   ];
   return generated(
     [
-      "The landscape, and one view per stage. Delete this file and write your own.",
+      "One view of each stack, and one per stage. Delete this file and write your own.",
       "Regenerate with:  alchemy-likec4 generate --project <dir>",
       "",
-      "`.*` rather than `.**`: the descendants selector omits resources with no relationship.",
+      "`of` is what makes the stack a box you can open: a scoped view becomes the element's",
+      "default, so every diagram that draws the stack gets a navigate button on it.",
+      "",
+      "`include *` is scoped here — the stack, its resources, AND whatever they talk to across a",
+      "boundary. `.**` beside it reaches a resource alchemy nested under a namespace, which the",
+      "children selector alone leaves out. Never `.**` on its own: the descendants selector drops",
+      "a resource that has no relationship, and the deployment views have no wildcard to catch it.",
+      "",
+      "The title reads `<Stack> / <view>`, so the UI files every stack under its own folder.",
     ],
     ["views {", ...body, "}", ""].join("\n"),
   );
