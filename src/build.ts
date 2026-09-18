@@ -166,14 +166,24 @@ export const buildSpecification = (opts: SpecificationOptions): string => {
     };
   }
   // A stack is a boundary, not a thing, so it is a faint dashed group.
-  elements[STACK_KIND] = { style: { shape: "rectangle", color: "muted", opacity: 10, border: "dashed" } };
-  if (namespaces) elements[NAMESPACE_KIND] = { style: { shape: "rectangle", color: "muted", opacity: 10 } };
+  // A stack is drawn twice: as the boundary around its own resources, and — since `buildViews`
+  // scopes a view to it — as one closed box in a diagram that spans stacks. Dashed keeps it
+  // reading as a boundary; the fill has to stay solid enough that the closed box is not a ghost.
+  elements[STACK_KIND] = {
+    notation: "Alchemy stack",
+    style: { shape: "rectangle", color: "muted", opacity: 30, border: "dashed" },
+  };
+  if (namespaces)
+    elements[NAMESPACE_KIND] = {
+      notation: "Nested resources",
+      style: { shape: "rectangle", color: "muted", opacity: 20 },
+    };
 
   const b = Builder.forSpecification({
     elements,
     deployments: {
       [STACK_KIND]: { notation: "Alchemy stack" },
-      ...(namespaces ? { [NAMESPACE_KIND]: {} } : {}),
+      ...(namespaces ? { [NAMESPACE_KIND]: { notation: "Nested resources" } } : {}),
     },
     relationships: Object.fromEntries([...bindings].sort().map((k) => [toRelationshipKind(k), { notation: k }])),
     tags: Object.fromEntries([...tags].sort().map((t) => [t, {}])),
@@ -383,18 +393,26 @@ export const buildDeployment = (graph: StackGraph): string => {
 };
 
 /**
- * A landscape view and one deployment view per stage, so the first run renders something.
+ * One view OF each stack and one deployment view per stage, so the first run renders something.
  *
  * Templated rather than built: the Builder's `$include` drops `.*` selectors and `$autoLayout`.
- * The selector has to be exactly `.*`, because `.**` silently omits resources that have no
- * relationship — an isolated bucket would vanish from the diagram.
+ *
+ * `of` is load-bearing. A scoped view becomes its element's default, and that is what puts the
+ * navigate button on the stack — a box a reader can open, rather than a boundary they can only
+ * look at. It also changes what the wildcard means: scoped, `*` is the stack, its resources AND
+ * whatever they relate to outside it.
+ *
+ * `.**` is never written alone. It reaches a resource alchemy nested under a namespace, which the
+ * children selector leaves out, but it drops any resource with no relationship. The scoped `*`
+ * covers that in the model view; the deployment views have no wildcard, so they keep `.*` too.
  */
 export const buildViews = (graph: Pick<StackGraph, "name">, stages: readonly string[]): string => {
   const model = modelId(graph);
   const body = [
-    `  view ${model}_landscape {`,
-    `    title '${graph.name}'`,
-    `    include ${model}, ${model}.*`,
+    `  view ${model}_landscape of ${model} {`,
+    `    title '${graph.name} / Overview'`,
+    "    order 1",
+    `    include *, ${model}.**`,
     "  }",
     ...[...stages].sort().flatMap((stage) => {
       const root = stackId({ name: graph.name, stage });
@@ -402,7 +420,7 @@ export const buildViews = (graph: Pick<StackGraph, "name">, stages: readonly str
         "",
         `  deployment view ${root} {`,
         `    title '${graph.name} / ${stage}'`,
-        `    include ${root}, ${root}.*`,
+        `    include ${root}, ${root}.*, ${root}.**`,
         "    autoLayout LeftRight",
         "  }",
       ];
@@ -410,10 +428,8 @@ export const buildViews = (graph: Pick<StackGraph, "name">, stages: readonly str
   ];
   return generated(
     [
-      "The landscape, and one view per stage. Delete this file and write your own.",
+      "One view of each stack, and one per stage. Delete this file and write your own.",
       "Regenerate with:  alchemy-likec4 generate --project <dir>",
-      "",
-      "`.*` rather than `.**`: the descendants selector omits resources with no relationship.",
     ],
     ["views {", ...body, "}", ""].join("\n"),
   );

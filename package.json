@@ -40,7 +40,7 @@
     "@effect/platform-node-shared": "4.0.0-rc.112",
     "@effect/platform-bun": "4.0.0-rc.112"
   },
-  "version": "0.77.3",
+  "version": "0.77.4",
   "description": "Generate a LikeC4 specification from alchemy's resource registry",
   "scripts": {
     "build": "tsdown",
