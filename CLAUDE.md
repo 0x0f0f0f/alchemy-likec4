@@ -78,7 +78,10 @@ documented as allowed and is a validation error. Check the grammar
   `service: PropExpr(RefExpr)`, and `RefExpr` carries `stack`, `resourceId` and
   `stables.Type` — `(stack, logical id, canonical type)` with no deploy. `refsIn` in `stack.ts`
   mirrors `upstream`'s per-kind dispatch: an Expr is a proxy that answers ANY unknown property with
-  a PropExpr wrapping itself, so reading `.expr` off an unclassified node never terminates.
+  a PropExpr wrapping itself, so reading `.expr` off an unclassified node never terminates. It also
+  mirrors the `isResource` arm that runs BEFORE `isPlainData`: a resource object is a proxy over a
+  plain object literal, so without it a resource reads as plain data and every resource binding a
+  ref-holding one inherits its refs, transitively.
 - The Builder resolves a relationship's ends against the elements it was given and throws
   `Element with id … not found` otherwise, so a cross-stack relation cannot go through it.
   `buildCrossStack` prints text, like `buildViews`.

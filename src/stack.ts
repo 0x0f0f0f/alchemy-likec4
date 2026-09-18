@@ -17,6 +17,7 @@
  */
 import * as Alchemist from "alchemy/Alchemist";
 import * as Output from "alchemy/Output";
+import { isResource } from "alchemy/Resource";
 import { isPlainData } from "alchemy/Util/data";
 import * as Effect from "effect/Effect";
 import { placeholderEnvironment } from "./auth.ts";
@@ -131,6 +132,11 @@ const refsIn = (value: unknown, seen: WeakSet<object>): RefTarget[] => {
       return refsIn(value.expr, seen);
     return []; // ResourceExpr, LiteralExpr and StackRefExpr reach no ref.
   }
+  // A resource is a dependency, not a container to walk into: alchemy's own `upstreamAny` tests
+  // `isResource` BEFORE `isPlainData` for the same reason. A resource object is a proxy over a
+  // plain object literal, so without this it reads as plain data and every resource that binds a
+  // ref-holding one inherits its refs — transitively.
+  if (isResource(value)) return [];
   // Every other value is a leaf, per alchemy's own dependency rule: only plain data is walked.
   if (!isPlainData(value) || seen.has(value)) return [];
   seen.add(value);
