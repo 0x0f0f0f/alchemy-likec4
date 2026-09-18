@@ -20,6 +20,7 @@ import { Builder } from "@likec4/core/builder";
 import { generate } from "@likec4/generators/likec4";
 import type { Annotations } from "./annotations.ts";
 import { toRelationshipKind } from "./bindings.ts";
+import type { StackProse } from "./describe.ts";
 import { iconFor } from "./icons.ts";
 import type { StackGraph, StackResource } from "./stack.ts";
 import { styleFor } from "./style.ts";
@@ -216,6 +217,8 @@ export interface ModelOptions {
   readonly bindings: readonly string[];
   /** Logical id → the JSDoc prose above it in the stack. */
   readonly descriptions: ReadonlyMap<string, string>;
+  /** What the stack says about itself, from the JSDoc above its own declaration. */
+  readonly stack?: StackProse;
 }
 
 /**
@@ -227,7 +230,7 @@ export interface ModelOptions {
  * live in `buildSpecification`, and the elements reference them by kind name at parse time.
  */
 export const buildModel = (graph: StackGraph, opts: ModelOptions): string => {
-  const { kinds, bindings, descriptions } = opts;
+  const { kinds, bindings, descriptions, stack } = opts;
   const root = modelId(graph);
   const namespaces = namespacesOf(root, graph.resources);
 
@@ -264,7 +267,17 @@ export const buildModel = (graph: StackGraph, opts: ModelOptions): string => {
     ),
   ];
 
-  const built = compose(b, [(h[STACK_KIND] as ElementHelper)(root, { title: graph.name }).with(...children)]);
+  // The stack is a box a reader opens, so it carries its own prose and, when the author said so,
+  // its own icon and colour. Resources take styling from their kind; a stack has only one kind, so
+  // telling two of them apart has to come from the stack itself.
+  const rootProps = {
+    title: graph.name,
+    ...(stack?.description ? { description: stack.description } : {}),
+    ...(stack?.icon || stack?.color
+      ? { style: { ...(stack.icon ? { icon: stack.icon } : {}), ...(stack.color ? { color: stack.color } : {}) } }
+      : {}),
+  };
+  const built = compose(b, [(h[STACK_KIND] as ElementHelper)(root, rootProps).with(...children)]);
 
   return generated(
     [
@@ -393,6 +406,37 @@ export const buildDeployment = (graph: StackGraph): string => {
 };
 
 /**
+ * Every stack in the run, opened, in one view.
+ *
+ * The per-stack views are scoped, which is what makes a stack a box you click — but a box you
+ * click is closed until you click it. This is the other half: the whole estate at once, every
+ * resource on screen. It spans stacks, so like the cross-stack relationships it belongs to the
+ * run rather than to any one of them.
+ *
+ * Not named `index`: LikeC4 generates that one when a project defines none, and claiming the name
+ * would silently replace whatever the consumer wrote.
+ */
+export const buildLandscape = (graphs: ReadonlyArray<Pick<StackGraph, "name">>): string => {
+  const roots = [...new Set(graphs.map((g) => modelId(g)))].sort();
+  return generated(
+    [
+      `Every resource of ${roots.length} stack${roots.length === 1 ? "" : "s"}, in one view.`,
+      "Regenerate with:  alchemy-likec4 generate --project <dir>",
+    ],
+    [
+      "views {",
+      "  view landscape {",
+      "    title 'Landscape'",
+      "    include *,",
+      ...roots.map((r, i) => `      ${r}.*, ${r}.**${i === roots.length - 1 ? "" : ","}`),
+      "  }",
+      "}",
+      "",
+    ].join("\n"),
+  );
+};
+
+/**
  * One view OF each stack and one deployment view per stage, so the first run renders something.
  *
  * Templated rather than built: the Builder's `$include` drops `.*` selectors and `$autoLayout`.
@@ -409,7 +453,7 @@ export const buildDeployment = (graph: StackGraph): string => {
 export const buildViews = (graph: Pick<StackGraph, "name">, stages: readonly string[]): string => {
   const model = modelId(graph);
   const body = [
-    `  view ${model}_landscape of ${model} {`,
+    `  view ${model}_overview of ${model} {`,
     `    title '${graph.name} / Overview'`,
     "    order 1",
     `    include *, ${model}.**`,

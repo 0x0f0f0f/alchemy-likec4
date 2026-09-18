@@ -3,7 +3,7 @@
 // Regenerate with:  alchemy-likec4 generate --project <dir>
 
 views {
-  view my_app_landscape of my_app {
+  view my_app_overview of my_app {
     title 'MyApp / Overview'
     order 1
     include *, my_app.**

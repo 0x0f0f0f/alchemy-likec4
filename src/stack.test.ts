@@ -4,11 +4,13 @@ import * as Ref from "alchemy/Ref";
 import {
   buildCrossStack,
   buildDeployment,
+  buildLandscape,
   buildModel,
   buildSpecification,
   buildViews,
   crossStackRelations,
 } from "./build.ts";
+import { stackProse } from "./describe.ts";
 import { deriveGraph, openStack } from "./stack.ts";
 
 // Compiles the example stack — no deploy, no network, no state on disk.
@@ -195,13 +197,13 @@ describe("buildViews", () => {
   const dsl = buildViews(graph, ["prod", "staging"]);
 
   it("emits a landscape and one deployment view per stage", () => {
-    expect(dsl).toInclude("view shortener_landscape");
+    expect(dsl).toInclude("view shortener_overview");
     expect(dsl).toInclude("deployment view shortener_prod");
     expect(dsl).toInclude("deployment view shortener_staging");
   });
 
   it("scopes the stack's view to it, which is what gives the element a navigate button", () => {
-    expect(dsl).toInclude("view shortener_landscape of shortener {");
+    expect(dsl).toInclude("view shortener_overview of shortener {");
     expect(dsl).toInclude("include *, shortener.**");
   });
 
@@ -376,5 +378,51 @@ describe("a ref reached through another resource", () => {
     const { relations } = crossStackRelations([g]);
     expect(relations.map((r) => `${r.from} -> ${r.to}`)).toEqual(["p.b -> p.a"]);
     expect(buildCrossStack(crossStackRelations([g]))).not.toInclude("p.a -> p.a");
+  });
+});
+
+describe("what a stack says about itself", () => {
+  const prose = stackProse("examples/basic/alchemy.run.ts");
+
+  it("reads the JSDoc above the stack, which no `yield*` ever matched", () => {
+    expect(prose.description).toInclude("Photos in, sessions out");
+  });
+
+  it("takes an icon and a colour from tags, which prose() already kept out of the description", () => {
+    expect(prose).toMatchObject({ icon: "tech:cloudflare-workers-icon", color: "blue" });
+    expect(prose.description).not.toInclude("@icon");
+  });
+
+  it("puts them on the stack element, the one box a kind cannot tell apart", () => {
+    const dsl = buildModel(neighbour, {
+      kinds: [...new Set(neighbour.resources.map((r) => r.type))],
+      bindings: [],
+      descriptions: new Map(),
+      stack: prose,
+    });
+    expect(dsl).toInclude("icon tech:cloudflare-workers-icon");
+    expect(dsl).toInclude("color blue");
+    expect(dsl).toInclude("Photos in, sessions out");
+  });
+
+  it("styles nothing when the stack says nothing", () => {
+    const kinds = [...new Set(neighbour.resources.map((r) => r.type))];
+    const dsl = buildModel(neighbour, { kinds, bindings: [], descriptions: new Map() });
+    expect(dsl).not.toInclude("icon tech:");
+    expect(dsl).not.toInclude("color blue");
+  });
+});
+
+describe("buildLandscape", () => {
+  const dsl = buildLandscape([graph, neighbour]);
+
+  it("opens every stack in the run, both selectors so nothing is dropped", () => {
+    expect(dsl).toInclude("view landscape {");
+    expect(dsl).toInclude("my_app.*, my_app.**");
+    expect(dsl).toInclude("shortener.*, shortener.**");
+  });
+
+  it("never claims `index`, which LikeC4 generates for a project that defines none", () => {
+    expect(dsl).not.toInclude("view index");
   });
 });

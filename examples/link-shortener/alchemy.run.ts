@@ -6,6 +6,11 @@ import * as Effect from "effect/Effect";
 
 const main = `${import.meta.dirname}/workers/noop.ts`;
 
+/**
+ * Short links, resolved at the edge and counted after the redirect.
+ *
+ * @color amber
+ */
 export default Alchemy.Stack(
   "Shortener",
   // A state store is mandatory; in-memory keeps the fixture off the disk.

@@ -8,9 +8,16 @@
 
 model {
   shortener = alchemy_stack 'Shortener' {
+    description '
+      Short links, resolved at the edge and counted after the redirect.
+    '
+    style {
+      color amber
+    }
+    
     hot = cloudflare_kv_namespace {
       description '
-        Read-through cache. A miss costs one D1 read.
+        Short links, resolved at the edge and counted after the redirect. / export default Alchemy.Stack( "Shortener", // A state store is mandatory; in-memory keeps the fixture off the disk. { providers: Cloudflare.providers(), state: Alchemy.inMemoryState() }, Effect.gen(function* () { /** Read-through cache. A miss costs one D1 read.
       '
       metadata {
         fqn 'hot'

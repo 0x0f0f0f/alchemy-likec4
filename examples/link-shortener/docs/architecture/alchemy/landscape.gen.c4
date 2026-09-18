@@ -1,0 +1,11 @@
+// GENERATED — DO NOT EDIT.
+// Every resource of 1 stack, in one view.
+// Regenerate with:  alchemy-likec4 generate --project <dir>
+
+views {
+  view landscape {
+    title 'Landscape'
+    include *,
+      shortener.*, shortener.**
+  }
+}

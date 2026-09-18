@@ -20,13 +20,14 @@ import { bindingKinds } from "./bindings.ts";
 import {
   buildCrossStack,
   buildDeployment,
+  buildLandscape,
   buildModel,
   buildSpecification,
   buildViews,
   crossStackRelations,
   hasNamespaces,
 } from "./build.ts";
-import { descriptionsFor } from "./describe.ts";
+import { descriptionsFor, stackProse } from "./describe.ts";
 import { type AlchemyResource, alchemyDir, discoverProviders, extractResources } from "./extract.ts";
 import type { StackGraph } from "./stack.ts";
 
@@ -105,6 +106,7 @@ const RESERVED = new Set(["model", "views"]);
 
 const SPECIFICATION = "specification.gen.c4";
 const CROSS_STACK = "cross-stack.gen.c4";
+const LANDSCAPE = "landscape.gen.c4";
 
 /** What `<outdir>` already holds, or nothing on a first run. */
 const existing = async (outdir: string): Promise<string[]> => {
@@ -123,6 +125,9 @@ const knownStages = (entries: readonly string[], graph: StackGraph): string[] =>
   const prefix = `${graph.name}.`;
   const stages = new Set([graph.stage]);
   for (const e of entries) {
+    // A stack named `specification`, `cross-stack` or `landscape` would otherwise read its own
+    // project-wide file as a stage called `gen`.
+    if (e === SPECIFICATION || e === CROSS_STACK || e === LANDSCAPE) continue;
     if (!e.startsWith(prefix) || !e.endsWith(".gen.c4")) continue;
     const stage = e.slice(prefix.length, -".gen.c4".length);
     if (!RESERVED.has(stage)) stages.add(stage);
@@ -169,12 +174,13 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
       annotations.set(type, a);
 
   const entries = await existing(outdir);
-  const files: string[] = [`${outdir}/${SPECIFICATION}`, `${outdir}/${CROSS_STACK}`];
+  const files: string[] = [`${outdir}/${SPECIFICATION}`, `${outdir}/${CROSS_STACK}`, `${outdir}/${LANDSCAPE}`];
   await write(
     files[0] as string,
     buildSpecification({ alchemyVersion, kinds, annotations, bindings, namespaces: hasNamespaces(graphs) }),
   );
   await write(files[1] as string, buildCrossStack(cross));
+  await write(files[2] as string, buildLandscape(graphs));
 
   const summaries: StackSummary[] = [];
   for (const { graph, entrypoint } of stacks) {
@@ -188,7 +194,10 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
       `${outdir}/${graph.name}.${graph.stage}.gen.c4`,
       `${outdir}/${graph.name}.views.gen.c4`,
     ] as const;
-    await write(mine[0], buildModel(graph, { kinds: stackKinds, bindings: stackBindings, descriptions }));
+    await write(
+      mine[0],
+      buildModel(graph, { kinds: stackKinds, bindings: stackBindings, descriptions, stack: stackProse(entrypoint) }),
+    );
     await write(mine[1], buildDeployment(graph));
     await write(mine[2], buildViews(graph, stages));
     files.push(...mine);

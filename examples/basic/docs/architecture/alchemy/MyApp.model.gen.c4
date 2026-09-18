@@ -8,9 +8,17 @@
 
 model {
   my_app = alchemy_stack 'MyApp' {
+    description '
+      Photos in, sessions out: the whole product, on four Cloudflare resources.
+    '
+    style {
+      color blue
+      icon tech:cloudflare-workers-icon
+    }
+    
     photos = cloudflare_r2_bucket 'Photos' {
       description '
-        Original uploads, never served directly.
+        Photos in, sessions out: the whole product, on four Cloudflare resources. / export default Alchemy.Stack( "MyApp", { providers: Cloudflare.providers(), state: Alchemy.inMemoryState() }, Effect.gen(function* () { /** Original uploads, never served directly.
       '
       metadata {
         fqn 'Photos'

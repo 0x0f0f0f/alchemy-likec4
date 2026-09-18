@@ -109,6 +109,7 @@ docs/architecture/
 └─ alchemy/                   # GENERATED — every alchemy-likec4 run rewrites it
    ├─ specification.gen.c4    # every kind your stacks use, styled and iconed — one per project
    ├─ cross-stack.gen.c4      # the relationships a `Resource.ref` crosses a stack for
+   ├─ landscape.gen.c4        # every stack in the run, opened, in one view
    ├─ MyApp.model.gen.c4      # your stack as a model: one element per resource, one edge per binding
    ├─ MyApp.prod.gen.c4       # each resource as a deployed instance, one file per stage
    └─ MyApp.views.gen.c4      # a view OF the stack — the box opens — and one per stage
@@ -154,6 +155,7 @@ One command writes into `docs/architecture/alchemy/`:
 | ------------------------ | --------------------------------------------------------------------------------------------- |
 | `specification.gen.c4`   | every element kind your stacks use, styled and iconed, and one relationship kind per binding — **one per project** |
 | `cross-stack.gen.c4`     | every relationship between two stacks in the run — **one per project**                      |
+| `landscape.gen.c4`       | one view with every stack opened — **one per project**                                      |
 | `<Stack>.model.gen.c4`   | one element per resource, with its relationships                                            |
 | `<Stack>.<stage>.gen.c4` | each resource as a deployed instance, one file per stage                                    |
 | `<Stack>.views.gen.c4`   | a view scoped to the stack, so its box opens, and one deployment view per stage              |
@@ -161,6 +163,38 @@ One command writes into `docs/architecture/alchemy/`:
 Run it again with `--stage staging` to add a stage. Nothing else is touched, and the views file
 picks up every stage it finds. `--all-kinds` declares every resource kind alchemy ships instead of
 only the ones you use, which is useful for browsing and noisy for everything else.
+
+### Tell one stack from another
+
+A stack is drawn twice: as the boundary around its resources, and — since its view is scoped — as
+one closed box wherever a diagram spans stacks. Resources take their styling from their kind, but
+every stack shares one kind, so the only place that knows what a stack *is* is the stack itself.
+It says so in the JSDoc above its own declaration:
+
+```ts
+/**
+ * Photos in, sessions out: the whole product, on four Cloudflare resources.
+ *
+ * @icon tech:cloudflare-workers-icon
+ * @color blue
+ */
+export default Alchemy.Stack("MyApp", { … });
+```
+
+```likec4
+my_app = alchemy_stack 'MyApp' {
+  description 'Photos in, sessions out: the whole product, on four Cloudflare resources.'
+  style {
+    color blue
+    icon tech:cloudflare-workers-icon
+  }
+}
+```
+
+The description is the same channel resources already use — JSDoc above the declaration — and
+without it the stack is the one box in the diagram with nothing but a title. `@color` takes a theme
+colour or one you declared yourself (`specification { color brand #F38020 }`); `@icon` takes any
+icon LikeC4 bundles. Both are optional.
 
 ### A monorepo: many stacks, one project
 

@@ -95,6 +95,14 @@ documented as allowed and is a validation error. Check the grammar
   wildcard covers the children (`include *, <root>.**`), and the deployment views, which have no
   wildcard, spell out all three (`include <root>, <root>.*, <root>.**`). Dropping the `.*` there
   silently loses a stack whose resources have no relationships between them.
+- A stack has no prose of its own unless `stackProse` reads it: `DESCRIBED` requires a `yield*`, and
+  a stack is `export default Alchemy.Stack("<name>", …)`, so the stack box was the one element with
+  only a title. `@icon` and `@color` in that same JSDoc set the element's style — `prose()` already
+  drops `@` lines from the description, so the tags never leak into it. Per-element `style { color,
+  icon }` and `technology` all print fine from `buildModel`; only KIND styling is stripped there.
+- `landscape.gen.c4` is the run-level counterpart to the scoped per-stack views: every stack opened
+  in one view. It is NOT named `index` — LikeC4 generates that itself when a project defines none,
+  so taking the name would silently replace the consumer's own.
 - A view declared `of <element>` becomes that element's DEFAULT view, which is what puts the
   navigate ("zoom in") button on it everywhere it is drawn. Nothing else turns the button on;
   `implicitViews: true` in `likec4.config.json` is the blanket alternative and mints one view per
