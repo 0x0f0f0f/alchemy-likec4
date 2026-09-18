@@ -200,11 +200,25 @@ describe("buildViews", () => {
     expect(dsl).toInclude("deployment view shortener_staging");
   });
 
-  it("uses the children selector, because `.**` drops resources with no relationship", () => {
-    expect(dsl).toInclude("include shortener_prod, shortener_prod.*");
+  it("scopes the stack's view to it, which is what gives the element a navigate button", () => {
+    expect(dsl).toInclude("view shortener_landscape of shortener {");
+    expect(dsl).toInclude("include *, shortener.**");
+  });
+
+  it("files every view under the stack's own folder, the overview first", () => {
+    expect(dsl).toInclude("title 'Shortener / Overview'");
+    expect(dsl).toInclude("order 1");
+    expect(dsl).toInclude("title 'Shortener / prod'");
+  });
+
+  // `.**` reaches a resource nested under a namespace, and drops any resource with no
+  // relationship. Never on its own: the scoped `*` backs it in the model view, and the deployment
+  // views — which have no wildcard — keep `.*` beside it.
+  it("never reaches for descendants without a selector that keeps the unrelated ones", () => {
     const includes = [...dsl.matchAll(/^ {4}include .+$/gm)].map((m) => m[0]);
     expect(includes.length).toBe(3);
-    expect(includes.some((line) => line.includes(".**"))).toBe(false);
+    for (const line of includes) if (line.includes(".**")) expect(line).toMatch(/include \*,|\.\*,/);
+    expect(dsl).toInclude("include shortener_prod, shortener_prod.*, shortener_prod.**");
   });
 });
 

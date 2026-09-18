@@ -89,8 +89,19 @@ documented as allowed and is a validation error. Check the grammar
   `{ durableObjects: { namespaceId } }`), and a binding whose VALUE is an Output arrives as a proxy
   wrapping the whole wire — `wire.type` is then an Output, not a string, and interpolating it throws.
   Both are guarded in `deriveGraph`; neither has a fixture that is not hand-made.
-- `include <root>.**` silently drops elements with no relationship; `include <root>.*` keeps them.
-  Generated views use `.*`.
+- `include <root>.**` silently drops elements with no relationship; `include <root>.*` keeps them,
+  but only direct children — a resource alchemy nested under a namespace needs `.**`. Generated
+  views therefore pair them and never use `.**` alone: the stack's own view is scoped, so the
+  wildcard covers the children (`include *, <root>.**`), and the deployment views, which have no
+  wildcard, spell out all three (`include <root>, <root>.*, <root>.**`). Dropping the `.*` there
+  silently loses a stack whose resources have no relationships between them.
+- A view declared `of <element>` becomes that element's DEFAULT view, which is what puts the
+  navigate ("zoom in") button on it everywhere it is drawn. Nothing else turns the button on;
+  `implicitViews: true` in `likec4.config.json` is the blanket alternative and mints one view per
+  element. `buildViews` scopes each stack's view for exactly this.
+- A `/` in a view's title makes a folder in the UI sidebar, and `order <n>` sorts within it
+  (properties must precede predicates). Generated titles are `<Stack> / Overview` and
+  `<Stack> / <stage>`, so a stack's views sit together.
 - `icon` must sit inside `style { }` in a specification kind body. Bare `icon` is model-elements only.
 - A named instance (`api = instanceOf x.api`) is one node inheriting the element's shape, colour,
   icon and technology. `deployment.nodes()` does NOT return instances — walk `deployment.instances()`.

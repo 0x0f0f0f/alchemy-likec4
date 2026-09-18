@@ -1,18 +1,17 @@
 // GENERATED — DO NOT EDIT.
-// The landscape, and one view per stage. Delete this file and write your own.
+// One view of each stack, and one per stage. Delete this file and write your own.
 // Regenerate with:  alchemy-likec4 generate --project <dir>
-//
-// `.*` rather than `.**`: the descendants selector omits resources with no relationship.
 
 views {
-  view shortener_landscape {
-    title 'Shortener'
-    include shortener, shortener.*
+  view shortener_landscape of shortener {
+    title 'Shortener / Overview'
+    order 1
+    include *, shortener.**
   }
 
   deployment view shortener_prod {
     title 'Shortener / prod'
-    include shortener_prod, shortener_prod.*
+    include shortener_prod, shortener_prod.*, shortener_prod.**
     autoLayout LeftRight
   }
 }

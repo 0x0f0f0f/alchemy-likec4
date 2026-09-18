@@ -111,7 +111,7 @@ docs/architecture/
    ├─ cross-stack.gen.c4      # the relationships a `Resource.ref` crosses a stack for
    ├─ MyApp.model.gen.c4      # your stack as a model: one element per resource, one edge per binding
    ├─ MyApp.prod.gen.c4       # each resource as a deployed instance, one file per stage
-   └─ MyApp.views.gen.c4      # a landscape view, and one per stage
+   └─ MyApp.views.gen.c4      # a view OF the stack — the box opens — and one per stage
 ```
 
 Every file outside `alchemy/` is optional. The `examples/basic` project in this repo contains
@@ -156,7 +156,7 @@ One command writes into `docs/architecture/alchemy/`:
 | `cross-stack.gen.c4`     | every relationship between two stacks in the run — **one per project**                      |
 | `<Stack>.model.gen.c4`   | one element per resource, with its relationships                                            |
 | `<Stack>.<stage>.gen.c4` | each resource as a deployed instance, one file per stage                                    |
-| `<Stack>.views.gen.c4`   | a landscape view and one deployment view per stage                                          |
+| `<Stack>.views.gen.c4`   | a view scoped to the stack, so its box opens, and one deployment view per stage              |
 
 Run it again with `--stage staging` to add a stage. Nothing else is touched, and the views file
 picks up every stage it finds. `--all-kinds` declares every resource kind alchemy ships instead of
@@ -352,6 +352,9 @@ The deployment carries no relationships. It does not need to.
 
 - Physical identifiers (bucket ids, worker URLs) exist only after a deploy; the compiled stack
   carries names, not ids.
+- Drill-down is a model-view feature. Deployment views take the same predicates, but LikeC4
+  documents `with { … }` overrides and `navigateTo` as not working there and has no
+  `deployment view … of <node>`, so the per-stage views stay flat.
 - Only Cloudflare carries `@category` and binding kinds, so other providers emit untagged kinds
   and no relationship kinds.
 - `DurableObject`, `Email.SendEmail` and `Website.Astro` are factory functions with no `.Type`, so

@@ -15,8 +15,12 @@ const views = projects.flatMap((p) => (Array.isArray(p.views) ? p.views : Object
 const view = (id: string) => {
   const found = (views as Array<{ id: string }>).find((v) => v.id === id);
   if (!found) throw new Error(`no view '${id}' in ${path}; found ${(views as Array<{ id: string }>).map((v) => v.id).join(", ")}`);
-  return found as { id: string; nodes: unknown[]; edges: Array<{ kind?: string }> };
+  return found as { id: string; nodes: unknown[]; edges: Array<{ kind?: string; relations?: string[] }> };
 };
+
+/** The model relationships an edge was derived from — the join key between the two view kinds. */
+const relationsOf = (v: { edges: Array<{ relations?: string[] }> }) =>
+  new Set(v.edges.flatMap((e) => e.relations ?? []));
 
 const expected = { nodes: 8, edges: 8 };
 for (const id of ["shortener_prod", "shortener_staging"]) {
@@ -27,8 +31,13 @@ for (const id of ["shortener_prod", "shortener_staging"]) {
   if (untyped.length > 0) throw new Error(`${id}: ${untyped.length} edges carry no binding kind`);
   console.log(`  ${id}: ${v.nodes.length} nodes, ${v.edges.length} edges, every edge typed`);
 }
-// The landscape sees the same relationships, from the same declaration.
+// Every relationship a deployment view draws must come from the model, because the deployment
+// declares none. Containment, not equality: the stack's view is scoped to it, so `include *` also
+// pulls in the actors and neighbours it talks to — edges the deployment has no instance for.
 const landscape = view("shortener_landscape");
-if (landscape.edges.length !== expected.edges)
-  throw new Error(`shortener_landscape: ${landscape.edges.length} edges, expected ${expected.edges}`);
-console.log(`  shortener_landscape: ${landscape.edges.length} edges, inherited by both stages`);
+const inModel = relationsOf(landscape);
+for (const id of ["shortener_prod", "shortener_staging"]) {
+  const missing = [...relationsOf(view(id))].filter((r) => !inModel.has(r));
+  if (missing.length > 0) throw new Error(`${id}: ${missing.length} relationships the model never declared`);
+}
+console.log(`  shortener_landscape: ${inModel.size} relationships, every deployment edge inherited from them`);
