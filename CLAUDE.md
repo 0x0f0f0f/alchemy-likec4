@@ -95,6 +95,14 @@ documented as allowed and is a validation error. Check the grammar
   wildcard covers the children (`include *, <root>.**`), and the deployment views, which have no
   wildcard, spell out all three (`include <root>, <root>.*, <root>.**`). Dropping the `.*` there
   silently loses a stack whose resources have no relationships between them.
+- A resource's `domain` prop survives compiling as a plain string — it is a pure function of the
+  stage in every stack that uses one — so the door a service answers on needs no deploy. `worker.url`
+  does NOT: it is an Output and stays unresolved. The domain goes on the DEPLOYED INSTANCE, never on
+  the logical element: `mcp.rel-int.ai` and `mcp-staging.rel-int.ai` are the same element on two
+  stages, and `modelId` is deliberately stage-free. It may carry a path (`auth.rel-int.ai/admin`),
+  so it is `domain`, alchemy's own name, not `host`. A deployment instance accepts `link`,
+  `technology`, `icon`, `style` and `metadata` (verified, 1.59.3); the printer wants
+  `links: [{ url, title }]`.
 - A stack has no prose of its own unless `stackProse` reads it: `DESCRIBED` requires a `yield*`, and
   a stack is `export default Alchemy.Stack("<name>", …)`, so the stack box was the one element with
   only a title. `@icon` and `@color` in that same JSDoc set the element's style — `prose()` already

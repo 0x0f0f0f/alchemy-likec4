@@ -31,6 +31,12 @@ export interface StackResource {
   readonly namespace: readonly string[];
   /** The `name` prop when it is a plain string; Outputs stay unresolved before a deploy. */
   readonly name: string | undefined;
+  /**
+   * The `domain` prop when it is a plain string — the door the stack configures, which is a pure
+   * function of the stage and so survives compiling. Not the URL Cloudflare assigns: `worker.url`
+   * is an Output and stays unresolved until a deploy. May carry a path (`auth.rel-int.ai/admin`).
+   */
+  readonly domain: string | undefined;
 }
 
 export interface StackEdge {
@@ -146,13 +152,14 @@ const refsIn = (value: unknown, seen: WeakSet<object>): RefTarget[] => {
 /** The graph of a compiled stack. Pure, so the edge rules are testable without compiling one. */
 export const deriveGraph = (stack: CompiledStack): StackGraph => {
   const resources = Object.values(stack.resources).map((r): StackResource => {
-    const name = (r.Props as { name?: unknown } | undefined)?.name;
+    const props = r.Props as { name?: unknown; domain?: unknown } | undefined;
     return {
       type: r.Type,
       fqn: r.FQN,
       logicalId: r.LogicalId,
       namespace: namespacePath(r.Namespace),
-      name: typeof name === "string" ? name : undefined,
+      name: typeof props?.name === "string" ? props.name : undefined,
+      domain: typeof props?.domain === "string" ? props.domain : undefined,
     };
   });
   const byName = new Map(resources.flatMap((r) => (r.name ? [[r.name, r.fqn] as const] : [])));

@@ -260,6 +260,7 @@ describe("ids that differ only by case", () => {
     logicalId,
     namespace: [] as string[],
     name: undefined,
+    domain: undefined,
   });
   const kinds = (rs: ReadonlyArray<{ type: string }>) => [...new Set(rs.map((r) => r.type))];
   const g = {
@@ -424,5 +425,28 @@ describe("buildLandscape", () => {
 
   it("never claims `index`, which LikeC4 generates for a project that defines none", () => {
     expect(dsl).not.toInclude("view index");
+  });
+});
+
+describe("the door a stage puts a service on", () => {
+  it("captures `domain` when it is a plain string, as it does `name`", () => {
+    expect(graph.resources.find((r) => r.fqn === "redirect")?.domain).toBe("go.example.com");
+    expect(graph.resources.find((r) => r.fqn === "api")?.domain).toBeUndefined();
+  });
+
+  it("puts it on the deployed instance, not the element: the host belongs to the stage", () => {
+    const dsl = buildDeployment(graph);
+    expect(dsl).toInclude("link https://go.example.com 'prod'");
+    expect(dsl).toInclude("domain 'go.example.com'");
+    const kinds = [...new Set(graph.resources.map((r) => r.type))];
+    expect(buildModel(graph, { kinds, bindings: [], descriptions: new Map() })).not.toInclude("go.example.com");
+  });
+
+  it("leaves a domain that already carries a scheme alone", () => {
+    const withScheme = {
+      ...graph,
+      resources: graph.resources.map((r) => (r.fqn === "redirect" ? { ...r, domain: "http://go.example.com" } : r)),
+    };
+    expect(buildDeployment(withScheme)).toInclude("link http://go.example.com");
   });
 });

@@ -157,7 +157,7 @@ One command writes into `docs/architecture/alchemy/`:
 | `cross-stack.gen.c4`     | every relationship between two stacks in the run — **one per project**                      |
 | `landscape.gen.c4`       | one view with every stack opened — **one per project**                                      |
 | `<Stack>.model.gen.c4`   | one element per resource, with its relationships                                            |
-| `<Stack>.<stage>.gen.c4` | each resource as a deployed instance, one file per stage                                    |
+| `<Stack>.<stage>.gen.c4` | each resource as a deployed instance with the door it answers on, one file per stage         |
 | `<Stack>.views.gen.c4`   | a view scoped to the stack, so its box opens, and one deployment view per stage              |
 
 Run it again with `--stage staging` to add a stage. Nothing else is touched, and the views file

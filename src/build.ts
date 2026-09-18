@@ -367,6 +367,9 @@ export const buildCrossStack = ({ relations, unresolved }: CrossStack): string =
   );
 };
 
+/** `mcp.rel-int.ai` → `https://mcp.rel-int.ai`. A domain may already carry a scheme or a path. */
+const urlOf = (domain: string): string => (/^https?:\/\//.test(domain) ? domain : `https://${domain}`);
+
 /**
  * A stack's resources as deployed instances of the logical model, one file per stage.
  *
@@ -390,7 +393,15 @@ export const buildDeployment = (graph: StackGraph): string => {
     ...graph.resources.map((r) => ({
       id: here.get(r.fqn) as string,
       element: there.get(r.fqn) as string,
-      metadata: { fqn: r.fqn, type: r.type, ...(r.name ? { name: r.name } : {}) },
+      metadata: {
+        fqn: r.fqn,
+        type: r.type,
+        ...(r.name ? { name: r.name } : {}),
+        ...(r.domain ? { domain: r.domain } : {}),
+      },
+      // A door belongs to a stage, not to the element: the same Worker answers on
+      // `mcp.rel-int.ai` here and `mcp-staging.rel-int.ai` in the file next door.
+      ...(r.domain ? { links: [{ url: urlOf(r.domain), title: graph.stage }] } : {}),
     })),
   ];
 

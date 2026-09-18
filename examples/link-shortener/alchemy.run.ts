@@ -38,6 +38,9 @@ export default Alchemy.Stack(
     const redirect = yield* Cloudflare.Worker("redirect", {
       main,
       name: "shortener-redirect",
+      // The door this stage puts the service on. A pure function of the stage, so it survives
+      // compiling — unlike `worker.url`, which Cloudflare only assigns at deploy.
+      domain: "go.example.com",
       env: { HOT: hot, LINKS: links, CLICKS: clicks },
     });
 
