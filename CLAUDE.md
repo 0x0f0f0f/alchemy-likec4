@@ -70,7 +70,18 @@ documented as allowed and is a validation error. Check the grammar
 - Two logical ids that differ only by case sanitise to one identifier. Both are alchemy state rows a
   consumer cannot rename, so `pathsOf` appends the sanitised canonical type to each of a colliding
   group — a pure function of `(logicalId, type)`, so the id is stable and both the model and the
-  deployment derive the same one.
+  deployment derive the same one. Namespace containers share that id space (a Website's derived
+  `Command.Build` sits under a namespace named after the site, whose Worker keeps the site's logical
+  id), so `pathsOf` seeds the group counts from `namespacesOf`.
+- `Output.upstreamAny` has no `RefExpr` arm, so a binding holding a `Resource.ref` walks to nothing.
+  The ref is on the wire all the same: `Cloudflare.WorkerEntrypoint(ref)` lowers to
+  `service: PropExpr(RefExpr)`, and `RefExpr` carries `stack`, `resourceId` and
+  `stables.Type` — `(stack, logical id, canonical type)` with no deploy. `refsIn` in `stack.ts`
+  mirrors `upstream`'s per-kind dispatch: an Expr is a proxy that answers ANY unknown property with
+  a PropExpr wrapping itself, so reading `.expr` off an unclassified node never terminates.
+- The Builder resolves a relationship's ends against the elements it was given and throws
+  `Element with id … not found` otherwise, so a cross-stack relation cannot go through it.
+  `buildCrossStack` prints text, like `buildViews`.
 - A binding's `data.bindings` is absent on a Container / Durable Object binding (`data` is
   `{ durableObjects: { namespaceId } }`), and a binding whose VALUE is an Output arrives as a proxy
   wrapping the whole wire — `wire.type` is then an Output, not a string, and interpolating it throws.

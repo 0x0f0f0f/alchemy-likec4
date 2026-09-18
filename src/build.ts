@@ -81,10 +81,14 @@ export const hasNamespaces = (graphs: ReadonlyArray<Pick<StackGraph, "resources"
  * `Wiki` (an Access application) and `wiki` (the Website in front of it) both become `wiki`. A
  * logical id IS an alchemy state row, so a consumer with deployed state cannot rename either one.
  * The canonical type is what tells them apart and it is stable, so the disambiguated id is too.
+ *
+ * A namespace container counts as one of the group: alchemy nests a Website's `Command.Build`
+ * under a namespace named after the site, and the Worker keeps the site's logical id, so the two
+ * land on the same id and the Builder rejects the second as a redeclaration.
  */
 const pathsOf = (root: string, resources: readonly StackResource[]): ReadonlyMap<string, string> => {
   const base = (r: StackResource) => [root, ...r.namespace.map(toIdentifier), toIdentifier(r.logicalId)].join(".");
-  const shared = new Map<string, number>();
+  const shared = new Map<string, number>([...namespacesOf(root, resources).keys()].map((id) => [id, 1]));
   for (const r of resources) shared.set(base(r), (shared.get(base(r)) ?? 0) + 1);
 
   const out = new Map<string, string>();
@@ -262,6 +266,77 @@ export const buildModel = (graph: StackGraph, opts: ModelOptions): string => {
       "from the logical model, so these reach deployment views through `instanceOf`.",
     ],
     print({ elements: built.elements, relations: built.relations }),
+  );
+};
+
+/** A relationship whose two ends are in different stacks' models. */
+export interface CrossStackRelation {
+  readonly from: string;
+  readonly to: string;
+  readonly kind: string;
+  readonly sid: string | undefined;
+}
+
+export interface CrossStack {
+  readonly relations: readonly CrossStackRelation[];
+  /** Refs whose target stack was not in the run, as `<stack>/<resource> → <stack>/<id>`. */
+  readonly unresolved: readonly string[];
+}
+
+/**
+ * Cross-stack edges resolved against the other stacks in the same run.
+ *
+ * A ref names `(stack, logical id)` rather than referencing a resource, so the element id can only
+ * be derived where the target's graph is — nowhere inside the stack that holds the ref. A ref whose
+ * target is not in the run is reported, not drawn: an arrow to a box outside the model is worse
+ * than no arrow.
+ */
+export const crossStackRelations = (graphs: readonly StackGraph[]): CrossStack => {
+  const index = new Map<string, Map<string, string>>();
+  for (const g of graphs) {
+    const paths = pathsOf(modelId(g), g.resources);
+    const byKey = new Map(g.resources.map((r) => [r.fqn, paths.get(r.fqn) as string]));
+    // A ref is given a logical id; a nested resource's FQN carries its namespace too. Answer both,
+    // with the FQN winning when a nested resource shares a root resource's logical id.
+    for (const r of g.resources) if (!byKey.has(r.logicalId)) byKey.set(r.logicalId, paths.get(r.fqn) as string);
+    index.set(g.name, byKey);
+  }
+
+  const relations: CrossStackRelation[] = [];
+  const unresolved: string[] = [];
+  for (const g of graphs)
+    for (const e of g.crossEdges) {
+      const to = index.get(e.stack)?.get(e.id);
+      if (to === undefined) unresolved.push(`${g.name}/${e.from} → ${e.stack}/${e.id}`);
+      else relations.push({ from: index.get(g.name)?.get(e.from) as string, to, kind: e.kind, sid: e.sid });
+    }
+  relations.sort((a, b) => `${a.from}|${a.to}|${a.sid}`.localeCompare(`${b.from}|${b.to}|${b.sid}`));
+  return { relations, unresolved };
+};
+
+/**
+ * The relationships that cross a stack boundary, in a file of their own.
+ *
+ * Templated rather than built, like the views: LikeC4's Builder resolves a relationship's ends
+ * against the elements it was given, and the far end is declared in another stack's file.
+ */
+export const buildCrossStack = ({ relations, unresolved }: CrossStack): string => {
+  const arrow = (r: CrossStackRelation) => (r.kind === "prop" ? "->" : `-[${toRelationshipKind(r.kind)}]->`);
+  const title = (r: CrossStackRelation) => (r.sid ? ` '${r.sid.replace(/'/g, "\\'")}'` : "");
+  return generated(
+    [
+      `${relations.length} relationship${relations.length === 1 ? "" : "s"} crossing a stack boundary.`,
+      "Regenerate with:  alchemy-likec4 generate --project <dir> --entrypoint <stack> …",
+      "",
+      "A ref names its target's stack and logical id instead of referencing it, so only a run that",
+      "holds both stacks can draw the arrow: pass every --entrypoint, or these go missing.",
+      // Named rather than dropped: these are the arrows this project is missing, and each one
+      // names the --entrypoint that would draw it.
+      ...(unresolved.length === 0 ? [] : ["", "Not drawn — the target's stack was not in the run:", ...unresolved]),
+    ],
+    relations.length === 0
+      ? ""
+      : ["model {", ...relations.map((r) => `  ${r.from} ${arrow(r)} ${r.to}${title(r)}`), "}", ""].join("\n"),
   );
 };
 

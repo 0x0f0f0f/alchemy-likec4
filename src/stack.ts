@@ -10,9 +10,14 @@
  *
  * A binding that names its host rather than referencing it — a Durable Object's `scriptName` — is
  * the one gap in alchemy's own graph. A name-join against the resources' names closes it.
+ *
+ * A `Resource.ref` is the other gap, and it cannot be closed here: the target belongs to another
+ * stack, so nothing in this one can name it. The ref's own `(stack, logical id, type)` is recorded
+ * as a `crossEdge` instead, for a run that holds the target's graph to resolve.
  */
 import * as Alchemist from "alchemy/Alchemist";
 import * as Output from "alchemy/Output";
+import { isPlainData } from "alchemy/Util/data";
 import * as Effect from "effect/Effect";
 import { placeholderEnvironment } from "./auth.ts";
 
@@ -36,11 +41,28 @@ export interface StackEdge {
   readonly sid: string | undefined;
 }
 
+/** An edge whose target is a `Resource.ref`: named, not referenced, and owned by another stack. */
+export interface CrossStackEdge {
+  /** FQN of the resource in THIS stack that holds the ref. */
+  readonly from: string;
+  /** The stack the ref names — this one, when the ref omitted it. */
+  readonly stack: string;
+  /** The target's logical id, as `Resource.ref` was given it. */
+  readonly id: string;
+  /** The target's canonical type. Statically known on the ref, so no deploy is needed to read it. */
+  readonly type: string | undefined;
+  readonly kind: string;
+  readonly sid: string | undefined;
+}
+
 export interface StackGraph {
   readonly name: string;
   readonly stage: string;
   readonly resources: readonly StackResource[];
+  /** Edges whose ends are both in this stack. */
   readonly edges: readonly StackEdge[];
+  /** Edges to a ref, unresolved: only a run holding the target's graph can turn one into a relation. */
+  readonly crossEdges: readonly CrossStackEdge[];
 }
 
 /** What this module reads off alchemy's compiled stack. */
@@ -79,6 +101,42 @@ const namespacePath = (ns: NamespaceNode | undefined): string[] => {
 const upstream = (value: unknown): string[] =>
   Object.values(Output.upstreamAny(value) as Record<string, { FQN: string }>).map((r) => r.FQN);
 
+interface RefTarget {
+  readonly stack: string | undefined;
+  readonly id: string;
+  readonly type: string | undefined;
+}
+
+/**
+ * Every ref reachable from `value`.
+ *
+ * `Output.upstreamAny` has no `RefExpr` arm — a ref is not a resource of this stack — so a binding
+ * that holds one walks to nothing. This mirrors its shape and stops at the ref instead.
+ *
+ * Dispatch is per expr kind rather than by reading `.expr` off whatever arrives: an Expr is a
+ * proxy that answers any unknown property with a PropExpr wrapping itself, so a generic walk
+ * never terminates.
+ */
+const refsIn = (value: unknown, seen: WeakSet<object>): RefTarget[] => {
+  if (Output.isExpr(value)) {
+    if (Output.isRefExpr(value)) return [{ stack: value.stack, id: value.resourceId, type: value.stables?.Type }];
+    if (Output.isAllExpr(value)) return value.outs.flatMap((out) => refsIn(out, seen));
+    if (
+      Output.isPropExpr(value) ||
+      Output.isApplyExpr(value) ||
+      Output.isFlatMapExpr(value) ||
+      Output.isEffectExpr(value) ||
+      Output.isNamedExpr(value)
+    )
+      return refsIn(value.expr, seen);
+    return []; // ResourceExpr, LiteralExpr and StackRefExpr reach no ref.
+  }
+  // Every other value is a leaf, per alchemy's own dependency rule: only plain data is walked.
+  if (!isPlainData(value) || seen.has(value)) return [];
+  seen.add(value);
+  return Object.values(value).flatMap((v) => refsIn(v, seen));
+};
+
 /** The graph of a compiled stack. Pure, so the edge rules are testable without compiling one. */
 export const deriveGraph = (stack: CompiledStack): StackGraph => {
   const resources = Object.values(stack.resources).map((r): StackResource => {
@@ -103,6 +161,17 @@ export const deriveGraph = (stack: CompiledStack): StackGraph => {
     }
   };
 
+  const crossEdges: CrossStackEdge[] = [];
+  const seenRef = new Set<string>();
+  // Keyed on the target alone: the props walk re-reaches a ref the binding walk already typed, and
+  // the binding's kind and `env` key are the better of the two.
+  const addRef = (from: string, t: RefTarget, kind: string, sid: string | undefined) => {
+    const key = `${from}|${t.stack ?? stack.name}|${t.id}`;
+    if (seenRef.has(key)) return;
+    seenRef.add(key);
+    crossEdges.push({ from, stack: t.stack ?? stack.name, id: t.id, type: t.type, kind, sid });
+  };
+
   for (const r of Object.values(stack.resources)) {
     // Bindings first: they carry the kind, and each is walked on its own so the edge is attributed
     // to the right `env` key. `data.bindings` is absent on a Container or Durable Object binding,
@@ -123,14 +192,16 @@ export const deriveGraph = (stack: CompiledStack): StackGraph => {
             if (key !== "type" && key !== "name" && typeof value === "string" && byName.has(value))
               targets.push(byName.get(value) as string);
         for (const to of targets) add({ from: r.FQN, to, kind: kind ?? "prop", sid: b.sid });
+        for (const t of refsIn(wire, new WeakSet())) addRef(r.FQN, t, kind ?? "prop", b.sid);
       }
     }
     // Then plain prop references a binding did not already cover.
     for (const to of upstream(r.Props))
       if (!edges.some((e) => e.from === r.FQN && e.to === to)) add({ from: r.FQN, to, kind: "prop", sid: undefined });
+    for (const t of refsIn(r.Props, new WeakSet())) addRef(r.FQN, t, "prop", undefined);
   }
 
-  return { name: stack.name, stage: stack.stage, resources, edges };
+  return { name: stack.name, stage: stack.stage, resources, edges, crossEdges };
 };
 
 export interface OpenOptions {

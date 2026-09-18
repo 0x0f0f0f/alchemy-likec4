@@ -65,6 +65,12 @@ const generateCmd = Command.make(
       const stages = [...new Set(r.stacks.flatMap((s) => s.stages))].sort();
       if (stages.length > 1) yield* say(`stages in this project: ${stages.join(", ")}`);
       if (r.skipped.length > 0) yield* say(`could not import: ${r.skipped.join(", ")}`);
+      // Each is an arrow the diagram does not draw, because the stack the ref names is not here.
+      if (r.unresolved.length > 0)
+        yield* say(
+          `\nWARNING: ${r.unresolved.length} ref${r.unresolved.length === 1 ? "" : "s"} to a stack not in this ` +
+            `run, so the relationship is not drawn:\n  ${r.unresolved.join("\n  ")}`,
+        );
       // The shared specification only covers the stacks in this run, so one left out no longer
       // has its kinds declared. Loud: the next `likec4 validate` would blame the wrong file.
       if (r.stale.length > 0)

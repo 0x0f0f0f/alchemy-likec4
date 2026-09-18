@@ -108,6 +108,7 @@ docs/architecture/
 ├─ views.c4                   # the views you care about
 └─ alchemy/                   # GENERATED — every alchemy-likec4 run rewrites it
    ├─ specification.gen.c4    # every kind your stacks use, styled and iconed — one per project
+   ├─ cross-stack.gen.c4      # the relationships a `Resource.ref` crosses a stack for
    ├─ MyApp.model.gen.c4      # your stack as a model: one element per resource, one edge per binding
    ├─ MyApp.prod.gen.c4       # each resource as a deployed instance, one file per stage
    └─ MyApp.views.gen.c4      # a landscape view, and one per stage
@@ -152,6 +153,7 @@ One command writes into `docs/architecture/alchemy/`:
 | File                     | Contents                                                                                    |
 | ------------------------ | --------------------------------------------------------------------------------------------- |
 | `specification.gen.c4`   | every element kind your stacks use, styled and iconed, and one relationship kind per binding — **one per project** |
+| `cross-stack.gen.c4`     | every relationship between two stacks in the run — **one per project**                      |
 | `<Stack>.model.gen.c4`   | one element per resource, with its relationships                                            |
 | `<Stack>.<stage>.gen.c4` | each resource as a deployed instance, one file per stage                                    |
 | `<Stack>.views.gen.c4`   | a landscape view and one deployment view per stage                                          |
@@ -178,14 +180,18 @@ bunx alchemy-likec4 generate --project docs/architecture \
 each stack gets its own `model` / `<stage>` / `views` files. Pass **every** entrypoint: a stack left
 out keeps its files but loses its kinds from the shared specification, and the CLI says so.
 
-One `model {}` for the whole org is also what lets you draw the edges between stacks — a cross-stack
-`Worker.ref` is not something the compiled stack records, so it stays yours to write:
+Generating them together is also what draws the edges between them. A `Cloudflare.Worker.ref` names
+its target's stack and logical id rather than referencing a resource, so no single stack can resolve
+one; a run that holds both writes it to `cross-stack.gen.c4`:
 
 ```likec4
 model {
-  api.gateway -> lake.worker 'service binding'
+  shortener.api -[service_binding]-> my_app.api 'PHOTOS'
 }
 ```
+
+A ref whose stack is not in the run is named in that file's header and warned about on the CLI,
+never guessed at.
 
 `--project` is required, and anything that is not a LikeC4 project is refused. To create one, make
 the directory and put a config file in it:
@@ -293,7 +299,7 @@ stack does not back.
   is a single file, `likec4.config.json`, and everything in the second screenshot comes from the
   stack.
 - [`examples/monorepo`](examples/monorepo) — both stacks above in ONE project, generated in one run:
-  one `specification.gen.c4`, two models, two landscapes.
+  one `specification.gen.c4`, two models, two landscapes, and the one edge that crosses between them.
 - [`examples/link-shortener`](examples/link-shortener) — two stages, two actors, eight bindings.
   The first screenshot is its `index` view. Hand-written: two actors, four `extend` blocks, a
   cross-stage restore edge, and five views including a sequence diagram.
@@ -350,10 +356,11 @@ The deployment carries no relationships. It does not need to.
   and no relationship kinds.
 - `DurableObject`, `Email.SendEmail` and `Website.Astro` are factory functions with no `.Type`, so
   they are not kinds. An Astro site _is_ a `cloudflare_worker` once deployed.
-- A cross-stack `Cloudflare.Worker.ref` is invisible: the reference is not a resource of the stack
-  that holds it, so no node and no edge is derived. Write that edge yourself.
-- Two logical ids that differ only by case (`Vault` and `vault`) both sanitise to one identifier, so
-  the canonical type is appended to each: `vault_cloudflare_access_application`, `vault_cloudflare_worker`.
+- A `Resource.ref` is drawn only when the stack it names is in the same run. Alone, it is a
+  reference to nothing this stack holds, so the relationship is reported and left undrawn.
+- Two logical ids that differ only by case (`Vault` and `vault`), or a resource and the namespace
+  alchemy derived beside it (`site` and `site/Build`), both sanitise to one identifier, so the
+  canonical type is appended to each: `vault_cloudflare_access_application`, `vault_cloudflare_worker`.
 - Deployment views cannot style by tag or kind (likec4 1.59.3). Style by node reference. Model
   views can style by tag.
 - Only Cloudflare carries `@category` and `@product`, so other providers get shapes from the

@@ -1,9 +1,18 @@
 import { describe, expect, it } from "bun:test";
-import { buildDeployment, buildModel, buildSpecification, buildViews } from "./build.ts";
+import {
+  buildCrossStack,
+  buildDeployment,
+  buildModel,
+  buildSpecification,
+  buildViews,
+  crossStackRelations,
+} from "./build.ts";
 import { deriveGraph, openStack } from "./stack.ts";
 
 // Compiles the example stack — no deploy, no network, no state on disk.
 const graph = await openStack({ entrypoint: "examples/link-shortener/alchemy.run.ts", stage: "prod" });
+// The stack the shortener's `Worker.ref` names. Only a run holding both can resolve it.
+const neighbour = await openStack({ entrypoint: "examples/basic/alchemy.run.ts", stage: "prod" });
 
 describe("openStack", () => {
   it("compiles the stack without deploying it", () => {
@@ -44,6 +53,39 @@ describe("openStack", () => {
   it("emits no edge for a value binding, so secrets are never read", () => {
     expect(graph.edges.some((e) => e.sid === "REGION")).toBe(false);
     expect(graph.edges.length).toBe(8);
+  });
+
+  it("records a ref as a cross-stack edge, kind and all, though it is no resource of this stack", () => {
+    // `Output.upstreamAny` walks a ref to nothing, so the binding used to vanish without a trace.
+    expect(graph.crossEdges).toEqual([
+      { from: "api", stack: "MyApp", id: "Api", type: "Cloudflare.Worker", kind: "service", sid: "PHOTOS" },
+    ]);
+    expect(graph.edges.some((e) => e.sid === "PHOTOS")).toBe(false);
+  });
+});
+
+describe("crossStackRelations", () => {
+  it("draws the arrow when the run holds the stack the ref names", () => {
+    const { relations, unresolved } = crossStackRelations([graph, neighbour]);
+    expect(relations).toEqual([{ from: "shortener.api", to: "my_app.api", kind: "service", sid: "PHOTOS" }]);
+    expect(unresolved).toEqual([]);
+  });
+
+  it("reports rather than guesses when it does not", () => {
+    const { relations, unresolved } = crossStackRelations([graph]);
+    expect(relations).toEqual([]);
+    expect(unresolved).toEqual(["Shortener/api → MyApp/Api"]);
+  });
+
+  it("names the binding kind, so the shared specification has to declare it", () => {
+    const dsl = buildCrossStack(crossStackRelations([graph, neighbour]));
+    expect(dsl).toInclude("shortener.api -[service_binding]-> my_app.api 'PHOTOS'");
+  });
+
+  it("writes no model block when nothing crosses, and still names what it could not draw", () => {
+    const dsl = buildCrossStack(crossStackRelations([graph]));
+    expect(dsl).not.toInclude("model {");
+    expect(dsl).toInclude("Shortener/api → MyApp/Api");
   });
 });
 
@@ -207,6 +249,7 @@ describe("ids that differ only by case", () => {
     stage: "prod",
     resources: [resource("Vault", "Cloudflare.Access.Application"), resource("vault", "Cloudflare.Worker")],
     edges: [],
+    crossEdges: [],
   };
 
   it("disambiguates by canonical type instead of refusing to build", () => {
@@ -226,6 +269,27 @@ describe("ids that differ only by case", () => {
     const dsl = buildModel({ ...g, resources: one }, { kinds: kinds(one), bindings: [], descriptions: new Map() });
     expect(dsl).toInclude("vault = cloudflare_worker");
     expect(dsl).not.toInclude("vault_cloudflare_worker");
+  });
+
+  // A namespace is a container the Builder declares too, so it is one of the colliding group.
+  // `Website.StaticSite("site")` is enough on its own: alchemy nests the derived `Command.Build`
+  // under a namespace named after the site, and the Worker keeps the site's logical id.
+  const site = {
+    ...g,
+    resources: [
+      { ...resource("Build", "Command.Build"), fqn: "site/Build", namespace: ["site"] },
+      resource("site", "Cloudflare.Worker"),
+    ],
+  };
+
+  it("counts a namespace container as one of the group, instead of redeclaring its id", () => {
+    const dsl = buildModel(site, { kinds: kinds(site.resources), bindings: [], descriptions: new Map() });
+    expect(dsl).toInclude("site = alchemy_namespace");
+    expect(dsl).toInclude("site_cloudflare_worker = cloudflare_worker");
+  });
+
+  it("gives the deployment the same ids there too", () => {
+    expect(buildDeployment(site)).toInclude("instanceOf v.site_cloudflare_worker");
   });
 });
 

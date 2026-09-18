@@ -1,6 +1,8 @@
 /**
  * Generate a LikeC4 project from one or more alchemy stacks: the vocabulary once, then each
- * stack's logical model, one deployment per stage, and views.
+ * stack's logical model, one deployment per stage, views, and the relationships that cross a
+ * stack boundary — those belong to the run rather than to either stack, so they get a file of
+ * their own.
  *
  * A repo has as many stacks as it has composition roots, and LikeC4 rejects a kind declared twice
  * in one project — so the specification is the union across every stack in the run and lives in a
@@ -15,7 +17,15 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { type Annotations, annotationsFor } from "./annotations.ts";
 import { bindingKinds } from "./bindings.ts";
-import { buildDeployment, buildModel, buildSpecification, buildViews, hasNamespaces } from "./build.ts";
+import {
+  buildCrossStack,
+  buildDeployment,
+  buildModel,
+  buildSpecification,
+  buildViews,
+  crossStackRelations,
+  hasNamespaces,
+} from "./build.ts";
 import { descriptionsFor } from "./describe.ts";
 import { type AlchemyResource, alchemyDir, discoverProviders, extractResources } from "./extract.ts";
 import type { StackGraph } from "./stack.ts";
@@ -59,6 +69,11 @@ export interface GenerateResult {
   /** Subpaths that failed to import. Loud, never silent: a helper and a broken provider must not look the same. */
   readonly skipped: readonly string[];
   /**
+   * Refs whose target stack was not in this run, as `<stack>/<resource> → <stack>/<id>`. Each is an
+   * arrow the diagram is missing, and passing that stack's `--entrypoint` is what draws it.
+   */
+  readonly unresolved: readonly string[];
+  /**
    * Stacks this project holds a model for that were NOT in this run. Their kinds are absent from
    * the shared specification, so the project no longer validates — the fix is to pass every
    * entrypoint, which is why this is reported rather than silently tolerated.
@@ -89,6 +104,7 @@ const catalogue = async (alchemy: string) => {
 const RESERVED = new Set(["model", "views"]);
 
 const SPECIFICATION = "specification.gen.c4";
+const CROSS_STACK = "cross-stack.gen.c4";
 
 /** What `<outdir>` already holds, or nothing on a first run. */
 const existing = async (outdir: string): Promise<string[]> => {
@@ -129,14 +145,17 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
   const alchemyVersion: string = JSON.parse(await readFile(`${alchemy}/package.json`, "utf8")).version;
   const graphs = stacks.map((s) => s.graph);
 
+  const cross = crossStackRelations(graphs);
+
   const used = [...new Set(graphs.flatMap((g) => g.resources.map((r) => r.type)))].sort();
   const { all, sourceDirs, skipped } = allKinds
     ? await catalogue(alchemy)
     : { all: new Map<string, AlchemyResource>(), sourceDirs: new Map<string, string>(), skipped: [] as string[] };
   const kinds = allKinds ? [...all.keys()].sort() : used;
-  const bindings = allKinds
-    ? bindingKinds()
-    : [...new Set(graphs.flatMap((g) => g.edges.filter((e) => e.kind !== "prop").map((e) => e.kind)))].sort();
+  // A cross-stack relationship carries a binding kind too, and it is the only place some stacks
+  // use one: without it the shared specification would not declare the kind the relation names.
+  const wired = [...graphs.flatMap((g) => g.edges.map((e) => e.kind)), ...cross.relations.map((r) => r.kind)];
+  const bindings = allKinds ? bindingKinds() : [...new Set(wired.filter((k) => k !== "prop"))].sort();
 
   // Annotations are read per provider, because each provider's sources live in its own directory.
   const annotations = new Map<string, Annotations>();
@@ -150,11 +169,12 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
       annotations.set(type, a);
 
   const entries = await existing(outdir);
-  const files: string[] = [`${outdir}/${SPECIFICATION}`];
+  const files: string[] = [`${outdir}/${SPECIFICATION}`, `${outdir}/${CROSS_STACK}`];
   await write(
     files[0] as string,
     buildSpecification({ alchemyVersion, kinds, annotations, bindings, namespaces: hasNamespaces(graphs) }),
   );
+  await write(files[1] as string, buildCrossStack(cross));
 
   const summaries: StackSummary[] = [];
   for (const { graph, entrypoint } of stacks) {
@@ -189,6 +209,7 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
     kinds: kinds.length,
     stacks: summaries,
     skipped,
+    unresolved: cross.unresolved,
     stale: staleStacks(entries, new Set(graphs.map((g) => g.name))),
   };
 };

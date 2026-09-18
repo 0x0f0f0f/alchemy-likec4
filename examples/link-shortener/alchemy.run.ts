@@ -18,11 +18,15 @@ export default Alchemy.Stack(
     const clicks = yield* Cloudflare.Queues.Queue("clicks");
     const reports = yield* Cloudflare.R2.Bucket("reports");
 
+    // A ref names a resource of ANOTHER stack. It is not a resource of this one, so alchemy's
+    // dependency graph walks to nothing and only a run holding both stacks can draw the arrow.
+    const photos = yield* Cloudflare.Worker.ref("Api", { stack: "MyApp" });
+
     /** Creates links and serves the author dashboard. */
     const api = yield* Cloudflare.Worker("api", {
       main,
       name: "shortener-api",
-      env: { LINKS: links, HOT: hot, REGION: "eu" },
+      env: { LINKS: links, HOT: hot, REGION: "eu", PHOTOS: photos },
     });
 
     /** The only thing on the request path a visitor waits for. */
