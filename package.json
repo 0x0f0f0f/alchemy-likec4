@@ -32,7 +32,9 @@
   "dependencies": {
     "@distilled.cloud/cloudflare": "1.0.0-rc.9",
     "@likec4/core": "1.59.3",
-    "@likec4/generators": "1.59.3"
+    "@likec4/generators": "1.59.3",
+    "comment-parser": "^1.4.9",
+    "oxc-parser": "^0.150.0"
   },
   "overrides": {
     "effect": "4.0.0-rc.112",
@@ -40,7 +42,7 @@
     "@effect/platform-node-shared": "4.0.0-rc.112",
     "@effect/platform-bun": "4.0.0-rc.112"
   },
-  "version": "0.77.4",
+  "version": "0.77.5",
   "description": "Generate a LikeC4 specification from alchemy's resource registry",
   "scripts": {
     "build": "tsdown",
