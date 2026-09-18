@@ -1,16 +1,6 @@
 // GENERATED — DO NOT EDIT.
 // One view of each stack, and one per stage. Delete this file and write your own.
 // Regenerate with:  alchemy-likec4 generate --project <dir>
-//
-// `of` is what makes the stack a box you can open: a scoped view becomes the element's
-// default, so every diagram that draws the stack gets a navigate button on it.
-//
-// `include *` is scoped here — the stack, its resources, AND whatever they talk to across a
-// boundary. `.**` beside it reaches a resource alchemy nested under a namespace, which the
-// children selector alone leaves out. Never `.**` on its own: the descendants selector drops
-// a resource that has no relationship, and the deployment views have no wildcard to catch it.
-//
-// The title reads `<Stack> / <view>`, so the UI files every stack under its own folder.
 
 views {
   view shortener_landscape of shortener {

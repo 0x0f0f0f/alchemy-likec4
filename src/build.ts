@@ -393,11 +393,18 @@ export const buildDeployment = (graph: StackGraph): string => {
 };
 
 /**
- * A landscape view and one deployment view per stage, so the first run renders something.
+ * One view OF each stack and one deployment view per stage, so the first run renders something.
  *
  * Templated rather than built: the Builder's `$include` drops `.*` selectors and `$autoLayout`.
- * The selector has to be exactly `.*`, because `.**` silently omits resources that have no
- * relationship — an isolated bucket would vanish from the diagram.
+ *
+ * `of` is load-bearing. A scoped view becomes its element's default, and that is what puts the
+ * navigate button on the stack — a box a reader can open, rather than a boundary they can only
+ * look at. It also changes what the wildcard means: scoped, `*` is the stack, its resources AND
+ * whatever they relate to outside it.
+ *
+ * `.**` is never written alone. It reaches a resource alchemy nested under a namespace, which the
+ * children selector leaves out, but it drops any resource with no relationship. The scoped `*`
+ * covers that in the model view; the deployment views have no wildcard, so they keep `.*` too.
  */
 export const buildViews = (graph: Pick<StackGraph, "name">, stages: readonly string[]): string => {
   const model = modelId(graph);
@@ -423,16 +430,6 @@ export const buildViews = (graph: Pick<StackGraph, "name">, stages: readonly str
     [
       "One view of each stack, and one per stage. Delete this file and write your own.",
       "Regenerate with:  alchemy-likec4 generate --project <dir>",
-      "",
-      "`of` is what makes the stack a box you can open: a scoped view becomes the element's",
-      "default, so every diagram that draws the stack gets a navigate button on it.",
-      "",
-      "`include *` is scoped here — the stack, its resources, AND whatever they talk to across a",
-      "boundary. `.**` beside it reaches a resource alchemy nested under a namespace, which the",
-      "children selector alone leaves out. Never `.**` on its own: the descendants selector drops",
-      "a resource that has no relationship, and the deployment views have no wildcard to catch it.",
-      "",
-      "The title reads `<Stack> / <view>`, so the UI files every stack under its own folder.",
     ],
     ["views {", ...body, "}", ""].join("\n"),
   );
