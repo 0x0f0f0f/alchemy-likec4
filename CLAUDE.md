@@ -103,11 +103,22 @@ documented as allowed and is a validation error. Check the grammar
   so it is `domain`, alchemy's own name, not `host`. A deployment instance accepts `link`,
   `technology`, `icon`, `style` and `metadata` (verified, 1.59.3); the printer wants
   `links: [{ url, title }]`.
-- A stack has no prose of its own unless `stackProse` reads it: `DESCRIBED` requires a `yield*`, and
-  a stack is `export default Alchemy.Stack("<name>", …)`, so the stack box was the one element with
-  only a title. `@icon` and `@color` in that same JSDoc set the element's style — `prose()` already
-  drops `@` lines from the description, so the tags never leak into it. Per-element `style { color,
-  icon }` and `technology` all print fine from `buildModel`; only KIND styling is stripped there.
+- `describe.ts` parses: `oxc-parser` for the TypeScript, `comment-parser` for the JSDoc. No regex
+  reads source. A resource is a `YieldExpression` with `delegate: true`; its logical id is the
+  INNERMOST call in the callee chain whose first argument is a string literal, because
+  `yield* D1.Database("AuthDb", {}).pipe(…)` yields the `.pipe` call. The stack is the entrypoint's
+  `ExportDefaultDeclaration` — it is never yielded, so it needs its own arm. JSDoc attaches as "the
+  nearest block comment above, with only whitespace between".
+- Three kinds of `@` line, and they differ. `@icon`/`@color` are ours. `@internal`/`@param` are real
+  JSDoc tags — metadata, not description. `@rel-int.ai addresses only.` only looks like one: a tag
+  NAME is an identifier (`/^[a-zA-Z][a-zA-Z0-9]*$/`), so that line goes back into the prose. Dropping
+  every tag deletes the author's sentence; keeping every tag resurrects `@internal`.
+- `comment-parser` splits a tag value at the first space into `name` + `description` — join both.
+- A parser only accepts valid TypeScript. `yield*` needs a generator body, so a test fixture has to
+  live inside `Effect.gen(function* () { … })`; the old regex happily matched files that were never
+  valid TS. And `export const x = yield* …` cannot exist — `export` is module-level, `yield*` is not.
+- Per-element `style { color, icon }` and `technology` all print fine from `buildModel`; only KIND
+  styling is stripped there.
 - `landscape.gen.c4` is the run-level counterpart to the scoped per-stack views: every stack opened
   in one view. It is NOT named `index` — LikeC4 generates that itself when a project defines none,
   so taking the name would silently replace the consumer's own.

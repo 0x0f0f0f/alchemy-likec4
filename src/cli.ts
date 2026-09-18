@@ -65,6 +65,13 @@ const generateCmd = Command.make(
       const stages = [...new Set(r.stacks.flatMap((s) => s.stages))].sort();
       if (stages.length > 1) yield* say(`stages in this project: ${stages.join(", ")}`);
       if (r.skipped.length > 0) yield* say(`could not import: ${r.skipped.join(", ")}`);
+      // A file that will not parse keeps its resources and loses their prose. Never silent.
+      if (r.unparsed.length > 0)
+        yield* say(
+          `\nWARNING: ${r.unparsed.length} source file${r.unparsed.length === 1 ? "" : "s"} would not parse, ` +
+            `so the resources in ${r.unparsed.length === 1 ? "it has" : "them have"} no description:\n  ` +
+            r.unparsed.join("\n  "),
+        );
       // Each is an arrow the diagram does not draw, because the stack the ref names is not here.
       if (r.unresolved.length > 0)
         yield* say(

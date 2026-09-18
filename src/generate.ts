@@ -27,7 +27,7 @@ import {
   crossStackRelations,
   hasNamespaces,
 } from "./build.ts";
-import { descriptionsFor, stackProse } from "./describe.ts";
+import { readProse } from "./describe.ts";
 import { type AlchemyResource, alchemyDir, discoverProviders, extractResources } from "./extract.ts";
 import type { StackGraph } from "./stack.ts";
 
@@ -74,6 +74,11 @@ export interface GenerateResult {
    * arrow the diagram is missing, and passing that stack's `--entrypoint` is what draws it.
    */
   readonly unresolved: readonly string[];
+  /**
+   * Source files that would not parse, as `<stack>: <path>`. Their resources keep their boxes and
+   * lose their prose, so this is reported rather than swallowed.
+   */
+  readonly unparsed: readonly string[];
   /**
    * Stacks this project holds a model for that were NOT in this run. Their kinds are absent from
    * the shared specification, so the project no longer validates — the fix is to pass every
@@ -183,8 +188,11 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
   await write(files[2] as string, buildLandscape(graphs));
 
   const summaries: StackSummary[] = [];
+  const unparsed: string[] = [];
   for (const { graph, entrypoint } of stacks) {
-    const descriptions = descriptionsFor(entrypoint);
+    const prose = readProse(entrypoint);
+    const { descriptions } = prose;
+    unparsed.push(...prose.unparsed.map((f) => `${graph.name}: ${f}`));
     const stages = knownStages(entries, graph);
     const stackKinds = [...new Set(graph.resources.map((r) => r.type))].sort();
     const stackBindings = [...new Set(graph.edges.filter((e) => e.kind !== "prop").map((e) => e.kind))].sort();
@@ -196,7 +204,7 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
     ] as const;
     await write(
       mine[0],
-      buildModel(graph, { kinds: stackKinds, bindings: stackBindings, descriptions, stack: stackProse(entrypoint) }),
+      buildModel(graph, { kinds: stackKinds, bindings: stackBindings, descriptions, stack: prose.stack }),
     );
     await write(mine[1], buildDeployment(graph));
     await write(mine[2], buildViews(graph, stages));
@@ -219,6 +227,7 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
     stacks: summaries,
     skipped,
     unresolved: cross.unresolved,
+    unparsed,
     stale: staleStacks(entries, new Set(graphs.map((g) => g.name))),
   };
 };

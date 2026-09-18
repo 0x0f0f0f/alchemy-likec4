@@ -11,87 +11,107 @@
  *
  * Keyed on the logical id — the first argument — which is the same key the compiled stack uses.
  * Decoration only: a resource with no JSDoc simply has no description.
+ *
+ * TypeScript is parsed as TypeScript, JSDoc as JSDoc. The regex this replaced knew what neither a
+ * comment nor a binding nor a call was, so every shape it did not anticipate — `export const`, a
+ * resource in a ternary, a comment terminator inside a fence — was silently wrong rather than loud.
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, relative } from "node:path";
+import { parse as parseBlock } from "comment-parser";
+import { parseSync } from "oxc-parser";
 
-/** A JSDoc block, then an optional binding or `return`, then `yield* Something("<logicalId>"`.
- *  The body cannot cross a comment terminator: a lazy `[\s\S]*?` backtracks past one when what
- *  follows is not a binding, so a block above `export default Alchemy.Stack(...)` used to swallow
- *  the file down to the next block and hand a resource the stack's prose plus the source between.
- *  `return yield* …` is how a resource declared inside a branch reaches the stack, so it carries
- *  prose as often as a bound one does. A binding written inline in another resource's `env` —
- *  `Cloudflare.Container("Hub", …)` — has no `yield*` and is not matched: requiring it is what
- *  keeps this from claiming the JSDoc above any call whose first argument is a string. */
-const DESCRIBED =
-  /\/\*\*((?:[^*]|\*(?!\/))*)\*\/\s*(?:(?:const|let|var)\s+\w+\s*=\s*|return\s+)?yield\*\s*[\w.]+\(\s*["']([^"']+)["']/g;
+/** The tags this generator defines. */
+const DEFINED = new Set(["icon", "color"]);
 
-/** The JSDoc above `export default Alchemy.Stack("<name>"`. A stack is not yielded, so `DESCRIBED`
- *  never sees it and the stack's own box was the one element with no prose of its own. */
-const STACK = /\/\*\*((?:[^*]|\*(?!\/))*)\*\/\s*export default\s+[\w.]+\(\s*["']([^"']+)["']/;
+/** A JSDoc tag name is an identifier. `@internal` is one; `@rel-int.ai` is an address. */
+const TAG_NAME = /^[a-zA-Z][a-zA-Z0-9]*$/;
 
-/** `@icon tech:foo` / `@color blue` on a JSDoc block. The stack is a box a reader clicks, so it is
- *  worth telling apart from its neighbours — and only the author of the stack knows how. */
-const tag = (block: string, name: string): string | undefined =>
-  new RegExp(`^\\s*\\*?\\s*@${name}\\s+(\\S+)`, "m").exec(block)?.[1];
+/** Minimal shape of the ESTree nodes walked here; oxc returns far more than is read. */
+interface Node {
+  readonly type: string;
+  readonly start: number;
+  readonly [key: string]: unknown;
+}
 
-/** JSDoc body → one line of prose. Tag lines are metadata, not description. */
-const prose = (block: string): string =>
-  block
-    .split("\n")
-    .map((line) =>
-      line
-        .trim()
-        .replace(/^\*+\s?/, "")
-        .trim(),
-    )
-    .filter((line) => line.length > 0 && !line.startsWith("@"))
-    .join(" ")
-    .trim();
+interface Comment {
+  readonly type: string;
+  readonly start: number;
+  readonly end: number;
+}
 
-/** Every `.ts` under `dir`, skipping the places a stack never declares resources. */
-const sources = (dir: string): string[] => {
-  const out: string[] = [];
-  const walk = (d: string): void => {
-    let entries: string[];
-    try {
-      entries = readdirSync(d);
-    } catch {
-      return;
-    }
-    for (const entry of entries) {
-      if (entry === "node_modules" || entry === ".alchemy" || entry.startsWith(".")) continue;
-      const path = join(d, entry);
-      if (statSync(path).isDirectory()) walk(path);
-      else if (entry.endsWith(".ts")) out.push(path);
-    }
-  };
-  walk(dir);
-  return out;
+/**
+ * A JSDoc block, split into the prose and the tags this generator defines.
+ *
+ * Three kinds of `@` line, and they are not the same thing. Ours (`@icon`, `@color`) are metadata.
+ * A real JSDoc tag (`@internal`, `@param`) is metadata too — someone else's, and not description.
+ * The third is a line that only looks like a tag: `@rel-int.ai addresses only.` is a sentence, and
+ * dropping it would delete the author's prose. A tag NAME is an identifier, which is what tells
+ * the second from the third.
+ */
+const read = (raw: string): { description: string; tags: ReadonlyMap<string, string> } => {
+  const [block] = parseBlock(raw);
+  const tags = new Map<string, string>();
+  if (!block) return { description: "", tags };
+
+  const prose = [block.description];
+  for (const tag of block.tags) {
+    // comment-parser splits a tag's value at the first space, so the value is both halves.
+    const value = [tag.name, tag.description].filter(Boolean).join(" ").trim();
+    if (DEFINED.has(tag.tag)) tags.set(tag.tag, value);
+    else if (!TAG_NAME.test(tag.tag)) prose.push(`@${tag.tag} ${value}`.trim());
+  }
+  return { description: prose.filter(Boolean).join(" ").replace(/\s+/g, " ").trim(), tags };
 };
 
 /**
- * Map logical id → the prose above its declaration.
+ * The JSDoc block attached to whatever starts at `start`.
  *
- * @param entrypoint the stack entrypoint; its whole directory tree is scanned, because alchemy's
- *   own file-layout guidance is one file per resource
+ * "The nearest block comment above, with only whitespace between" — which is what the regex could
+ * not express, and why a block above `export default` used to swallow the file down to the next.
  */
-export const descriptionsFor = (entrypoint: string): ReadonlyMap<string, string> => {
-  const map = new Map<string, string>();
-  for (const path of sources(dirname(entrypoint))) {
-    let text: string;
-    try {
-      text = readFileSync(path, "utf8");
-    } catch {
-      continue;
-    }
-    for (const [, block, logicalId] of text.matchAll(DESCRIBED)) {
-      const description = prose(block as string);
-      // First wins, so a resource declared once keeps its own prose even if an id repeats.
-      if (description && !map.has(logicalId as string)) map.set(logicalId as string, description);
-    }
+const jsdocAt = (start: number, comments: readonly Comment[], src: string): string | undefined => {
+  let best: Comment | undefined;
+  for (const c of comments)
+    if (c.type === "Block" && c.end <= start && (best === undefined || c.end > best.end)) best = c;
+  if (!best || src.slice(best.end, start).trim() !== "") return undefined;
+  const raw = src.slice(best.start, best.end);
+  return raw.startsWith("/**") ? raw : undefined;
+};
+
+/**
+ * The logical id a resource call names — the innermost call in a callee chain whose first argument
+ * is a string literal.
+ *
+ * `yield* Cloudflare.D1.Database("AuthDb", {}).pipe(RemovalPolicy.retain(…))` yields the `.pipe`
+ * call, whose first argument is not a string. The id is one level in.
+ */
+const logicalIdOf = (node: unknown): string | undefined => {
+  let call = node as Node | undefined;
+  while (call?.type === "CallExpression") {
+    const first = (call.arguments as Array<{ type?: string; value?: unknown }> | undefined)?.[0];
+    if (first?.type === "Literal" && typeof first.value === "string") return first.value;
+    const callee = call.callee as Node | undefined;
+    call = callee?.type === "MemberExpression" ? (callee.object as Node) : undefined;
   }
-  return map;
+  return undefined;
+};
+
+const isStatement = (type: string): boolean =>
+  type.endsWith("Statement") || type === "VariableDeclaration" || type.startsWith("Export");
+
+/** Walk every node, carrying the innermost enclosing statement — what a JSDoc block attaches to. */
+const walk = (node: unknown, stmt: Node | undefined, visit: (n: Node, stmt: Node | undefined) => void): void => {
+  if (!node || typeof node !== "object") return;
+  if (Array.isArray(node)) {
+    for (const child of node) walk(child, stmt, visit);
+    return;
+  }
+  const n = node as Node;
+  if (typeof n.type !== "string") return;
+  const here = isStatement(n.type) ? n : stmt;
+  visit(n, here);
+  for (const key of Object.keys(n)) if (key !== "type") walk(n[key], here, visit);
 };
 
 /** What a stack says about itself, from the JSDoc above its own declaration. */
@@ -103,20 +123,94 @@ export interface StackProse {
   readonly color?: string;
 }
 
-/** The stack's own prose and styling. Only the entrypoint declares the stack, so only it is read. */
-export const stackProse = (entrypoint: string): StackProse => {
-  let text: string;
-  try {
-    text = readFileSync(entrypoint, "utf8");
-  } catch {
-    return {};
-  }
-  const block = STACK.exec(text)?.[1];
-  if (block === undefined) return {};
-  const description = prose(block);
-  return {
-    ...(description ? { description } : {}),
-    ...(tag(block, "icon") ? { icon: tag(block, "icon") } : {}),
-    ...(tag(block, "color") ? { color: tag(block, "color") } : {}),
+export interface Prose {
+  /** Logical id → the prose above its declaration. */
+  readonly descriptions: ReadonlyMap<string, string>;
+  /** The stack's own prose and styling, from the entrypoint. */
+  readonly stack: StackProse;
+  /**
+   * Files that would not parse, relative to the entrypoint's directory. Their resources lose their
+   * prose, which is the silent failure this module exists to stop, so it is reported rather than
+   * swallowed.
+   */
+  readonly unparsed: readonly string[];
+}
+
+/** Every `.ts` under `dir`, skipping the places a stack never declares resources. */
+const sources = (dir: string): string[] => {
+  const out: string[] = [];
+  const walkDir = (d: string): void => {
+    let entries: string[];
+    try {
+      entries = readdirSync(d);
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      if (entry === "node_modules" || entry === ".alchemy" || entry.startsWith(".")) continue;
+      const path = join(d, entry);
+      if (statSync(path).isDirectory()) walkDir(path);
+      else if (entry.endsWith(".ts")) out.push(path);
+    }
   };
+  walkDir(dir);
+  return out;
+};
+
+/**
+ * Every resource's prose, and the stack's own.
+ *
+ * @param entrypoint the stack entrypoint; its whole directory tree is scanned, because alchemy's
+ *   own file-layout guidance is one file per resource. Only the entrypoint declares the stack.
+ */
+export const readProse = (entrypoint: string): Prose => {
+  const root = dirname(entrypoint);
+  const descriptions = new Map<string, string>();
+  const unparsed: string[] = [];
+  let stack: StackProse = {};
+
+  for (const path of sources(root)) {
+    let src: string;
+    try {
+      src = readFileSync(path, "utf8");
+    } catch {
+      unparsed.push(relative(root, path));
+      continue;
+    }
+
+    const parsed = parseSync(path, src);
+    if (parsed.errors.length > 0) {
+      unparsed.push(relative(root, path));
+      continue;
+    }
+    const comments = parsed.comments as readonly Comment[];
+
+    walk(parsed.program, undefined, (node, stmt) => {
+      // A resource: `yield* Something("<logicalId>", …)`, however it is bound.
+      if (node.type === "YieldExpression" && node.delegate === true) {
+        const id = logicalIdOf(node.argument);
+        // First wins, so a resource declared once keeps its own prose even if an id repeats.
+        if (id === undefined || descriptions.has(id) || stmt === undefined) return;
+        const raw = jsdocAt(stmt.start, comments, src);
+        if (!raw) return;
+        const { description } = read(raw);
+        if (description) descriptions.set(id, description);
+        return;
+      }
+      // The stack itself is never yielded, so it needs its own arm.
+      if (node.type === "ExportDefaultDeclaration" && path === entrypoint) {
+        if (logicalIdOf(node.declaration) === undefined) return;
+        const raw = jsdocAt(node.start, comments, src);
+        if (!raw) return;
+        const { description, tags } = read(raw);
+        stack = {
+          ...(description ? { description } : {}),
+          ...(tags.get("icon") ? { icon: tags.get("icon") } : {}),
+          ...(tags.get("color") ? { color: tags.get("color") } : {}),
+        };
+      }
+    });
+  }
+
+  return { descriptions, stack, unparsed: unparsed.sort() };
 };
