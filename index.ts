@@ -19,6 +19,7 @@ export { bindingKinds, toRelationshipKind } from "./src/bindings.ts";
 export {
   buildCrossStack,
   buildDeployment,
+  buildLandscape,
   buildModel,
   buildSpecification,
   buildViews,

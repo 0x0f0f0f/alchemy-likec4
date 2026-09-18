@@ -109,6 +109,7 @@ docs/architecture/
 └─ alchemy/                   # GENERATED — every alchemy-likec4 run rewrites it
    ├─ specification.gen.c4    # every kind your stacks use, styled and iconed — one per project
    ├─ cross-stack.gen.c4      # the relationships a `Resource.ref` crosses a stack for
+   ├─ landscape.gen.c4        # every stack in the run, opened, in one view
    ├─ MyApp.model.gen.c4      # your stack as a model: one element per resource, one edge per binding
    ├─ MyApp.prod.gen.c4       # each resource as a deployed instance, one file per stage
    └─ MyApp.views.gen.c4      # a view OF the stack — the box opens — and one per stage
@@ -154,13 +155,26 @@ One command writes into `docs/architecture/alchemy/`:
 | ------------------------ | --------------------------------------------------------------------------------------------- |
 | `specification.gen.c4`   | every element kind your stacks use, styled and iconed, and one relationship kind per binding — **one per project** |
 | `cross-stack.gen.c4`     | every relationship between two stacks in the run — **one per project**                      |
+| `landscape.gen.c4`       | one view with every stack opened — **one per project**                                      |
 | `<Stack>.model.gen.c4`   | one element per resource, with its relationships                                            |
-| `<Stack>.<stage>.gen.c4` | each resource as a deployed instance, one file per stage                                    |
+| `<Stack>.<stage>.gen.c4` | each resource as a deployed instance with the door it answers on, one file per stage         |
 | `<Stack>.views.gen.c4`   | a view scoped to the stack, so its box opens, and one deployment view per stage              |
 
 Run it again with `--stage staging` to add a stage. Nothing else is touched, and the views file
 picks up every stage it finds. `--all-kinds` declares every resource kind alchemy ships instead of
 only the ones you use, which is useful for browsing and noisy for everything else.
+
+A stack takes its description, and optionally an icon and colour, from the JSDoc above it:
+
+```ts
+/**
+ * Photos in, sessions out: the whole product, on four Cloudflare resources.
+ *
+ * @icon tech:cloudflare-workers-icon
+ * @color blue
+ */
+export default Alchemy.Stack("MyApp", { … });
+```
 
 ### A monorepo: many stacks, one project
 

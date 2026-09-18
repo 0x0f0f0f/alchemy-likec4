@@ -16,12 +16,24 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 /** A JSDoc block, then an optional binding or `return`, then `yield* Something("<logicalId>"`.
+ *  The body cannot cross a comment terminator: a lazy `[\s\S]*?` backtracks past one when what
+ *  follows is not a binding, so a block above `export default Alchemy.Stack(...)` used to swallow
+ *  the file down to the next block and hand a resource the stack's prose plus the source between.
  *  `return yield* …` is how a resource declared inside a branch reaches the stack, so it carries
  *  prose as often as a bound one does. A binding written inline in another resource's `env` —
  *  `Cloudflare.Container("Hub", …)` — has no `yield*` and is not matched: requiring it is what
  *  keeps this from claiming the JSDoc above any call whose first argument is a string. */
 const DESCRIBED =
-  /\/\*\*([\s\S]*?)\*\/\s*(?:(?:const|let|var)\s+\w+\s*=\s*|return\s+)?yield\*\s*[\w.]+\(\s*["']([^"']+)["']/g;
+  /\/\*\*((?:[^*]|\*(?!\/))*)\*\/\s*(?:(?:const|let|var)\s+\w+\s*=\s*|return\s+)?yield\*\s*[\w.]+\(\s*["']([^"']+)["']/g;
+
+/** The JSDoc above `export default Alchemy.Stack("<name>"`. A stack is not yielded, so `DESCRIBED`
+ *  never sees it and the stack's own box was the one element with no prose of its own. */
+const STACK = /\/\*\*((?:[^*]|\*(?!\/))*)\*\/\s*export default\s+[\w.]+\(\s*["']([^"']+)["']/;
+
+/** `@icon tech:foo` / `@color blue` on a JSDoc block. The stack is a box a reader clicks, so it is
+ *  worth telling apart from its neighbours — and only the author of the stack knows how. */
+const tag = (block: string, name: string): string | undefined =>
+  new RegExp(`^\\s*\\*?\\s*@${name}\\s+(\\S+)`, "m").exec(block)?.[1];
 
 /** JSDoc body → one line of prose. Tag lines are metadata, not description. */
 const prose = (block: string): string =>
@@ -80,4 +92,31 @@ export const descriptionsFor = (entrypoint: string): ReadonlyMap<string, string>
     }
   }
   return map;
+};
+
+/** What a stack says about itself, from the JSDoc above its own declaration. */
+export interface StackProse {
+  readonly description?: string;
+  /** `@icon`, any icon LikeC4 bundles — `tech:cloudflare-workers-icon`. */
+  readonly icon?: string;
+  /** `@color`, a theme colour or one declared in the consumer's own specification. */
+  readonly color?: string;
+}
+
+/** The stack's own prose and styling. Only the entrypoint declares the stack, so only it is read. */
+export const stackProse = (entrypoint: string): StackProse => {
+  let text: string;
+  try {
+    text = readFileSync(entrypoint, "utf8");
+  } catch {
+    return {};
+  }
+  const block = STACK.exec(text)?.[1];
+  if (block === undefined) return {};
+  const description = prose(block);
+  return {
+    ...(description ? { description } : {}),
+    ...(tag(block, "icon") ? { icon: tag(block, "icon") } : {}),
+    ...(tag(block, "color") ? { color: tag(block, "color") } : {}),
+  };
 };

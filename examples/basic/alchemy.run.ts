@@ -2,6 +2,12 @@ import * as Alchemy from "alchemy";
 import * as Cloudflare from "alchemy/Cloudflare";
 import * as Effect from "effect/Effect";
 
+/**
+ * Photos in, sessions out: the whole product, on four Cloudflare resources.
+ *
+ * @icon tech:cloudflare-workers-icon
+ * @color blue
+ */
 export default Alchemy.Stack(
   "MyApp",
   { providers: Cloudflare.providers(), state: Alchemy.inMemoryState() },

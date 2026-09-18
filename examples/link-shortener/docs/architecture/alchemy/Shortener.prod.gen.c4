@@ -47,10 +47,12 @@ deployment {
     }
     
     instanceOf shortener.redirect {
+      link https://go.example.com 'prod'
       metadata {
         fqn 'redirect'
         type 'Cloudflare.Worker'
         name 'shortener-redirect'
+        domain 'go.example.com'
       }
     }
     

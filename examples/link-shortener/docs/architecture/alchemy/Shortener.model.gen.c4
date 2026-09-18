@@ -8,6 +8,13 @@
 
 model {
   shortener = alchemy_stack 'Shortener' {
+    description '
+      Short links, resolved at the edge and counted after the redirect.
+    '
+    style {
+      color amber
+    }
+    
     hot = cloudflare_kv_namespace {
       description '
         Read-through cache. A miss costs one D1 read.

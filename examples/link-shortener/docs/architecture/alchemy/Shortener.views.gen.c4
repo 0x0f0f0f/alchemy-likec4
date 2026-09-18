@@ -3,7 +3,7 @@
 // Regenerate with:  alchemy-likec4 generate --project <dir>
 
 views {
-  view shortener_landscape of shortener {
+  view shortener_overview of shortener {
     title 'Shortener / Overview'
     order 1
     include *, shortener.**

@@ -34,10 +34,10 @@ for (const id of ["shortener_prod", "shortener_staging"]) {
 // Every relationship a deployment view draws must come from the model, because the deployment
 // declares none. Containment, not equality: the stack's view is scoped to it, so `include *` also
 // pulls in the actors and neighbours it talks to — edges the deployment has no instance for.
-const landscape = view("shortener_landscape");
+const landscape = view("shortener_overview");
 const inModel = relationsOf(landscape);
 for (const id of ["shortener_prod", "shortener_staging"]) {
   const missing = [...relationsOf(view(id))].filter((r) => !inModel.has(r));
   if (missing.length > 0) throw new Error(`${id}: ${missing.length} relationships the model never declared`);
 }
-console.log(`  shortener_landscape: ${inModel.size} relationships, every deployment edge inherited from them`);
+console.log(`  shortener_overview: ${inModel.size} relationships, every deployment edge inherited from them`);

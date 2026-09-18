@@ -23,7 +23,14 @@ describe("reflexion", () => {
       ...graph,
       resources: [
         ...graph.resources,
-        { type: "Cloudflare.KV.Namespace", fqn: "sessions", logicalId: "sessions", namespace: [], name: undefined },
+        {
+          type: "Cloudflare.KV.Namespace",
+          fqn: "sessions",
+          logicalId: "sessions",
+          namespace: [],
+          name: undefined,
+          domain: undefined,
+        },
       ],
     };
     expect(reflexion(model, grown).divergence).toEqual(["sessions"]);
@@ -82,7 +89,14 @@ describe("baseline ratchet", () => {
       ...shrunk,
       resources: [
         ...shrunk.resources,
-        { type: "Cloudflare.Worker", fqn: "cron", logicalId: "cron", namespace: [], name: undefined },
+        {
+          type: "Cloudflare.Worker",
+          fqn: "cron",
+          logicalId: "cron",
+          namespace: [],
+          name: undefined,
+          domain: undefined,
+        },
       ],
     };
     expect(newViolations(reflexion(model, worse), baseline).divergence).toEqual(["cron"]);

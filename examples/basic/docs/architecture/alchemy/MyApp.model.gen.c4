@@ -8,6 +8,14 @@
 
 model {
   my_app = alchemy_stack 'MyApp' {
+    description '
+      Photos in, sessions out: the whole product, on four Cloudflare resources.
+    '
+    style {
+      color blue
+      icon tech:cloudflare-workers-icon
+    }
+    
     photos = cloudflare_r2_bucket 'Photos' {
       description '
         Original uploads, never served directly.

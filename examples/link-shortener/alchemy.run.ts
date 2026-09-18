@@ -6,6 +6,11 @@ import * as Effect from "effect/Effect";
 
 const main = `${import.meta.dirname}/workers/noop.ts`;
 
+/**
+ * Short links, resolved at the edge and counted after the redirect.
+ *
+ * @color amber
+ */
 export default Alchemy.Stack(
   "Shortener",
   // A state store is mandatory; in-memory keeps the fixture off the disk.
@@ -33,6 +38,9 @@ export default Alchemy.Stack(
     const redirect = yield* Cloudflare.Worker("redirect", {
       main,
       name: "shortener-redirect",
+      // The door this stage puts the service on. A pure function of the stage, so it survives
+      // compiling — unlike `worker.url`, which Cloudflare only assigns at deploy.
+      domain: "go.example.com",
       env: { HOT: hot, LINKS: links, CLICKS: clicks },
     });
 

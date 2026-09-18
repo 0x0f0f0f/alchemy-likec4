@@ -4,11 +4,13 @@ import * as Ref from "alchemy/Ref";
 import {
   buildCrossStack,
   buildDeployment,
+  buildLandscape,
   buildModel,
   buildSpecification,
   buildViews,
   crossStackRelations,
 } from "./build.ts";
+import { descriptionsFor, stackProse } from "./describe.ts";
 import { deriveGraph, openStack } from "./stack.ts";
 
 // Compiles the example stack — no deploy, no network, no state on disk.
@@ -195,13 +197,13 @@ describe("buildViews", () => {
   const dsl = buildViews(graph, ["prod", "staging"]);
 
   it("emits a landscape and one deployment view per stage", () => {
-    expect(dsl).toInclude("view shortener_landscape");
+    expect(dsl).toInclude("view shortener_overview");
     expect(dsl).toInclude("deployment view shortener_prod");
     expect(dsl).toInclude("deployment view shortener_staging");
   });
 
   it("scopes the stack's view to it, which is what gives the element a navigate button", () => {
-    expect(dsl).toInclude("view shortener_landscape of shortener {");
+    expect(dsl).toInclude("view shortener_overview of shortener {");
     expect(dsl).toInclude("include *, shortener.**");
   });
 
@@ -258,6 +260,7 @@ describe("ids that differ only by case", () => {
     logicalId,
     namespace: [] as string[],
     name: undefined,
+    domain: undefined,
   });
   const kinds = (rs: ReadonlyArray<{ type: string }>) => [...new Set(rs.map((r) => r.type))];
   const g = {
@@ -376,5 +379,82 @@ describe("a ref reached through another resource", () => {
     const { relations } = crossStackRelations([g]);
     expect(relations.map((r) => `${r.from} -> ${r.to}`)).toEqual(["p.b -> p.a"]);
     expect(buildCrossStack(crossStackRelations([g]))).not.toInclude("p.a -> p.a");
+  });
+});
+
+describe("what a stack says about itself", () => {
+  const prose = stackProse("examples/basic/alchemy.run.ts");
+
+  it("does not bleed into the resource below it", () => {
+    // The stack's block sits above `export default`, which is not a binding — so a lazy body
+    // backtracked past its terminator and swallowed the file down to the next block.
+    const photos = descriptionsFor("examples/basic/alchemy.run.ts").get("Photos");
+    expect(photos).toBe("Original uploads, never served directly.");
+    expect(photos).not.toInclude("export default");
+  });
+
+  it("reads the JSDoc above the stack, which no `yield*` ever matched", () => {
+    expect(prose.description).toInclude("Photos in, sessions out");
+  });
+
+  it("takes an icon and a colour from tags, which prose() already kept out of the description", () => {
+    expect(prose).toMatchObject({ icon: "tech:cloudflare-workers-icon", color: "blue" });
+    expect(prose.description).not.toInclude("@icon");
+  });
+
+  it("puts them on the stack element, the one box a kind cannot tell apart", () => {
+    const dsl = buildModel(neighbour, {
+      kinds: [...new Set(neighbour.resources.map((r) => r.type))],
+      bindings: [],
+      descriptions: new Map(),
+      stack: prose,
+    });
+    expect(dsl).toInclude("icon tech:cloudflare-workers-icon");
+    expect(dsl).toInclude("color blue");
+    expect(dsl).toInclude("Photos in, sessions out");
+  });
+
+  it("styles nothing when the stack says nothing", () => {
+    const kinds = [...new Set(neighbour.resources.map((r) => r.type))];
+    const dsl = buildModel(neighbour, { kinds, bindings: [], descriptions: new Map() });
+    expect(dsl).not.toInclude("icon tech:");
+    expect(dsl).not.toInclude("color blue");
+  });
+});
+
+describe("buildLandscape", () => {
+  const dsl = buildLandscape([graph, neighbour]);
+
+  it("opens every stack in the run, both selectors so nothing is dropped", () => {
+    expect(dsl).toInclude("view landscape {");
+    expect(dsl).toInclude("my_app.*, my_app.**");
+    expect(dsl).toInclude("shortener.*, shortener.**");
+  });
+
+  it("never claims `index`, which LikeC4 generates for a project that defines none", () => {
+    expect(dsl).not.toInclude("view index");
+  });
+});
+
+describe("the door a stage puts a service on", () => {
+  it("captures `domain` when it is a plain string, as it does `name`", () => {
+    expect(graph.resources.find((r) => r.fqn === "redirect")?.domain).toBe("go.example.com");
+    expect(graph.resources.find((r) => r.fqn === "api")?.domain).toBeUndefined();
+  });
+
+  it("puts it on the deployed instance, not the element: the host belongs to the stage", () => {
+    const dsl = buildDeployment(graph);
+    expect(dsl).toInclude("link https://go.example.com 'prod'");
+    expect(dsl).toInclude("domain 'go.example.com'");
+    const kinds = [...new Set(graph.resources.map((r) => r.type))];
+    expect(buildModel(graph, { kinds, bindings: [], descriptions: new Map() })).not.toInclude("go.example.com");
+  });
+
+  it("leaves a domain that already carries a scheme alone", () => {
+    const withScheme = {
+      ...graph,
+      resources: graph.resources.map((r) => (r.fqn === "redirect" ? { ...r, domain: "http://go.example.com" } : r)),
+    };
+    expect(buildDeployment(withScheme)).toInclude("link http://go.example.com");
   });
 });
