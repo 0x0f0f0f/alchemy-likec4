@@ -1,0 +1,7 @@
+// GENERATED — DO NOT EDIT.
+// 0 relationships crossing a stack boundary.
+// Regenerate with:  alchemy-likec4 generate --project <dir> --entrypoint <stack> …
+//
+// A ref names its target's stack and logical id instead of referencing it, so only a run that
+// holds both stacks can draw the arrow: pass every --entrypoint, or these go missing.
+

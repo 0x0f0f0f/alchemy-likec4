@@ -17,10 +17,14 @@ export { type Annotations, annotationsFor, categoriesFor } from "./src/annotatio
 export { assertConverges, type Baseline, freeze, newViolations, type Reflexion, reflexion } from "./src/assert.ts";
 export { bindingKinds, toRelationshipKind } from "./src/bindings.ts";
 export {
+  buildCrossStack,
   buildDeployment,
   buildModel,
   buildSpecification,
   buildViews,
+  type CrossStack,
+  type CrossStackRelation,
+  crossStackRelations,
   hasNamespaces,
   type ModelOptions,
   modelId,
@@ -39,6 +43,7 @@ export {
   write,
 } from "./src/generate.ts";
 export {
+  type CrossStackEdge,
   type OpenOptions,
   openStack,
   type StackEdge,
