@@ -47,7 +47,7 @@ jobs:
         run: |
           bun run example:generate
           git diff --exit-code examples
-      - name: LikeC4 validates both example projects
+      - name: LikeC4 validates all three example projects
         run: bun run example:validate
       # The whole point of generating into the model rather than the deployment: one declaration
       # draws the edge in both view kinds. This asserts it on the computed model, not the text.
