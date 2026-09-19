@@ -33,6 +33,12 @@ import * as Alchemy from "alchemy";
 import * as Cloudflare from "alchemy/Cloudflare";
 import * as Effect from "effect/Effect";
 
+/**
+ * Photos in, sessions out: the whole product, on four Cloudflare resources.
+ *
+ * @icon tech:cloudflare-workers-icon
+ * @color blue
+ */
 export default Alchemy.Stack(
   "MyApp",
   { providers: Cloudflare.providers(), state: Alchemy.inMemoryState() },
@@ -164,17 +170,9 @@ Run it again with `--stage staging` to add a stage. Nothing else is touched, and
 picks up every stage it finds. `--all-kinds` declares every resource kind alchemy ships instead of
 only the ones you use, which is useful for browsing and noisy for everything else.
 
-A stack takes its description, and optionally an icon and colour, from the JSDoc above it:
-
-```ts
-/**
- * Photos in, sessions out: the whole product, on four Cloudflare resources.
- *
- * @icon tech:cloudflare-workers-icon
- * @color blue
- */
-export default Alchemy.Stack("MyApp", { … });
-```
+A stack takes its description, and optionally an icon and colour, from the JSDoc above it. The
+`@icon` and `@color` on the stack above are why its box is blue and carries the Workers mark; the
+JSDoc above each resource becomes that element's description.
 
 ### A monorepo: many stacks, one project
 
@@ -204,6 +202,12 @@ model {
 }
 ```
 
+![examples/monorepo: both stacks in one project, with the PHOTOS edge crossing from the shortener's api to MyApp's Api](monorepo.png)
+
+That is `examples/monorepo`: `examples/basic` and `examples/link-shortener` generated into one
+project by one command. Each box takes the colour and icon of its own stack's JSDoc, and the only
+edge between them is the `ref`.
+
 A ref whose stack is not in the run is named in that file's header and warned about on the CLI,
 never guessed at.
 
@@ -230,6 +234,7 @@ Nothing in the list below is typed by hand, in this package or in your repo.
 | description                               | the JSDoc you wrote above the resource in `alchemy.run.ts`                |
 | relationships                             | the `env` bindings, typed by binding kind                                 |
 | the prod/staging mapping                  | `instanceOf`, from the compiled stack                                     |
+| the link on a deployed instance           | the resource's `domain`, a pure function of the stage                     |
 
 ### While alchemy is in beta, pin the effect graph
 
@@ -309,17 +314,19 @@ stack does not back.
 
 ## Examples
 
-- [`examples/basic`](examples/basic) — one Worker, one bucket, one KV namespace. Its LikeC4 project
-  is a single file, `likec4.config.json`, and everything in the second screenshot comes from the
-  stack.
-- [`examples/monorepo`](examples/monorepo) — both stacks above in ONE project, generated in one run:
-  one `specification.gen.c4`, two models, two landscapes, and the one edge that crosses between them.
-- [`examples/link-shortener`](examples/link-shortener) — two stages, two actors, eight bindings.
-  The first screenshot is its `index` view. Hand-written: two actors, four `extend` blocks, a
-  cross-stage restore edge, and five views including a sequence diagram.
+- [`examples/basic`](examples/basic) — two Workers, one of them an Astro site, an R2 bucket and two
+  KV namespaces, one of which alchemy adds by itself. Its LikeC4 project is a single file,
+  `likec4.config.json`, and everything in the second screenshot comes from the stack.
+- [`examples/link-shortener`](examples/link-shortener) — two stages, two actors, eight bindings and
+  a `domain`, which becomes the link on the deployed instance. The first screenshot is its `index`
+  view. Hand-written: two actors, four `extend` blocks, a cross-stage restore edge, and five views
+  including a sequence diagram.
+- [`examples/monorepo`](examples/monorepo) — the other two in ONE project, generated in one run: one
+  `specification.gen.c4`, one `landscape.gen.c4` holding both stacks, a model and a views file per
+  stack, and the one edge that crosses between them. It is the third screenshot.
 
-`bun run example` in this repo opens both in LikeC4's UI. `bun run example:png` regenerates both
-screenshots.
+`bun run example` in this repo opens all three in LikeC4's UI. `bun run example:png` regenerates the
+three screenshots.
 
 ## How it works
 
@@ -355,6 +362,13 @@ model {
 deployment {
   shortener_prod = alchemy_stack 'Shortener (prod)' {
     instanceOf shortener.api { metadata { name 'shortener-api' } }
+    instanceOf shortener.redirect {
+      link https://go.example.com 'prod'
+      metadata {
+        name 'shortener-redirect'
+        domain 'go.example.com'
+      }
+    }
     instanceOf shortener.links
   }
 }
