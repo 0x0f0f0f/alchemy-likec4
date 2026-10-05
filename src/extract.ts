@@ -11,8 +11,7 @@
  * and no single pattern is complete — scanning `src` finds 233, scanning `.d.ts` finds 39, and
  * each misses resources the other catches. The module object has no such problem.
  *
- * The cost is that importing `alchemy/Cloudflare` pulls the whole effect peer graph, which has
- * to be version-pinned. See `overrides` in package.json.
+ * The cost is that importing `alchemy/Cloudflare` pulls the whole effect peer graph.
  */
 
 import { readFile } from "node:fs/promises";

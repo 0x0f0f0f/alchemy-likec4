@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { readProse } from "./describe.ts";
 
 /**
@@ -122,5 +122,39 @@ describe("readProse", () => {
   it("reports a file it cannot parse rather than pretending it had no prose", () => {
     const { unparsed } = readProse(stack(`const broken = (((;`, { raw: true }));
     expect(unparsed).toEqual(["alchemy.run.ts"]);
+  });
+
+  it("reads a Worker declared as its own module, the Effect-native class form", () => {
+    const entrypoint = stack(`const api = yield* Api;`);
+    writeFileSync(
+      join(dirname(entrypoint), "worker.ts"),
+      `/** Answers every request. */\nexport default class Api extends Cloudflare.Worker<Api>()("Api", props, impl) {}\n/** Not a resource. */\nclass Failure extends Data.TaggedError("Failure")<{}> {}`,
+    );
+    const { descriptions } = readProse(entrypoint);
+    expect(descriptions.get("Api")).toBe("Answers every request.");
+    expect(descriptions.has("Failure")).toBe(false);
+  });
+
+  it("reads a module-level declaration through a `.pipe` chain, bare or exported", () => {
+    const entrypoint = stack(`const db = yield* Db;`);
+    writeFileSync(
+      join(dirname(entrypoint), "db.ts"),
+      `/** Replay ledger. */\nexport const Db = Cloudflare.D1.Database("Index", {}).pipe(RemovalPolicy.retain(true));\n/** Signing key. */\nconst Key = Alchemy.KeyPair("Key", {});\n/** Not a resource. */\nexport const x = helper("Api");`,
+    );
+    const { descriptions } = readProse(entrypoint);
+    expect(descriptions.get("Index")).toBe("Replay ledger.");
+    expect(descriptions.get("Key")).toBe("Signing key.");
+    expect(descriptions.has("Api")).toBe(false);
+  });
+
+  it("reads `export default` of a resource in a module that is not the entrypoint", () => {
+    const entrypoint = stack(`const site = yield* Site;`);
+    writeFileSync(
+      join(dirname(entrypoint), "site.ts"),
+      `/** The marketing site. */\nexport default Cloudflare.Worker("Site", {});`,
+    );
+    const { descriptions, stack: own } = readProse(entrypoint);
+    expect(descriptions.get("Site")).toBe("The marketing site.");
+    expect(own.description).toBeUndefined();
   });
 });

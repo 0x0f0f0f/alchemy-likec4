@@ -130,7 +130,7 @@ describe("discoverProviders", () => {
     const names = (await discoverProviders("node_modules/alchemy")).map((p) => p.name);
     expect(names).toContain("Cloudflare");
     expect(names).toContain("AWS");
-    expect(names).toContain("Stack");
+    expect(names).toContain("GitHub");
     // The test that separates a provider from a runtime helper is whether it yields resources.
     expect(extractResources(Stack)).toEqual([]);
   });
