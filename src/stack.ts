@@ -230,7 +230,9 @@ export const stackGraph = (opts: OpenOptions = {}): Effect.Effect<StackGraph> =>
     // Building a provider layer resolves credentials, though compiling never calls an API. A
     // placeholder satisfies each variable alchemy's auth providers declare as required.
     placeholderEnvironment();
-    const session = yield* Alchemist.open({ entrypoint: opts.entrypoint, stage: opts.stage }, { dev: true });
+    // Compiled as a deploy (`dev: false`): a stack that branches on `defaultProviderMode` declares
+    // what ships, not what `alchemy dev` emulates locally.
+    const session = yield* Alchemist.open({ entrypoint: opts.entrypoint, stage: opts.stage }, { dev: false });
     return deriveGraph(session.stack as unknown as CompiledStack);
   }).pipe(Effect.scoped, Effect.provide(Alchemist.layer())) as Effect.Effect<StackGraph>;
 

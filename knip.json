@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["examples/*/alchemy.run.ts", "examples/link-shortener/workers/noop.ts"],
+  "entry": ["examples/*/alchemy.run.ts", "examples/link-shortener/workers/noop.ts", "src/fixtures/*.run.ts"],
   "project": ["src/**/*.ts", "examples/**/*.ts"],
   "ignoreDependencies": ["@effect/platform-node-shared"],
   "ignoreExportsUsedInFile": {
