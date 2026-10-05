@@ -33,6 +33,12 @@ describe("openStack", () => {
     ]);
   });
 
+  it("compiles what a deploy declares, not what `alchemy dev` emulates", async () => {
+    // A stack may skip a resource that has no local emulator; the diagram is of what ships.
+    const liveOnly = await openStack({ entrypoint: "src/fixtures/live-only.run.ts", stage: "prod" });
+    expect(liveOnly.resources.map((r) => r.fqn).sort()).toEqual(["Always", "Deployed"]);
+  });
+
   it("identifies each resource by the same canonical type the specification uses", () => {
     expect(graph.resources.find((r) => r.fqn === "api")?.type).toBe("Cloudflare.Worker");
     expect(graph.resources.find((r) => r.fqn === "links")?.type).toBe("Cloudflare.D1Database");
