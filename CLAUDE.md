@@ -19,11 +19,13 @@ documented as allowed and is a validation error. Check the grammar
 - Version is `0.<alchemy beta>.<patch>`: built against `alchemy@2.0.0-beta.77` → publish `0.77.0`.
   First release is `0.77.0`. Bump the minor with every alchemy beta bump; patch for our own fixes.
 - README.md is for users only. Contributor and release notes live here, not there.
-- Bumping the alchemy beta means editing **four** exact pins together: `peerDependencies.alchemy`,
-  `peerDependencies.effect`, `peerDependencies["@effect/platform-node"]` and
-  `dependencies["@distilled.cloud/cloudflare"]` (match whatever the new alchemy beta pins), then
-  the same versions in the README `overrides` block. Peer ranges are deliberately exact: effect 4
-  rc builds break each other, and `>=` resolves a newer rc than the alchemy beta was built for.
+- Bumping the alchemy beta means moving `alchemy` and `@alchemy.run/frontend-frameworks` (dev and
+  peer) together with `dependencies["@distilled.cloud/cloudflare"]`, and setting the effect peers to
+  whatever the new alchemy beta peers. Since beta.80 that is `^4.0.0`: effect 4 is stable, and a
+  fresh npm install resolves one effect with no `overrides`. Through beta.77 effect was an rc with
+  breaking changes between builds, which is why the peers used to be exact and the README carried
+  an `overrides` block — if alchemy pins an rc again, so must we.
+- Effect 4 stable moved `effect/unstable/cli/*` to `effect/cli` (one entry, no per-module subpaths).
 - `bun run build` (tsdown → `dist/`, ESM + d.mts, deps external) then `bun run check:pack`
   (publint + are-the-types-wrong on the ESM-only profile). `prepublishOnly` runs both.
 - Ship no Bun-only API in `src/`: the package must run on node. `node:fs` everywhere,
@@ -34,8 +36,10 @@ documented as allowed and is a validation error. Check the grammar
 
 - `likec4 validate --file <path>` with a path that does not match reports **`valid: true`** and
   `filteredFiles: 0`. A CI gate written that way passes vacuously. Omit `--file` in CI.
-- Importing `alchemy/Cloudflare` needs the effect peer graph pinned — see `overrides` in
-  package.json. Without it you get three different failures in a row.
+- `annotationsFor` matches a type to its file by the `"Cloudflare.X"` literal. Other files name it
+  too, to test for it (`Queues/Subscription.ts`: `isSourceResource(source, "Cloudflare.R2.Bucket")`),
+  and the walk reaches `Queues/` before `R2/`, so an ambiguous match is settled by parsing: a file
+  that only ever passes the literal as argument 2+ of a call is a reference, not the declaration.
 - `@likec4/icons` ships aws 307, gcp 216, azure 614, tech 2000, bootstrap 2052 icons as
   `<pack>:<kebab-name>`. Cloudflare has only four (`cloudflare`, `cloudflare-icon`,
   `cloudflare-workers`, `cloudflare-workers-icon`), none per service, so Cloudflare resources are

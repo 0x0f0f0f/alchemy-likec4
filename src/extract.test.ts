@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import * as Cloudflare from "alchemy/Cloudflare";
-import * as Stack from "alchemy/Stack";
+import * as Util from "alchemy/Util";
 import { annotationsFor, categoriesFor } from "./annotations.ts";
 import { requiredEnvironment } from "./auth.ts";
 import { bindingKinds, toRelationshipKind } from "./bindings.ts";
@@ -130,9 +130,9 @@ describe("discoverProviders", () => {
     const names = (await discoverProviders("node_modules/alchemy")).map((p) => p.name);
     expect(names).toContain("Cloudflare");
     expect(names).toContain("AWS");
-    expect(names).toContain("Stack");
+    expect(names).toContain("Util");
     // The test that separates a provider from a runtime helper is whether it yields resources.
-    expect(extractResources(Stack)).toEqual([]);
+    expect(extractResources(Util)).toEqual([]);
   });
 });
 

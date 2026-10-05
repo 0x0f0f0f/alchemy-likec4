@@ -7,8 +7,8 @@
 > [!WARNING]
 > **Alchemy is in beta and under active development.** Resource
 > declarations will change between version, Every release of `alchemy-likec4`
-> targets **one alchemy 2 beta only** and the version says which: `0.77.x` is
-> built against `alchemy@2.0.0-beta.77`. Match them and regenerate your diagrams after every
+> targets **one alchemy 2 beta only** and the version says which: `0.80.x` is
+> built against `alchemy@2.0.0-beta.80`. Match them and regenerate your diagrams after every
 > alchemy bump!
 
 **Why?** You have written your infrastructure with
@@ -176,6 +176,18 @@ A stack takes its description, and optionally an icon and colour, from the JSDoc
 export default Alchemy.Stack("MyApp", { … });
 ```
 
+From a script:
+
+```ts
+import { writeFile } from "node:fs/promises";
+import { openStack, buildDeployment } from "alchemy-likec4";
+
+await writeFile(
+  "docs/architecture/alchemy/MyApp.prod.gen.c4",
+  buildDeployment(await openStack({ stage: "prod" })),
+);
+```
+
 ### A monorepo: many stacks, one project
 
 A repo has one stack per composition root, and LikeC4 rejects a kind declared twice in a project —
@@ -230,42 +242,6 @@ Nothing in the list below is typed by hand, in this package or in your repo.
 | description                               | the JSDoc you wrote above the resource in `alchemy.run.ts`                |
 | relationships                             | the `env` bindings, typed by binding kind                                 |
 | the prod/staging mapping                  | `instanceOf`, from the compiled stack                                     |
-
-### While alchemy is in beta, pin the effect graph
-
-This is alchemy's constraint, not ours, and it bites `npm install alchemy` on its own. Effect 4 is
-a release candidate with breaking changes between builds, and alchemy's version ranges are open,
-so a fresh npm install resolves a newer effect than the alchemy beta was built against. The
-symptom is `TypeError: Config.string is not a function` on the first import.
-
-Add this to your `package.json` and the whole tree lands on one version:
-
-```json
-{
-  "overrides": {
-    "effect": "4.0.0-rc.112",
-    "@effect/platform-node": "4.0.0-rc.112",
-    "@effect/platform-bun": "4.0.0-rc.112",
-    "@effect/platform-node-shared": "4.0.0-rc.112"
-  }
-}
-```
-
-Use `resolutions` instead of `overrides` on yarn, and `pnpm.overrides` on pnpm. Any direct
-dependency on one of those packages has to be the exact same version, or npm refuses the override.
-Bun users need this less often, because `bun.lock` already holds one resolved version.
-
-From a script:
-
-```ts
-import { writeFile } from "node:fs/promises";
-import { openStack, buildDeployment } from "alchemy-likec4";
-
-await writeFile(
-  "docs/architecture/alchemy/MyApp.prod.gen.c4",
-  buildDeployment(await openStack({ stage: "prod" })),
-);
-```
 
 ## What you write
 

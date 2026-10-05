@@ -1,6 +1,6 @@
 // GENERATED — DO NOT EDIT.
 // 6 kinds and 6 binding kinds,
-// reflected from alchemy@2.0.0-beta.77.
+// reflected from alchemy@2.0.0-beta.80.
 // Regenerate with:  alchemy-likec4 generate --project <dir> --entrypoint <stack> …
 //
 // One file for the whole project: LikeC4 rejects a kind declared twice, so the stacks that
