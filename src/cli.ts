@@ -6,15 +6,13 @@
  * `--entrypoint` repeats: a monorepo has one stack per composition root, and they share one
  * specification, so they have to be generated together.
  *
- * A thin shell over the library — the same `effect/unstable/cli` alchemy's own CLI is built on.
+ * A thin shell over the library — the same `effect/cli` alchemy's own CLI is built on.
  */
 import { DEFAULT_ENTRYPOINT } from "alchemy/Alchemist";
 import { PlatformServices, runMain } from "alchemy/Util/PlatformServices";
+import { CliError, Command, Flag } from "effect/cli";
 import * as Effect from "effect/Effect";
 import * as Option from "effect/Option";
-import * as CliError from "effect/unstable/cli/CliError";
-import * as Command from "effect/unstable/cli/Command";
-import * as Flag from "effect/unstable/cli/Flag";
 import pkg from "../package.json" with { type: "json" };
 import { generate, type StackInput } from "./generate.ts";
 import { type NotALikeC4Project, projectOutput } from "./project.ts";
@@ -23,7 +21,7 @@ import { stackGraph } from "./stack.ts";
 // alchemy's runtime provides no Stdio service, so effect/Console is out; plain console is fine here.
 const say = (line: string) => Effect.sync(() => console.log(line));
 
-const project = Flag.string("project").pipe(
+const project = Flag.String("project").pipe(
   Flag.withDescription("LikeC4 project directory (holds a likec4.config.*); output goes to <project>/alchemy/"),
 );
 
@@ -33,12 +31,12 @@ const generateCmd = Command.make(
   "generate",
   {
     project,
-    entrypoint: Flag.string("entrypoint").pipe(
+    entrypoint: Flag.String("entrypoint").pipe(
       Flag.withDescription("Stack entrypoint; repeat it once per stack in a monorepo"),
       Flag.atLeast(0),
     ),
-    stage: Flag.string("stage").pipe(Flag.withDescription("Stage; only names derived from it change"), Flag.optional),
-    allKinds: Flag.boolean("all-kinds").pipe(
+    stage: Flag.String("stage").pipe(Flag.withDescription("Stage; only names derived from it change"), Flag.optional),
+    allKinds: Flag.Boolean("all-kinds").pipe(
       Flag.withDescription("Declare every kind alchemy ships, not only the ones these stacks use"),
       Flag.withDefault(false),
     ),

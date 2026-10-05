@@ -7,8 +7,8 @@
 > [!WARNING]
 > **Alchemy is in beta and under active development.** Resource
 > declarations will change between version, Every release of `alchemy-likec4`
-> targets **one alchemy 2 beta only** and the version says which: `0.77.x` is
-> built against `alchemy@2.0.0-beta.77`. Match them and regenerate your diagrams after every
+> targets **one alchemy 2 beta only** and the version says which: `0.80.x` is
+> built against `alchemy@2.0.0-beta.80`. Match them and regenerate your diagrams after every
 > alchemy bump!
 
 **Why?** You have written your infrastructure with
@@ -172,7 +172,10 @@ only the ones you use, which is useful for browsing and noisy for everything els
 
 A stack takes its description, and optionally an icon and colour, from the JSDoc above it. The
 `@icon` and `@color` on the stack above are why its box is blue and carries the Workers mark; the
-JSDoc above each resource becomes that element's description.
+JSDoc above each resource becomes that element's description. That holds wherever the resource is
+declared under the stack's directory: above a `yield* Ns.Resource("Id", …)`, above a module-level
+`const Db = Ns.Resource("Id", …)` or `export default Ns.Resource("Id", …)`, and above an
+Effect-native Worker class, `class Api extends Cloudflare.Worker<Api>()("Api", props, impl) {}`.
 
 ### A monorepo: many stacks, one project
 
@@ -231,34 +234,10 @@ Nothing in the list below is typed by hand, in this package or in your repo.
 | colour                                    | alchemy's `@category`, so one product family reads as one group           |
 | icon                                      | the vendor's own icon set in `@likec4/icons`, matched on the service name |
 | `technology`, e.g. `R2`                   | alchemy's `@product`                                                      |
-| description                               | the JSDoc you wrote above the resource in `alchemy.run.ts`                |
+| description                               | the JSDoc you wrote above the resource's declaration                      |
 | relationships                             | the `env` bindings, typed by binding kind                                 |
 | the prod/staging mapping                  | `instanceOf`, from the compiled stack                                     |
 | the link on a deployed instance           | the resource's `domain`, a pure function of the stage                     |
-
-### While alchemy is in beta, pin the effect graph
-
-This is alchemy's constraint, not ours, and it bites `npm install alchemy` on its own. Effect 4 is
-a release candidate with breaking changes between builds, and alchemy's version ranges are open,
-so a fresh npm install resolves a newer effect than the alchemy beta was built against. The
-symptom is `TypeError: Config.string is not a function` on the first import.
-
-Add this to your `package.json` and the whole tree lands on one version:
-
-```json
-{
-  "overrides": {
-    "effect": "4.0.0-rc.112",
-    "@effect/platform-node": "4.0.0-rc.112",
-    "@effect/platform-bun": "4.0.0-rc.112",
-    "@effect/platform-node-shared": "4.0.0-rc.112"
-  }
-}
-```
-
-Use `resolutions` instead of `overrides` on yarn, and `pnpm.overrides` on pnpm. Any direct
-dependency on one of those packages has to be the exact same version, or npm refuses the override.
-Bun users need this less often, because `bun.lock` already holds one resolved version.
 
 From a script:
 

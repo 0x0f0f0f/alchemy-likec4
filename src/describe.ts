@@ -86,19 +86,54 @@ const jsdocAt = (start: number, comments: readonly Comment[], src: string): stri
  * `yield* Cloudflare.D1.Database("AuthDb", {}).pipe(RemovalPolicy.retain(…))` yields the `.pipe`
  * call, whose first argument is not a string. The id is one level in.
  */
-const logicalIdOf = (node: unknown): string | undefined => {
+const idCallOf = (node: unknown): { readonly id: string; readonly call: Node } | undefined => {
   let call = node as Node | undefined;
   while (call?.type === "CallExpression") {
     const first = (call.arguments as Array<{ type?: string; value?: unknown }> | undefined)?.[0];
-    if (first?.type === "Literal" && typeof first.value === "string") return first.value;
+    if (first?.type === "Literal" && typeof first.value === "string") return { id: first.value, call };
     const callee = call.callee as Node | undefined;
     call = callee?.type === "MemberExpression" ? (callee.object as Node) : undefined;
   }
   return undefined;
 };
 
+const logicalIdOf = (node: unknown): string | undefined => idCallOf(node)?.id;
+
+/**
+ * The logical id a module-level declaration names, which is how a resource that is its own module
+ * is written — never yielded where it is declared:
+ *
+ *   const Db = Cloudflare.D1.Database("Db", …)                       (any `.pipe` chain after it)
+ *   class Api extends Cloudflare.Worker<Api>()("Api", props, impl) {}
+ *
+ * A plain call (`helper("Api")`) claims nothing: the id-bearing call has to be namespaced
+ * (`Ns.Resource("Id")`) or the class-factory form (`Ns.Resource<X>()("Id")`).
+ */
+const declaredIdOf = (decl: Node | undefined): string | undefined => {
+  if (decl?.type === "ClassDeclaration") {
+    const found = idCallOf(decl.superClass);
+    return (found?.call.callee as Node | undefined)?.type === "CallExpression" ? found?.id : undefined;
+  }
+  const init =
+    decl?.type === "VariableDeclaration" && (decl.declarations as Node[]).length === 1
+      ? (decl.declarations as Node[])[0]?.init
+      : decl?.type === "CallExpression"
+        ? decl
+        : undefined;
+  const found = idCallOf(init);
+  return (found?.call.callee as Node | undefined)?.type === "MemberExpression" ? found?.id : undefined;
+};
+
 const isStatement = (type: string): boolean =>
   type.endsWith("Statement") || type === "VariableDeclaration" || type.startsWith("Export");
+
+const isNode = (x: unknown): x is Node =>
+  typeof x === "object" &&
+  x !== null &&
+  "type" in x &&
+  typeof x.type === "string" &&
+  "start" in x &&
+  typeof x.start === "number";
 
 /** Walk every node, carrying the innermost enclosing statement — what a JSDoc block attaches to. */
 const walk = (node: unknown, stmt: Node | undefined, visit: (n: Node, stmt: Node | undefined) => void): void => {
@@ -184,17 +219,27 @@ export const readProse = (entrypoint: string): Prose => {
       continue;
     }
     const comments = parsed.comments as readonly Comment[];
+    const describe = (id: string | undefined, start: number): void => {
+      // First wins, so a resource declared once keeps its own prose even if an id repeats.
+      if (id === undefined || descriptions.has(id)) return;
+      const raw = jsdocAt(start, comments, src);
+      if (!raw) return;
+      const { description } = read(raw);
+      if (description) descriptions.set(id, description);
+    };
+
+    // A resource declared at module level, bare or exported; JSDoc sits above the `export`.
+    const body: readonly unknown[] = parsed.program.body;
+    for (const top of body.filter(isNode)) {
+      if (top.type === "ExportDefaultDeclaration" && path === entrypoint) continue;
+      const exported = top.type === "ExportNamedDeclaration" || top.type === "ExportDefaultDeclaration";
+      describe(declaredIdOf(exported ? (top.declaration as Node | undefined) : top), top.start);
+    }
 
     walk(parsed.program, undefined, (node, stmt) => {
       // A resource: `yield* Something("<logicalId>", …)`, however it is bound.
       if (node.type === "YieldExpression" && node.delegate === true) {
-        const id = logicalIdOf(node.argument);
-        // First wins, so a resource declared once keeps its own prose even if an id repeats.
-        if (id === undefined || descriptions.has(id) || stmt === undefined) return;
-        const raw = jsdocAt(stmt.start, comments, src);
-        if (!raw) return;
-        const { description } = read(raw);
-        if (description) descriptions.set(id, description);
+        if (stmt !== undefined) describe(logicalIdOf(node.argument), stmt.start);
         return;
       }
       // The stack itself is never yielded, so it needs its own arm.

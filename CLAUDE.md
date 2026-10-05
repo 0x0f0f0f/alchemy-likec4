@@ -16,14 +16,14 @@ documented as allowed and is a validation error. Check the grammar
 
 ## Releasing
 
-- Version is `0.<alchemy beta>.<patch>`: built against `alchemy@2.0.0-beta.77` → publish `0.77.0`.
+- Version is `0.<alchemy beta>.<patch>`: built against `alchemy@2.0.0-beta.80` → publish `0.80.0`.
   First release is `0.77.0`. Bump the minor with every alchemy beta bump; patch for our own fixes.
 - README.md is for users only. Contributor and release notes live here, not there.
-- Bumping the alchemy beta means editing **four** exact pins together: `peerDependencies.alchemy`,
-  `peerDependencies.effect`, `peerDependencies["@effect/platform-node"]` and
-  `dependencies["@distilled.cloud/cloudflare"]` (match whatever the new alchemy beta pins), then
-  the same versions in the README `overrides` block. Peer ranges are deliberately exact: effect 4
-  rc builds break each other, and `>=` resolves a newer rc than the alchemy beta was built for.
+- Bumping the alchemy beta means editing the pins together: `peerDependencies.alchemy` and
+  `peerDependencies["@alchemy.run/frontend-frameworks"]` (exact — beta declarations break between
+  betas), the same two in `devDependencies`, and `dependencies["@distilled.cloud/cloudflare"]`
+  (match whatever the new alchemy beta pins). effect and `@effect/platform-*` are caret ranges on
+  the stable 4.x line, the same ranges alchemy declares, so no `overrides` block is needed.
 - `bun run build` (tsdown → `dist/`, ESM + d.mts, deps external) then `bun run check:pack`
   (publint + are-the-types-wrong on the ESM-only profile). `prepublishOnly` runs both.
 - Ship no Bun-only API in `src/`: the package must run on node. `node:fs` everywhere,
@@ -34,13 +34,16 @@ documented as allowed and is a validation error. Check the grammar
 
 - `likec4 validate --file <path>` with a path that does not match reports **`valid: true`** and
   `filteredFiles: 0`. A CI gate written that way passes vacuously. Omit `--file` in CI.
-- Importing `alchemy/Cloudflare` needs the effect peer graph pinned — see `overrides` in
-  package.json. Without it you get three different failures in a row.
 - `@likec4/icons` ships aws 307, gcp 216, azure 614, tech 2000, bootstrap 2052 icons as
   `<pack>:<kebab-name>`. Cloudflare has only four (`cloudflare`, `cloudflare-icon`,
   `cloudflare-workers`, `cloudflare-workers-icon`), none per service, so Cloudflare resources are
   told apart by shape and colour. `src/icons.gen.ts` is generated from the directory listing by
   `bun run build:icons` — never hand-list icons.
+- A type id's declaring file is the one passing it as a call's FIRST argument, literal or via a
+  const (`Platform(WorkerTypeId, …)`). `Queues/Subscription.ts` names `"Cloudflare.Worker"` and
+  `"Cloudflare.R2.Bucket"` as later arguments to test a source, and a plain `includes` picked it.
+  `const TypeId = "…"` is file-local in many files, so a name resolves only where it is bound or
+  exported.
 - alchemy's Cloudflare JSDoc carries `@category` (15 values) and `@product` (104 values, the
   `technology` label). No other provider carries either. `@see` is deliberately unread: it is the
   first URL in the file and often names a sub-feature rather than the product.
@@ -109,6 +112,10 @@ documented as allowed and is a validation error. Check the grammar
   `yield* D1.Database("AuthDb", {}).pipe(…)` yields the `.pipe` call. The stack is the entrypoint's
   `ExportDefaultDeclaration` — it is never yielded, so it needs its own arm. JSDoc attaches as "the
   nearest block comment above, with only whitespace between".
+  A resource that is its own module (Effect-native `class X extends Ns.Worker<X>()("Id", …)`,
+  `export const Db = Ns.D1.Database("Id", …)`, `export default Ns.Worker("Id", …)`) is never yielded
+  where it is declared, so module-level declarations get a third arm. Only a namespaced call or the
+  class-factory form claims an id — `helper("Id")` and `Data.TaggedError("Id")` do not.
 - Three kinds of `@` line, and they differ. `@icon`/`@color` are ours. `@internal`/`@param` are real
   JSDoc tags — metadata, not description. `@rel-int.ai addresses only.` only looks like one: a tag
   NAME is an identifier (`/^[a-zA-Z][a-zA-Z0-9]*$/`), so that line goes back into the prose. Dropping
