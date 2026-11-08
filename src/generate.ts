@@ -45,7 +45,8 @@ export interface StackInput {
 export interface GenerateOptions {
   /** Where the files go — a LikeC4 project's `alchemy/` directory, see `projectOutput`. */
   readonly outdir: string;
-  /** Every stack in this run. The specification is their union. */
+  /** Every stack in this run. The specification is their union. A stack may appear once per
+   *  stage: its logical model is then the union of what every stage declares. */
   readonly stacks: readonly StackInput[];
 }
 
@@ -114,12 +115,12 @@ const existing = async (outdir: string): Promise<string[]> => {
 };
 
 /**
- * Every stage this project already has a file for, plus the one being written, so `views.gen.c4`
+ * Every stage this project already has a file for, plus the ones being written, so `views.gen.c4`
  * lists them all. Generating `staging` must not drop the view for `prod`.
  */
-const knownStages = (entries: readonly string[], graph: StackGraph): string[] => {
-  const prefix = `${graph.name}.`;
-  const stages = new Set([graph.stage]);
+const knownStages = (entries: readonly string[], name: string, writing: readonly string[]): string[] => {
+  const prefix = `${name}.`;
+  const stages = new Set(writing);
   for (const e of entries) {
     // A stack named `specification`, `cross-stack` or `landscape` would otherwise read its own
     // project-wide file as a stage called `gen`.
@@ -138,6 +139,41 @@ const staleStacks = (entries: readonly string[], written: ReadonlySet<string>): 
     .map((e) => e.slice(0, -".model.gen.c4".length))
     .filter((name) => !written.has(name));
 
+/** First of each key, in order. */
+const uniqueBy = <T>(items: readonly T[], key: (t: T) => string): T[] => {
+  const seen = new Set<string>();
+  return items.filter((t) => {
+    const k = key(t);
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+};
+
+/**
+ * One logical model per stack, from every stage of it in the run. Stages may declare different
+ * resources — a widget only prod needs — and each stage's deployment instantiates the one model,
+ * so the model holds them all and ids that a collision suffixes agree across every stage.
+ */
+const mergeStages = (graphs: readonly StackGraph[]): Map<string, StackGraph> => {
+  const merged = new Map<string, StackGraph>();
+  for (const g of graphs) {
+    const m = merged.get(g.name);
+    merged.set(
+      g.name,
+      m === undefined
+        ? g
+        : {
+            ...m,
+            resources: uniqueBy([...m.resources, ...g.resources], (r) => r.fqn),
+            edges: uniqueBy([...m.edges, ...g.edges], (e) => `${e.from}|${e.to}|${e.kind}|${e.sid ?? ""}`),
+            crossEdges: uniqueBy([...m.crossEdges, ...g.crossEdges], (e) => `${e.from}|${e.stack}|${e.id}`),
+          },
+    );
+  }
+  return merged;
+};
+
 export const generate = async (opts: GenerateOptions): Promise<GenerateResult> => {
   const { outdir, stacks } = opts;
   const first = stacks[0];
@@ -148,8 +184,9 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
   if (alchemy === undefined) throw new Error(`alchemy is not resolvable from ${from}`);
   const alchemyVersion: string = JSON.parse(await readFile(`${alchemy}/package.json`, "utf8")).version;
   const graphs = stacks.map((s) => s.graph);
+  const models = mergeStages(graphs);
 
-  const cross = crossStackRelations(graphs);
+  const cross = crossStackRelations([...models.values()]);
 
   const kinds = [...new Set(graphs.flatMap((g) => g.resources.map((r) => r.type)))].sort();
   // A cross-stack relationship carries a binding kind too, and it is the only place some stacks
@@ -183,35 +220,40 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
 
   const summaries: StackSummary[] = [];
   const unparsed: string[] = [];
-  for (const { graph, entrypoint } of stacks) {
-    const prose = readProse(entrypoint);
+  for (const [name, model] of models) {
+    const inputs = stacks.filter((s) => s.graph.name === name);
+    const prose = readProse((inputs[0] as StackInput).entrypoint);
     const { descriptions } = prose;
-    unparsed.push(...prose.unparsed.map((f) => `${graph.name}: ${f}`));
-    const stages = knownStages(entries, graph);
-    const stackKinds = [...new Set(graph.resources.map((r) => r.type))].sort();
-    const stackBindings = [...new Set(graph.edges.filter((e) => e.kind !== "prop").map((e) => e.kind))].sort();
-
-    const mine = [
-      `${outdir}/${graph.name}.model.gen.c4`,
-      `${outdir}/${graph.name}.${graph.stage}.gen.c4`,
-      `${outdir}/${graph.name}.views.gen.c4`,
-    ] as const;
-    await write(
-      mine[0],
-      buildModel(graph, { kinds: stackKinds, bindings: stackBindings, descriptions, stack: prose.stack }),
+    unparsed.push(...prose.unparsed.map((f) => `${name}: ${f}`));
+    const stages = knownStages(
+      entries,
+      name,
+      inputs.map((s) => s.graph.stage),
     );
-    await write(mine[1], buildDeployment(graph));
-    await write(mine[2], buildViews(graph, stages));
-    files.push(...mine);
+    const stackKinds = [...new Set(model.resources.map((r) => r.type))].sort();
+    const stackBindings = [...new Set(model.edges.filter((e) => e.kind !== "prop").map((e) => e.kind))].sort();
 
-    summaries.push({
-      name: graph.name,
-      stage: graph.stage,
-      resources: graph.resources.length,
-      relationships: graph.edges.length,
-      described: graph.resources.filter((r) => descriptions.has(r.logicalId)).length,
-      stages,
-    });
+    const shared = [`${outdir}/${name}.model.gen.c4`, `${outdir}/${name}.views.gen.c4`] as const;
+    await write(
+      shared[0],
+      buildModel(model, { kinds: stackKinds, bindings: stackBindings, descriptions, stack: prose.stack }),
+    );
+    await write(shared[1], buildViews(model, stages));
+    files.push(...shared);
+
+    for (const { graph } of inputs) {
+      const deployment = `${outdir}/${name}.${graph.stage}.gen.c4`;
+      await write(deployment, buildDeployment(graph, model.resources));
+      files.push(deployment);
+      summaries.push({
+        name,
+        stage: graph.stage,
+        resources: graph.resources.length,
+        relationships: graph.edges.length,
+        described: graph.resources.filter((r) => descriptions.has(r.logicalId)).length,
+        stages,
+      });
+    }
   }
 
   return {
@@ -221,6 +263,6 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
     stacks: summaries,
     unresolved: cross.unresolved,
     unparsed,
-    stale: staleStacks(entries, new Set(graphs.map((g) => g.name))),
+    stale: staleStacks(entries, new Set(models.keys())),
   };
 };

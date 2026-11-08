@@ -381,13 +381,16 @@ const urlOf = (domain: string): string => (/^https?:\/\//.test(domain) ? domain 
  *
  * Metadata is repeated from the model element because instance metadata REPLACES it rather than
  * merging, and `assert.ts` reads `fqn` off the deployment node.
+ *
+ * `model` is every resource the logical model holds. It defaults to this stage's own, and is wider
+ * when another stage declares resources this one does not: a collision suffix depends on what else
+ * shares the id, so the element ids must come from the same set the model was built from.
  */
-export const buildDeployment = (graph: StackGraph): string => {
+export const buildDeployment = (graph: StackGraph, model: readonly StackResource[] = graph.resources): string => {
   const root = stackId(graph);
-  const model = modelId(graph);
   const namespaces = namespacesOf(root, graph.resources);
   const here = pathsOf(root, graph.resources);
-  const there = pathsOf(model, graph.resources);
+  const there = pathsOf(modelId(graph), model);
 
   const elements = [
     { id: root, kind: STACK_KIND, title: `${graph.name} (${graph.stage})`, metadata: { stage: graph.stage } },

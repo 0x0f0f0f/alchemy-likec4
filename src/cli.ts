@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 /**
- *   alchemy-likec4 generate --project <dir> [--entrypoint alchemy.run.ts …] [--stage prod]
+ *   alchemy-likec4 generate --project <dir> [--entrypoint alchemy.run.ts …] [--stage prod …]
  *
  * `<dir>` is a LikeC4 project (holds a likec4.config.*); everything lands in `<dir>/alchemy/`.
  * `--entrypoint` repeats: a monorepo has one stack per composition root, and they share one
- * specification, so they have to be generated together.
+ * specification, so they have to be generated together. `--stage` repeats for the same reason: a
+ * stack's stages share one logical model, which must hold whatever any of them declares.
  *
  * A thin shell over the library — the same `effect/cli` alchemy's own CLI is built on.
  */
@@ -12,7 +13,6 @@ import { DEFAULT_ENTRYPOINT } from "alchemy/Alchemist";
 import { PlatformServices, runMain } from "alchemy/Util/PlatformServices";
 import { CliError, Command, Flag } from "effect/cli";
 import * as Effect from "effect/Effect";
-import * as Option from "effect/Option";
 import pkg from "../package.json" with { type: "json" };
 import { generate, type StackInput } from "./generate.ts";
 import { type NotALikeC4Project, projectOutput } from "./project.ts";
@@ -35,7 +35,10 @@ const generateCmd = Command.make(
       Flag.withDescription("Stack entrypoint; repeat it once per stack in a monorepo"),
       Flag.atLeast(0),
     ),
-    stage: Flag.String("stage").pipe(Flag.withDescription("Stage; only names derived from it change"), Flag.optional),
+    stage: Flag.String("stage").pipe(
+      Flag.withDescription("Stage; repeat it to generate several, when they declare different resources"),
+      Flag.atLeast(0),
+    ),
   },
   ({ project, entrypoint, stage }) =>
     Effect.gen(function* () {
@@ -43,10 +46,11 @@ const generateCmd = Command.make(
       const entrypoints = entrypoint.length > 0 ? entrypoint : [DEFAULT_ENTRYPOINT];
 
       const stacks: StackInput[] = [];
-      for (const e of entrypoints) {
-        const graph = yield* stackGraph({ entrypoint: e, stage: Option.getOrUndefined(stage) });
-        stacks.push({ graph, entrypoint: e });
-      }
+      for (const e of entrypoints)
+        for (const s of stage.length > 0 ? stage : [undefined]) {
+          const graph = yield* stackGraph({ entrypoint: e, stage: s });
+          stacks.push({ graph, entrypoint: e });
+        }
 
       const r = yield* Effect.promise(() => generate({ outdir, stacks }));
       for (const f of r.files) yield* say(`  → ${f}`);

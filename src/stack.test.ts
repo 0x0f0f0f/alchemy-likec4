@@ -1,4 +1,7 @@
 import { describe, expect, it } from "bun:test";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import * as Output from "alchemy/Output";
 import * as Ref from "alchemy/Ref";
 import {
@@ -11,6 +14,7 @@ import {
   crossStackRelations,
 } from "./build.ts";
 import { readProse } from "./describe.ts";
+import { generate } from "./generate.ts";
 import { deriveGraph, openStack } from "./stack.ts";
 
 // Compiles the example stack — no deploy, no network, no state on disk.
@@ -316,6 +320,30 @@ describe("ids that differ only by case", () => {
   it("gives the deployment the same ids there too", () => {
     expect(buildDeployment(site)).toInclude("instanceOf v.site_cloudflare_worker");
   });
+
+  // prod adds the Access application; staging has only the Worker, which on its own is `vault`.
+  const staging = { ...g, stage: "staging", resources: [resource("vault", "Cloudflare.Worker")] };
+
+  it("takes a deployment's ids from the model when another stage declares more", () => {
+    expect(buildDeployment(staging, g.resources)).toInclude("instanceOf v.vault_cloudflare_worker");
+  });
+
+  it("builds one model from every stage in the run, so each stage's instances resolve", async () => {
+    const outdir = mkdtempSync(join(tmpdir(), "alchemy-likec4-stages-"));
+    const entrypoint = "examples/basic/alchemy.run.ts";
+    // staging second: a model rewritten per stage would lose prod's Access application.
+    await generate({
+      outdir,
+      stacks: [
+        { graph: g, entrypoint },
+        { graph: staging, entrypoint },
+      ],
+    });
+    const model = readFileSync(join(outdir, "V.model.gen.c4"), "utf8");
+    expect(model).toInclude("vault_cloudflare_access_application");
+    expect(readFileSync(join(outdir, "V.staging.gen.c4"), "utf8")).toInclude("instanceOf v.vault_cloudflare_worker");
+    expect(readFileSync(join(outdir, "V.views.gen.c4"), "utf8")).toInclude("v_staging");
+  });
 });
 
 describe("bindings a stack can carry that are not wires", () => {
@@ -385,6 +413,25 @@ describe("a ref reached through another resource", () => {
     const { relations } = crossStackRelations([g]);
     expect(relations.map((r) => `${r.from} -> ${r.to}`)).toEqual(["p.b -> p.a"]);
     expect(buildCrossStack(crossStackRelations([g]))).not.toInclude("p.a -> p.a");
+  });
+});
+
+describe("an upstream that is not a resource of the stack", () => {
+  it("draws no edge to it, because LikeC4 cannot place an element that does not exist", () => {
+    // An alchemy Action (better-auth's `<id>Migrate`) is upstream of the Worker it gates, but is
+    // registered among the stack's actions, not its resources.
+    const node = (fqn: string, Props: object) => ({
+      Type: "Cloudflare.Worker",
+      FQN: fqn,
+      LogicalId: fqn,
+      Props,
+      Namespace: undefined,
+    });
+    const migrate = node("AuthMigrate", {});
+    const db = node("db", {});
+    const auth = node("auth", { env: { DB: db, MIGRATION: migrate } });
+    const g = deriveGraph({ name: "P", stage: "t", resources: { auth, db }, bindings: {} });
+    expect(g.edges.map((e) => `${e.from} -> ${e.to}`)).toEqual(["auth -> db"]);
   });
 });
 

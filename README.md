@@ -167,7 +167,9 @@ One command writes into `docs/architecture/alchemy/`:
 | `<Stack>.views.gen.c4`   | a view scoped to the stack, so its box opens, and one deployment view per stage              |
 
 Run it again with `--stage staging` to add a stage. Nothing else is touched, and the views file
-picks up every stage it finds.
+picks up every stage it finds. If your stages declare different resources (a widget only prod
+has), pass every stage in one run instead, `--stage prod --stage staging`: the model is shared by
+all of them, so it has to hold what each one declares.
 
 A stack takes its description, and optionally an icon and colour, from the JSDoc above it. The
 `@icon` and `@color` on the stack above are why its box is blue and carries the Workers mark; the

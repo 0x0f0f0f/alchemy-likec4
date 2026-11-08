@@ -164,12 +164,15 @@ export const deriveGraph = (stack: CompiledStack): StackGraph => {
     };
   });
   const byName = new Map(resources.flatMap((r) => (r.name ? [[r.name, r.fqn] as const] : [])));
+  const fqns = new Set(resources.map((r) => r.fqn));
 
   const edges: StackEdge[] = [];
   const seen = new Set<string>();
+  // An upstream that is no resource of this stack — an Action, such as better-auth's `<id>Migrate`
+  // — has no element to draw, and LikeC4 rejects a relation to one.
   const add = (e: StackEdge) => {
     const key = `${e.from}|${e.to}|${e.kind}|${e.sid ?? ""}`;
-    if (e.from !== e.to && !seen.has(key)) {
+    if (e.from !== e.to && fqns.has(e.to) && !seen.has(key)) {
       seen.add(key);
       edges.push(e);
     }
