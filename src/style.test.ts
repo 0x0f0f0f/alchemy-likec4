@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import * as Cloudflare from "alchemy/Cloudflare";
+import * as Cloudflare from "@alchemy.run/cloudflare";
 import { annotationsFor } from "./annotations.ts";
 import { extractResources } from "./extract.ts";
 import { iconFor } from "./icons.ts";
@@ -7,7 +7,7 @@ import { BY_CATEGORY, DEFAULT_STYLE, styleFor } from "./style.ts";
 
 const resources = extractResources(Cloudflare);
 const annotations = annotationsFor(
-  "node_modules/alchemy/src/Cloudflare",
+  "node_modules/@alchemy.run/cloudflare/src",
   resources.map((r) => r.type),
 );
 

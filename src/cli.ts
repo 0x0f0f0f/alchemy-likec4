@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- *   alchemy-likec4 generate --project <dir> [--entrypoint alchemy.run.ts …] [--stage prod] [--all-kinds]
+ *   alchemy-likec4 generate --project <dir> [--entrypoint alchemy.run.ts …] [--stage prod]
  *
  * `<dir>` is a LikeC4 project (holds a likec4.config.*); everything lands in `<dir>/alchemy/`.
  * `--entrypoint` repeats: a monorepo has one stack per composition root, and they share one
@@ -36,12 +36,8 @@ const generateCmd = Command.make(
       Flag.atLeast(0),
     ),
     stage: Flag.String("stage").pipe(Flag.withDescription("Stage; only names derived from it change"), Flag.optional),
-    allKinds: Flag.Boolean("all-kinds").pipe(
-      Flag.withDescription("Declare every kind alchemy ships, not only the ones these stacks use"),
-      Flag.withDefault(false),
-    ),
   },
-  ({ project, entrypoint, stage, allKinds }) =>
+  ({ project, entrypoint, stage }) =>
     Effect.gen(function* () {
       const outdir = yield* output(project);
       const entrypoints = entrypoint.length > 0 ? entrypoint : [DEFAULT_ENTRYPOINT];
@@ -52,7 +48,7 @@ const generateCmd = Command.make(
         stacks.push({ graph, entrypoint: e });
       }
 
-      const r = yield* Effect.promise(() => generate({ outdir, stacks, allKinds }));
+      const r = yield* Effect.promise(() => generate({ outdir, stacks }));
       for (const f of r.files) yield* say(`  → ${f}`);
       yield* say(`\n${r.kinds} kinds, reflected from alchemy@${r.alchemyVersion}`);
       for (const s of r.stacks)
@@ -62,7 +58,6 @@ const generateCmd = Command.make(
         );
       const stages = [...new Set(r.stacks.flatMap((s) => s.stages))].sort();
       if (stages.length > 1) yield* say(`stages in this project: ${stages.join(", ")}`);
-      if (r.skipped.length > 0) yield* say(`could not import: ${r.skipped.join(", ")}`);
       // A file that will not parse keeps its resources and loses their prose. Never silent.
       if (r.unparsed.length > 0)
         yield* say(

@@ -11,12 +11,12 @@
  *
  * Only what the stacks use. A kind nothing instantiates is legal LikeC4 but 241 Cloudflare kinds
  * for a four-resource stack is noise, so the stacks are compiled first and the specification is
- * filtered to the types in them. `--all-kinds` restores the full catalogue for browsing.
+ * filtered to the types in them.
  */
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
+import { createRequire } from "node:module";
+import { dirname, join, resolve } from "node:path";
 import { type Annotations, annotationsFor } from "./annotations.ts";
-import { bindingKinds } from "./bindings.ts";
 import {
   buildCrossStack,
   buildDeployment,
@@ -28,7 +28,6 @@ import {
   hasNamespaces,
 } from "./build.ts";
 import { readProse } from "./describe.ts";
-import { type AlchemyResource, alchemyDir, discoverProviders, extractResources } from "./extract.ts";
 import type { StackGraph } from "./stack.ts";
 
 /** Write a generated file, creating its directory. Shared with the CLI. */
@@ -48,8 +47,6 @@ export interface GenerateOptions {
   readonly outdir: string;
   /** Every stack in this run. The specification is their union. */
   readonly stacks: readonly StackInput[];
-  /** Declare every kind alchemy ships, not only the ones these stacks use. */
-  readonly allKinds?: boolean;
 }
 
 export interface StackSummary {
@@ -67,8 +64,6 @@ export interface GenerateResult {
   readonly files: readonly string[];
   readonly kinds: number;
   readonly stacks: readonly StackSummary[];
-  /** Subpaths that failed to import. Loud, never silent: a helper and a broken provider must not look the same. */
-  readonly skipped: readonly string[];
   /**
    * Refs whose target stack was not in this run, as `<stack>/<resource> → <stack>/<id>`. Each is an
    * arrow the diagram is missing, and passing that stack's `--entrypoint` is what draws it.
@@ -87,24 +82,20 @@ export interface GenerateResult {
   readonly stale: readonly string[];
 }
 
-/** Every resource alchemy ships, with the provider source dir each was found under. */
-const catalogue = async (alchemy: string) => {
-  const all = new Map<string, AlchemyResource>();
-  const sourceDirs = new Map<string, string>();
-  const skipped: string[] = [];
-  for (const ns of await discoverProviders(alchemy)) {
-    try {
-      const module = await import(ns.specifier);
-      for (const r of extractResources(module as Record<string, unknown>)) {
-        if (!all.has(r.type)) all.set(r.type, r);
-        if (!sourceDirs.has(r.provider)) sourceDirs.set(r.provider, ns.sourceDir);
-      }
-    } catch (e) {
-      skipped.push(`${ns.name} (${(e as Error).message.slice(0, 60)})`);
-    }
+/** A package's root as the stacks' own install resolves it: `src/index.ts` under bun,
+ *  `lib/index.js` under node, both two levels down. Resolved from the entrypoint, not from
+ *  this package, because providers are the consumer's dependencies, not ours. */
+const packageRoot = (pkg: string, from: string): string | undefined => {
+  try {
+    return dirname(dirname(createRequire(from).resolve(pkg)));
+  } catch {
+    return undefined;
   }
-  return { all, sourceDirs, skipped };
 };
+
+/** `Cloudflare` → `@alchemy.run/cloudflare`; core resources (`Alchemy.KeyPair`) live in `alchemy`. */
+const providerPackage = (provider: string): string =>
+  provider === "Alchemy" ? "alchemy" : `@alchemy.run/${provider.toLowerCase()}`;
 
 /** `<Stack>.<name>.gen.c4` names that are not a stage. */
 const RESERVED = new Set(["model", "views"]);
@@ -148,24 +139,23 @@ const staleStacks = (entries: readonly string[], written: ReadonlySet<string>): 
     .filter((name) => !written.has(name));
 
 export const generate = async (opts: GenerateOptions): Promise<GenerateResult> => {
-  const { outdir, stacks, allKinds } = opts;
-  if (stacks.length === 0) throw new Error("no stacks to generate: pass at least one --entrypoint");
+  const { outdir, stacks } = opts;
+  const first = stacks[0];
+  if (first === undefined) throw new Error("no stacks to generate: pass at least one --entrypoint");
 
-  const alchemy = alchemyDir();
+  const from = resolve(first.entrypoint);
+  const alchemy = packageRoot("alchemy", from);
+  if (alchemy === undefined) throw new Error(`alchemy is not resolvable from ${from}`);
   const alchemyVersion: string = JSON.parse(await readFile(`${alchemy}/package.json`, "utf8")).version;
   const graphs = stacks.map((s) => s.graph);
 
   const cross = crossStackRelations(graphs);
 
-  const used = [...new Set(graphs.flatMap((g) => g.resources.map((r) => r.type)))].sort();
-  const { all, sourceDirs, skipped } = allKinds
-    ? await catalogue(alchemy)
-    : { all: new Map<string, AlchemyResource>(), sourceDirs: new Map<string, string>(), skipped: [] as string[] };
-  const kinds = allKinds ? [...all.keys()].sort() : used;
+  const kinds = [...new Set(graphs.flatMap((g) => g.resources.map((r) => r.type)))].sort();
   // A cross-stack relationship carries a binding kind too, and it is the only place some stacks
   // use one: without it the shared specification would not declare the kind the relation names.
   const wired = [...graphs.flatMap((g) => g.edges.map((e) => e.kind)), ...cross.relations.map((r) => r.kind)];
-  const bindings = allKinds ? bindingKinds() : [...new Set(wired.filter((k) => k !== "prop"))].sort();
+  const bindings = [...new Set(wired.filter((k) => k !== "prop"))].sort();
 
   // Annotations are read per provider, because each provider's sources live in its own directory.
   const annotations = new Map<string, Annotations>();
@@ -174,9 +164,13 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
     const provider = type.split(".")[0] as string;
     byProvider.set(provider, [...(byProvider.get(provider) ?? []), type]);
   }
-  for (const [provider, types] of byProvider)
-    for (const [type, a] of annotationsFor(sourceDirs.get(provider) ?? `${alchemy}/src/${provider}`, types))
-      annotations.set(type, a);
+  // Annotations are decoration: a provider whose package is not where the name points gets the
+  // default style, not an error.
+  for (const [provider, types] of byProvider) {
+    const root = packageRoot(providerPackage(provider), from);
+    if (root === undefined) continue;
+    for (const [type, a] of annotationsFor(join(root, "src"), types)) annotations.set(type, a);
+  }
 
   const entries = await existing(outdir);
   const files: string[] = [`${outdir}/${SPECIFICATION}`, `${outdir}/${CROSS_STACK}`, `${outdir}/${LANDSCAPE}`];
@@ -225,7 +219,6 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
     files,
     kinds: kinds.length,
     stacks: summaries,
-    skipped,
     unresolved: cross.unresolved,
     unparsed,
     stale: staleStacks(entries, new Set(graphs.map((g) => g.name))),

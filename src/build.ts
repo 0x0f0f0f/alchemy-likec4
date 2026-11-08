@@ -2,7 +2,7 @@
  * Build LikeC4 with LikeC4's own Builder and print it with its own generator.
  *
  * Nothing here is typed by hand: kinds come from alchemy's `.Type`s, tags from its `@category`,
- * technology from its `@product`, relationship kinds from Cloudflare's binding schema, and nodes,
+ * technology from its `@product`, relationship kinds from the bindings the stacks wire, and nodes,
  * edges and descriptions from a compiled stack.
  *
  * The specification is built and printed SEPARATELY from the model. LikeC4 rejects a kind declared
@@ -19,7 +19,6 @@
 import { Builder } from "@likec4/core/builder";
 import { generate } from "@likec4/generators/likec4";
 import type { Annotations } from "./annotations.ts";
-import { toRelationshipKind } from "./bindings.ts";
 import type { StackProse } from "./describe.ts";
 import { iconFor } from "./icons.ts";
 import type { StackGraph, StackResource } from "./stack.ts";
@@ -42,6 +41,9 @@ export const toTag = (category: string): string =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_|_$/g, "");
+
+/** `kv_namespace` → `kv_namespace_binding`: the LikeC4 relationship kind for a binding. */
+export const toRelationshipKind = (binding: string): string => `${binding}_binding`;
 
 // The Builder's parsed model and the generator's input type disagree on whether `project.styles`
 // is optional. Same data; one cast.

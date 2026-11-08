@@ -1,7 +1,8 @@
 // The shortener from shortener.c4, as an alchemy stack. `bun run generate deployment` reads this
 // and emits shortener.gen.c4 — the deployment half of the model, derived rather than typed.
+
+import * as Cloudflare from "@alchemy.run/cloudflare";
 import * as Alchemy from "alchemy";
-import * as Cloudflare from "alchemy/Cloudflare";
 import * as Effect from "effect/Effect";
 
 const main = `${import.meta.dirname}/workers/noop.ts`;
