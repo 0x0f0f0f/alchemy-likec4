@@ -11,16 +11,8 @@
  * and no single pattern is complete — scanning `src` finds 233, scanning `.d.ts` finds 39, and
  * each misses resources the other catches. The module object has no such problem.
  *
- * The cost is that importing `alchemy/Cloudflare` pulls the whole effect peer graph.
+ * The cost is that importing `@alchemy.run/cloudflare` pulls the whole effect peer graph.
  */
-
-import { readFile } from "node:fs/promises";
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-
-/** alchemy's package root, wherever the consumer's linker put it — two levels above its entry.
- *  `src/index.ts` under bun, `lib/index.js` under node; both sit two levels down. */
-export const alchemyDir = (): string => dirname(dirname(fileURLToPath(import.meta.resolve("alchemy"))));
 
 /** A resource, as alchemy itself defines it. */
 export interface AlchemyResource {
@@ -86,25 +78,4 @@ export const extractResources = (namespace: object): AlchemyResource[] => {
 
   walk(namespace, "");
   return [...found.values()].sort((a, b) => a.type.localeCompare(b.type));
-};
-
-/** A provider namespace alchemy exports, e.g. `Cloudflare` at `alchemy/Cloudflare`. */
-export interface Provider {
-  readonly name: string;
-  /** Import specifier, e.g. `alchemy/Cloudflare`. */
-  readonly specifier: string;
-  /** Source root for `@category` lookup, if the package ships sources. */
-  readonly sourceDir: string;
-}
-
-/** Every top-level subpath alchemy exports, read from its own `exports` map. Which of them is a
- *  provider is not decided here by name: a provider is a subpath whose module yields resources,
- *  and `extractResources` is the test. Runtime helpers like `alchemy/Cli` yield none. */
-export const discoverProviders = async (alchemyPkgPath: string): Promise<Provider[]> => {
-  const pkg = JSON.parse(await readFile(`${alchemyPkgPath}/package.json`, "utf8"));
-  return Object.keys(pkg.exports ?? {})
-    .filter((k) => k.startsWith("./") && !k.includes("*") && !k.slice(2).includes("/"))
-    .map((k) => k.slice(2))
-    .sort()
-    .map((name) => ({ name, specifier: `alchemy/${name}`, sourceDir: `${alchemyPkgPath}/src/${name}` }));
 };

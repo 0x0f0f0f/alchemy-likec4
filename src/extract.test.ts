@@ -1,15 +1,12 @@
 import { describe, expect, it } from "bun:test";
-import * as Cloudflare from "alchemy/Cloudflare";
-import * as Stack from "alchemy/Stack";
+import * as Cloudflare from "@alchemy.run/cloudflare";
 import { annotationsFor, categoriesFor } from "./annotations.ts";
-import { requiredEnvironment } from "./auth.ts";
-import { bindingKinds, toRelationshipKind } from "./bindings.ts";
-import { toIdentifier, toTag } from "./build.ts";
-import { discoverProviders, extractResources } from "./extract.ts";
+import { toIdentifier, toRelationshipKind, toTag } from "./build.ts";
+import { extractResources } from "./extract.ts";
 
 const resources = extractResources(Cloudflare);
 const categories = categoriesFor(
-  "node_modules/alchemy/src/Cloudflare",
+  "node_modules/@alchemy.run/cloudflare/src",
   resources.map((r) => r.type),
 );
 
@@ -82,33 +79,24 @@ describe("toTag", () => {
   });
 });
 
-describe("bindingKinds", () => {
-  const kinds = bindingKinds();
-
-  it("reads the Workers API's binding vocabulary rather than a hand-written list", () => {
-    for (const k of ["d1", "r2_bucket", "kv_namespace", "durable_object_namespace", "service", "queue", "workflow"])
-      expect(kinds).toContain(k);
-    expect(kinds.length).toBeGreaterThan(30);
-  });
-
-  it("is pinned by snapshot so a schema change is visible in review", () => {
-    expect(kinds).toMatchSnapshot();
-  });
-
+describe("toRelationshipKind", () => {
   it("maps a binding to a relationship kind", () => {
     expect(toRelationshipKind("d1")).toBe("d1_binding");
   });
 });
 
+// alchemy declares this one `@internal` and gives it no `@category`: every Container on a Durable
+// Object class registers it implicitly. Pinned, so a second gap shows up as a failure.
+const UNCATEGORISED = ["Cloudflare.Containers.DurableObjectApplication"];
+
 describe("annotationsFor", () => {
   const annotations = annotationsFor(
-    "node_modules/alchemy/src/Cloudflare",
+    "node_modules/@alchemy.run/cloudflare/src",
     resources.map((r) => r.type),
   );
 
-  it("resolves a category for every resource, by finding its declaration", () => {
-    expect(annotations.size).toBe(resources.length);
-    expect([...annotations.values()].filter((a) => a.category).length).toBe(resources.length);
+  it("resolves a category for every public resource, by finding its declaration", () => {
+    expect(resources.filter((r) => !annotations.get(r.type)?.category).map((r) => r.type)).toEqual(UNCATEGORISED);
   });
 
   it("reads @product, which is the technology label a consumer would otherwise type by hand", () => {
@@ -125,21 +113,10 @@ describe("annotationsFor", () => {
   });
 });
 
-describe("discoverProviders", () => {
-  it("lists every subpath off alchemy's exports map; resources decide which are providers", async () => {
-    const names = (await discoverProviders("node_modules/alchemy")).map((p) => p.name);
-    expect(names).toContain("Cloudflare");
-    expect(names).toContain("AWS");
-    expect(names).toContain("GitHub");
-    // The test that separates a provider from a runtime helper is whether it yields resources.
-    expect(extractResources(Stack)).toEqual([]);
-  });
-});
-
 describe("categoriesFor", () => {
-  it("resolves every Cloudflare resource to one of alchemy's curated categories", () => {
+  it("resolves every public Cloudflare resource to one of alchemy's curated categories", () => {
     // A path guess resolves 205/241; finding the declaring file resolves all of them.
-    expect(categories.size).toBe(resources.length);
+    expect(resources.filter((r) => !categories.has(r.type)).map((r) => r.type)).toEqual(UNCATEGORISED);
     expect(categories.get("Cloudflare.R2.Bucket")).toBe("Storage & Databases");
     expect(categories.get("Cloudflare.Worker")).toBe("Workers & Compute");
   });
@@ -149,15 +126,6 @@ describe("categoriesFor", () => {
   });
 
   it("returns an empty map rather than throwing when sources are absent", () => {
-    expect(categoriesFor("node_modules/alchemy/src/DoesNotExist", ["X"]).size).toBe(0);
-  });
-});
-
-describe("requiredEnvironment", () => {
-  it("reads each auth provider's declared contract rather than a list of names", () => {
-    const vars = requiredEnvironment();
-    expect(vars.map((v) => v.name)).toContain("CLOUDFLARE_ACCOUNT_ID");
-    expect(vars.find((v) => v.name === "CLOUDFLARE_API_TOKEN")?.alternatives).toEqual(["CLOUDFLARE_API_KEY"]);
-    expect(vars.length).toBeGreaterThan(2);
+    expect(categoriesFor("node_modules/@alchemy.run/cloudflare/src/DoesNotExist", ["X"]).size).toBe(0);
   });
 });

@@ -2,7 +2,7 @@
  * Build LikeC4 with LikeC4's own Builder and print it with its own generator.
  *
  * Nothing here is typed by hand: kinds come from alchemy's `.Type`s, tags from its `@category`,
- * technology from its `@product`, relationship kinds from Cloudflare's binding schema, and nodes,
+ * technology from its `@product`, relationship kinds from the bindings the stacks wire, and nodes,
  * edges and descriptions from a compiled stack.
  *
  * The specification is built and printed SEPARATELY from the model. LikeC4 rejects a kind declared
@@ -19,7 +19,6 @@
 import { Builder } from "@likec4/core/builder";
 import { generate } from "@likec4/generators/likec4";
 import type { Annotations } from "./annotations.ts";
-import { toRelationshipKind } from "./bindings.ts";
 import type { StackProse } from "./describe.ts";
 import { iconFor } from "./icons.ts";
 import type { StackGraph, StackResource } from "./stack.ts";
@@ -42,6 +41,9 @@ export const toTag = (category: string): string =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_|_$/g, "");
+
+/** `kv_namespace` → `kv_namespace_binding`: the LikeC4 relationship kind for a binding. */
+export const toRelationshipKind = (binding: string): string => `${binding}_binding`;
 
 // The Builder's parsed model and the generator's input type disagree on whether `project.styles`
 // is optional. Same data; one cast.
@@ -379,18 +381,33 @@ const urlOf = (domain: string): string => (/^https?:\/\//.test(domain) ? domain 
  *
  * Metadata is repeated from the model element because instance metadata REPLACES it rather than
  * merging, and `assert.ts` reads `fqn` off the deployment node.
+ *
+ * `model` is every resource the logical model holds. It defaults to this stage's own, and is wider
+ * when another stage declares resources this one does not: a collision suffix depends on what else
+ * shares the id, so the element ids must come from the same set the model was built from.
+ *
+ * `hidden` types are left out of the instance list. LikeC4 rejects `element.kind` in deployment
+ * view rules, so a deployment view cannot exclude a kind the way a model view does; the instance
+ * is simply not drawn. Its element stays in the model.
  */
-export const buildDeployment = (graph: StackGraph): string => {
+export const buildDeployment = (
+  graph: StackGraph,
+  model: readonly StackResource[] = graph.resources,
+  hidden: readonly string[] = [],
+): string => {
   const root = stackId(graph);
-  const model = modelId(graph);
   const namespaces = namespacesOf(root, graph.resources);
   const here = pathsOf(root, graph.resources);
-  const there = pathsOf(model, graph.resources);
+  const there = pathsOf(modelId(graph), model);
+  const hide = new Set(hidden);
+  const drawn = graph.resources.filter((r) => !hide.has(r.type));
+  const skipped = graph.resources.length - drawn.length;
+  const skippedTypes = [...new Set(graph.resources.filter((r) => hide.has(r.type)).map((r) => r.type))].sort();
 
   const elements = [
     { id: root, kind: STACK_KIND, title: `${graph.name} (${graph.stage})`, metadata: { stage: graph.stage } },
     ...[...namespaces].map(([id, title]) => ({ id, kind: NAMESPACE_KIND, title })),
-    ...graph.resources.map((r) => ({
+    ...drawn.map((r) => ({
       id: here.get(r.fqn) as string,
       element: there.get(r.fqn) as string,
       metadata: {
@@ -408,6 +425,7 @@ export const buildDeployment = (graph: StackGraph): string => {
   return generated(
     [
       `Stack ${graph.name}, stage ${graph.stage}: ${graph.resources.length} resources.`,
+      ...(skipped > 0 ? [`${skipped} hidden (${skippedTypes.join(", ")}): in the model, not drawn here.`] : []),
       `Regenerate with:  alchemy-likec4 generate --project <dir> --stage ${graph.stage}`,
       "",
       "No relationships here on purpose: they are inherited from the model through `instanceOf`.",
@@ -426,8 +444,14 @@ export const buildDeployment = (graph: StackGraph): string => {
  *
  * Not named `index`: LikeC4 generates that one when a project defines none, and claiming the name
  * would silently replace whatever the consumer wrote.
+ *
+ * `hidden` types stay in the model and out of the view. Pass only kinds the run declares: an
+ * `element.kind` naming an undeclared kind fails validation.
  */
-export const buildLandscape = (graphs: ReadonlyArray<Pick<StackGraph, "name">>): string => {
+export const buildLandscape = (
+  graphs: ReadonlyArray<Pick<StackGraph, "name">>,
+  hidden: readonly string[] = [],
+): string => {
   const roots = [...new Set(graphs.map((g) => modelId(g)))].sort();
   return generated(
     [
@@ -440,12 +464,17 @@ export const buildLandscape = (graphs: ReadonlyArray<Pick<StackGraph, "name">>):
       "    title 'Landscape'",
       "    include *,",
       ...roots.map((r, i) => `      ${r}.*, ${r}.**${i === roots.length - 1 ? "" : ","}`),
+      ...excludeKinds(hidden),
       "  }",
       "}",
       "",
     ].join("\n"),
   );
 };
+
+/** One `exclude` per hidden canonical type, sorted. Model views only: deployment rules reject kinds. */
+const excludeKinds = (hidden: readonly string[]): string[] =>
+  [...hidden].sort().map((type) => `    exclude element.kind = ${toIdentifier(type)}`);
 
 /**
  * One view OF each stack and one deployment view per stage, so the first run renders something.
@@ -460,14 +489,22 @@ export const buildLandscape = (graphs: ReadonlyArray<Pick<StackGraph, "name">>):
  * `.**` is never written alone. It reaches a resource alchemy nested under a namespace, which the
  * children selector leaves out, but it drops any resource with no relationship. The scoped `*`
  * covers that in the model view; the deployment views have no wildcard, so they keep `.*` too.
+ *
+ * `hidden` types are excluded from the overview only; `buildDeployment` leaves them out of the
+ * stage's instances instead. Pass only kinds this stack declares.
  */
-export const buildViews = (graph: Pick<StackGraph, "name">, stages: readonly string[]): string => {
+export const buildViews = (
+  graph: Pick<StackGraph, "name">,
+  stages: readonly string[],
+  hidden: readonly string[] = [],
+): string => {
   const model = modelId(graph);
   const body = [
     `  view ${model}_overview of ${model} {`,
     `    title '${graph.name} / Overview'`,
     "    order 1",
     `    include *, ${model}.**`,
+    ...excludeKinds(hidden),
     "  }",
     ...[...stages].sort().flatMap((stage) => {
       const root = stackId({ name: graph.name, stage });

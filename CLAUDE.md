@@ -16,14 +16,17 @@ documented as allowed and is a validation error. Check the grammar
 
 ## Releasing
 
-- Version is `0.<alchemy beta>.<patch>`: built against `alchemy@2.0.0-beta.80` → publish `0.80.0`.
+- Version is `0.<alchemy beta>.<patch>`: built against `alchemy@2.0.0-beta.85` → publish `0.85.0`.
   First release is `0.77.0`. Bump the minor with every alchemy beta bump; patch for our own fixes.
 - README.md is for users only. Contributor and release notes live here, not there.
-- Bumping the alchemy beta means editing the pins together: `peerDependencies.alchemy` and
-  `peerDependencies["@alchemy.run/frontend-frameworks"]` (exact — beta declarations break between
-  betas), the same two in `devDependencies`, and `dependencies["@distilled.cloud/cloudflare"]`
-  (match whatever the new alchemy beta pins). effect and `@effect/platform-*` are caret ranges on
-  the stable 4.x line, the same ranges alchemy declares, so no `overrides` block is needed.
+- Bumping the alchemy beta means editing the pins together: `peerDependencies.alchemy` (exact —
+  beta declarations break between betas) and, in `devDependencies`, `alchemy`,
+  `@alchemy.run/cloudflare` and `@alchemy.run/frontend-frameworks`. effect and `@effect/platform-*`
+  are caret ranges on the stable 4.x line, the same ranges alchemy declares, so no `overrides`
+  block is needed.
+- Since beta.85 providers are their own packages (`@alchemy.run/cloudflare`, …), not `alchemy/*`
+  subpaths. They are the consumer's dependencies, so `generate` resolves each from the first
+  stack's entrypoint, never from this package.
 - `bun run build` (tsdown → `dist/`, ESM + d.mts, deps external) then `bun run check:pack`
   (publint + are-the-types-wrong on the ESM-only profile). `prepublishOnly` runs both.
 - Ship no Bun-only API in `src/`: the package must run on node. `node:fs` everywhere,
@@ -47,9 +50,9 @@ documented as allowed and is a validation error. Check the grammar
 - alchemy's Cloudflare JSDoc carries `@category` (15 values) and `@product` (104 values, the
   `technology` label). No other provider carries either. `@see` is deliberately unread: it is the
   first URL in the file and often names a sub-feature rather than the product.
-- `@distilled.cloud/cloudflare/workers` resolves to `.ts` under bun and compiled `.js` under node,
-  where the binding type aliases no longer exist. `bindingKinds()` reads the `.d.ts` beside it and
-  throws on an empty list, because a silent empty list means a spec with no relationship kinds.
+- Compiling a stack is `Alchemist.importStack` + `buildStack` (`alchemy/Alchemist/Operations`,
+  marked `@internal` but exported in the `.d.ts`). Credentials resolve lazily since beta.85, so no
+  env is needed unless a stack body reads config itself.
 - `@likec4/config` reaches `isLikeC4Config` only through an entry needing `bundle-require` and
   `esbuild` peers, so the nine config filenames are inlined in `src/project.ts` instead.
 - **Relationship inheritance is one-way**: LikeC4 inherits deployment relationships from the

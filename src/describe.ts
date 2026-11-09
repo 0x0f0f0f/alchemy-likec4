@@ -12,6 +12,15 @@
  * Keyed on the logical id — the first argument — which is the same key the compiled stack uses.
  * Decoration only: a resource with no JSDoc simply has no description.
  *
+ * When the declaration has no literal id the generator can see — a template literal, an
+ * identifier, an object-map key, a resource a library mints — a block carrying `@resource <id>`
+ * describes that id wherever it sits in a scanned file, and never the statement below it:
+ *
+ *   /**
+ *    * Platform D1, better-auth's store.
+ *    * @resource platform-db3
+ *    *\/
+ *
  * TypeScript is parsed as TypeScript, JSDoc as JSDoc. The regex this replaced knew what neither a
  * comment nor a binding nor a call was, so every shape it did not anticipate — `export const`, a
  * resource in a ternary, a comment terminator inside a fence — was silently wrong rather than loud.
@@ -21,8 +30,17 @@ import { dirname, join, relative } from "node:path";
 import { parse as parseBlock } from "comment-parser";
 import { parseSync } from "oxc-parser";
 
-/** The tags this generator defines. */
-const DEFINED = new Set(["icon", "color"]);
+/** The tags this generator defines. `@resource <id>` names the logical id a block describes. */
+const DEFINED = new Set(["icon", "color", "resource"]);
+
+/**
+ * One of ours written inline, `/** Text. @resource Id *\/`. comment-parser only sees a tag at the
+ * start of a line, so a one-line block gets the line break it would have had written out.
+ */
+const INLINE_DEFINED = /\s@(icon|color|resource)(?=\s)/g;
+
+/** A logical id is one token; `@resource Not An Id` names nothing. */
+const LOGICAL_ID = /^\S+$/;
 
 /** A JSDoc tag name is an identifier. `@internal` is one; `@rel-int.ai` is an address. */
 const TAG_NAME = /^[a-zA-Z][a-zA-Z0-9]*$/;
@@ -50,7 +68,7 @@ interface Comment {
  * the second from the third.
  */
 const read = (raw: string): { description: string; tags: ReadonlyMap<string, string> } => {
-  const [block] = parseBlock(raw);
+  const [block] = parseBlock(raw.includes("\n") ? raw : raw.replace(INLINE_DEFINED, "\n * @$1"));
   const tags = new Map<string, string>();
   if (!block) return { description: "", tags };
 
@@ -62,6 +80,12 @@ const read = (raw: string): { description: string; tags: ReadonlyMap<string, str
     else if (!TAG_NAME.test(tag.tag)) prose.push(`@${tag.tag} ${value}`.trim());
   }
   return { description: prose.filter(Boolean).join(" ").replace(/\s+/g, " ").trim(), tags };
+};
+
+/** The logical id a block names with `@resource`, if it names exactly one. */
+const resourceIdOf = (tags: ReadonlyMap<string, string>): string | undefined => {
+  const id = tags.get("resource");
+  return id !== undefined && LOGICAL_ID.test(id) ? id : undefined;
 };
 
 /**
@@ -201,6 +225,8 @@ const sources = (dir: string): string[] => {
 export const readProse = (entrypoint: string): Prose => {
   const root = dirname(entrypoint);
   const descriptions = new Map<string, string>();
+  // `@resource` blocks, kept apart so they override an attached block for the same id.
+  const explicit = new Map<string, string>();
   const unparsed: string[] = [];
   let stack: StackProse = {};
 
@@ -219,12 +245,22 @@ export const readProse = (entrypoint: string): Prose => {
       continue;
     }
     const comments = parsed.comments as readonly Comment[];
+    for (const c of comments) {
+      if (c.type !== "Block") continue;
+      const raw = src.slice(c.start, c.end);
+      if (!raw.startsWith("/**")) continue;
+      const { description, tags } = read(raw);
+      const id = resourceIdOf(tags);
+      if (id !== undefined && description && !explicit.has(id)) explicit.set(id, description);
+    }
     const describe = (id: string | undefined, start: number): void => {
       // First wins, so a resource declared once keeps its own prose even if an id repeats.
       if (id === undefined || descriptions.has(id)) return;
       const raw = jsdocAt(start, comments, src);
       if (!raw) return;
-      const { description } = read(raw);
+      const { description, tags } = read(raw);
+      // A block that names its id describes that id only, never the statement it happens to sit on.
+      if (tags.has("resource")) return;
       if (description) descriptions.set(id, description);
     };
 
@@ -257,5 +293,6 @@ export const readProse = (entrypoint: string): Prose => {
     });
   }
 
+  for (const [id, description] of explicit) descriptions.set(id, description);
   return { descriptions, stack, unparsed: unparsed.sort() };
 };

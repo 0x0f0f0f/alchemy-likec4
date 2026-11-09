@@ -11,12 +11,12 @@
  *
  * Only what the stacks use. A kind nothing instantiates is legal LikeC4 but 241 Cloudflare kinds
  * for a four-resource stack is noise, so the stacks are compiled first and the specification is
- * filtered to the types in them. `--all-kinds` restores the full catalogue for browsing.
+ * filtered to the types in them.
  */
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
+import { createRequire } from "node:module";
+import { dirname, join, resolve } from "node:path";
 import { type Annotations, annotationsFor } from "./annotations.ts";
-import { bindingKinds } from "./bindings.ts";
 import {
   buildCrossStack,
   buildDeployment,
@@ -28,7 +28,6 @@ import {
   hasNamespaces,
 } from "./build.ts";
 import { readProse } from "./describe.ts";
-import { type AlchemyResource, alchemyDir, discoverProviders, extractResources } from "./extract.ts";
 import type { StackGraph } from "./stack.ts";
 
 /** Write a generated file, creating its directory. Shared with the CLI. */
@@ -46,10 +45,11 @@ export interface StackInput {
 export interface GenerateOptions {
   /** Where the files go — a LikeC4 project's `alchemy/` directory, see `projectOutput`. */
   readonly outdir: string;
-  /** Every stack in this run. The specification is their union. */
+  /** Every stack in this run. The specification is their union. A stack may appear once per
+   *  stage: its logical model is then the union of what every stage declares. */
   readonly stacks: readonly StackInput[];
-  /** Declare every kind alchemy ships, not only the ones these stacks use. */
-  readonly allKinds?: boolean;
+  /** Canonical types (`Alchemy.Random`) kept in the model but left out of every generated view. */
+  readonly hide?: readonly string[];
 }
 
 export interface StackSummary {
@@ -67,8 +67,6 @@ export interface GenerateResult {
   readonly files: readonly string[];
   readonly kinds: number;
   readonly stacks: readonly StackSummary[];
-  /** Subpaths that failed to import. Loud, never silent: a helper and a broken provider must not look the same. */
-  readonly skipped: readonly string[];
   /**
    * Refs whose target stack was not in this run, as `<stack>/<resource> → <stack>/<id>`. Each is an
    * arrow the diagram is missing, and passing that stack's `--entrypoint` is what draws it.
@@ -87,24 +85,20 @@ export interface GenerateResult {
   readonly stale: readonly string[];
 }
 
-/** Every resource alchemy ships, with the provider source dir each was found under. */
-const catalogue = async (alchemy: string) => {
-  const all = new Map<string, AlchemyResource>();
-  const sourceDirs = new Map<string, string>();
-  const skipped: string[] = [];
-  for (const ns of await discoverProviders(alchemy)) {
-    try {
-      const module = await import(ns.specifier);
-      for (const r of extractResources(module as Record<string, unknown>)) {
-        if (!all.has(r.type)) all.set(r.type, r);
-        if (!sourceDirs.has(r.provider)) sourceDirs.set(r.provider, ns.sourceDir);
-      }
-    } catch (e) {
-      skipped.push(`${ns.name} (${(e as Error).message.slice(0, 60)})`);
-    }
+/** A package's root as the stacks' own install resolves it: `src/index.ts` under bun,
+ *  `lib/index.js` under node, both two levels down. Resolved from the entrypoint, not from
+ *  this package, because providers are the consumer's dependencies, not ours. */
+const packageRoot = (pkg: string, from: string): string | undefined => {
+  try {
+    return dirname(dirname(createRequire(from).resolve(pkg)));
+  } catch {
+    return undefined;
   }
-  return { all, sourceDirs, skipped };
 };
+
+/** `Cloudflare` → `@alchemy.run/cloudflare`; core resources (`Alchemy.KeyPair`) live in `alchemy`. */
+const providerPackage = (provider: string): string =>
+  provider === "Alchemy" ? "alchemy" : `@alchemy.run/${provider.toLowerCase()}`;
 
 /** `<Stack>.<name>.gen.c4` names that are not a stage. */
 const RESERVED = new Set(["model", "views"]);
@@ -123,12 +117,12 @@ const existing = async (outdir: string): Promise<string[]> => {
 };
 
 /**
- * Every stage this project already has a file for, plus the one being written, so `views.gen.c4`
+ * Every stage this project already has a file for, plus the ones being written, so `views.gen.c4`
  * lists them all. Generating `staging` must not drop the view for `prod`.
  */
-const knownStages = (entries: readonly string[], graph: StackGraph): string[] => {
-  const prefix = `${graph.name}.`;
-  const stages = new Set([graph.stage]);
+const knownStages = (entries: readonly string[], name: string, writing: readonly string[]): string[] => {
+  const prefix = `${name}.`;
+  const stages = new Set(writing);
   for (const e of entries) {
     // A stack named `specification`, `cross-stack` or `landscape` would otherwise read its own
     // project-wide file as a stage called `gen`.
@@ -147,25 +141,61 @@ const staleStacks = (entries: readonly string[], written: ReadonlySet<string>): 
     .map((e) => e.slice(0, -".model.gen.c4".length))
     .filter((name) => !written.has(name));
 
-export const generate = async (opts: GenerateOptions): Promise<GenerateResult> => {
-  const { outdir, stacks, allKinds } = opts;
-  if (stacks.length === 0) throw new Error("no stacks to generate: pass at least one --entrypoint");
+/** First of each key, in order. */
+const uniqueBy = <T>(items: readonly T[], key: (t: T) => string): T[] => {
+  const seen = new Set<string>();
+  return items.filter((t) => {
+    const k = key(t);
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+};
 
-  const alchemy = alchemyDir();
+/**
+ * One logical model per stack, from every stage of it in the run. Stages may declare different
+ * resources — a widget only prod needs — and each stage's deployment instantiates the one model,
+ * so the model holds them all and ids that a collision suffixes agree across every stage.
+ */
+const mergeStages = (graphs: readonly StackGraph[]): Map<string, StackGraph> => {
+  const merged = new Map<string, StackGraph>();
+  for (const g of graphs) {
+    const m = merged.get(g.name);
+    merged.set(
+      g.name,
+      m === undefined
+        ? g
+        : {
+            ...m,
+            resources: uniqueBy([...m.resources, ...g.resources], (r) => r.fqn),
+            edges: uniqueBy([...m.edges, ...g.edges], (e) => `${e.from}|${e.to}|${e.kind}|${e.sid ?? ""}`),
+            crossEdges: uniqueBy([...m.crossEdges, ...g.crossEdges], (e) => `${e.from}|${e.stack}|${e.id}`),
+          },
+    );
+  }
+  return merged;
+};
+
+export const generate = async (opts: GenerateOptions): Promise<GenerateResult> => {
+  const { outdir, stacks } = opts;
+  const hide = new Set(opts.hide ?? []);
+  const first = stacks[0];
+  if (first === undefined) throw new Error("no stacks to generate: pass at least one --entrypoint");
+
+  const from = resolve(first.entrypoint);
+  const alchemy = packageRoot("alchemy", from);
+  if (alchemy === undefined) throw new Error(`alchemy is not resolvable from ${from}`);
   const alchemyVersion: string = JSON.parse(await readFile(`${alchemy}/package.json`, "utf8")).version;
   const graphs = stacks.map((s) => s.graph);
+  const models = mergeStages(graphs);
 
-  const cross = crossStackRelations(graphs);
+  const cross = crossStackRelations([...models.values()]);
 
-  const used = [...new Set(graphs.flatMap((g) => g.resources.map((r) => r.type)))].sort();
-  const { all, sourceDirs, skipped } = allKinds
-    ? await catalogue(alchemy)
-    : { all: new Map<string, AlchemyResource>(), sourceDirs: new Map<string, string>(), skipped: [] as string[] };
-  const kinds = allKinds ? [...all.keys()].sort() : used;
+  const kinds = [...new Set(graphs.flatMap((g) => g.resources.map((r) => r.type)))].sort();
   // A cross-stack relationship carries a binding kind too, and it is the only place some stacks
   // use one: without it the shared specification would not declare the kind the relation names.
   const wired = [...graphs.flatMap((g) => g.edges.map((e) => e.kind)), ...cross.relations.map((r) => r.kind)];
-  const bindings = allKinds ? bindingKinds() : [...new Set(wired.filter((k) => k !== "prop"))].sort();
+  const bindings = [...new Set(wired.filter((k) => k !== "prop"))].sort();
 
   // Annotations are read per provider, because each provider's sources live in its own directory.
   const annotations = new Map<string, Annotations>();
@@ -174,9 +204,13 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
     const provider = type.split(".")[0] as string;
     byProvider.set(provider, [...(byProvider.get(provider) ?? []), type]);
   }
-  for (const [provider, types] of byProvider)
-    for (const [type, a] of annotationsFor(sourceDirs.get(provider) ?? `${alchemy}/src/${provider}`, types))
-      annotations.set(type, a);
+  // Annotations are decoration: a provider whose package is not where the name points gets the
+  // default style, not an error.
+  for (const [provider, types] of byProvider) {
+    const root = packageRoot(providerPackage(provider), from);
+    if (root === undefined) continue;
+    for (const [type, a] of annotationsFor(join(root, "src"), types)) annotations.set(type, a);
+  }
 
   const entries = await existing(outdir);
   const files: string[] = [`${outdir}/${SPECIFICATION}`, `${outdir}/${CROSS_STACK}`, `${outdir}/${LANDSCAPE}`];
@@ -185,39 +219,52 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
     buildSpecification({ alchemyVersion, kinds, annotations, bindings, namespaces: hasNamespaces(graphs) }),
   );
   await write(files[1] as string, buildCrossStack(cross));
-  await write(files[2] as string, buildLandscape(graphs));
+  await write(
+    files[2] as string,
+    buildLandscape(
+      graphs,
+      kinds.filter((t) => hide.has(t)),
+    ),
+  );
 
   const summaries: StackSummary[] = [];
   const unparsed: string[] = [];
-  for (const { graph, entrypoint } of stacks) {
-    const prose = readProse(entrypoint);
+  for (const [name, model] of models) {
+    const inputs = stacks.filter((s) => s.graph.name === name);
+    const prose = readProse((inputs[0] as StackInput).entrypoint);
     const { descriptions } = prose;
-    unparsed.push(...prose.unparsed.map((f) => `${graph.name}: ${f}`));
-    const stages = knownStages(entries, graph);
-    const stackKinds = [...new Set(graph.resources.map((r) => r.type))].sort();
-    const stackBindings = [...new Set(graph.edges.filter((e) => e.kind !== "prop").map((e) => e.kind))].sort();
-
-    const mine = [
-      `${outdir}/${graph.name}.model.gen.c4`,
-      `${outdir}/${graph.name}.${graph.stage}.gen.c4`,
-      `${outdir}/${graph.name}.views.gen.c4`,
-    ] as const;
-    await write(
-      mine[0],
-      buildModel(graph, { kinds: stackKinds, bindings: stackBindings, descriptions, stack: prose.stack }),
+    unparsed.push(...prose.unparsed.map((f) => `${name}: ${f}`));
+    const stages = knownStages(
+      entries,
+      name,
+      inputs.map((s) => s.graph.stage),
     );
-    await write(mine[1], buildDeployment(graph));
-    await write(mine[2], buildViews(graph, stages));
-    files.push(...mine);
+    const stackKinds = [...new Set(model.resources.map((r) => r.type))].sort();
+    // Only kinds this stack declares: an `exclude` naming an undeclared kind fails validation.
+    const stackHidden = stackKinds.filter((t) => hide.has(t));
+    const stackBindings = [...new Set(model.edges.filter((e) => e.kind !== "prop").map((e) => e.kind))].sort();
 
-    summaries.push({
-      name: graph.name,
-      stage: graph.stage,
-      resources: graph.resources.length,
-      relationships: graph.edges.length,
-      described: graph.resources.filter((r) => descriptions.has(r.logicalId)).length,
-      stages,
-    });
+    const shared = [`${outdir}/${name}.model.gen.c4`, `${outdir}/${name}.views.gen.c4`] as const;
+    await write(
+      shared[0],
+      buildModel(model, { kinds: stackKinds, bindings: stackBindings, descriptions, stack: prose.stack }),
+    );
+    await write(shared[1], buildViews(model, stages, stackHidden));
+    files.push(...shared);
+
+    for (const { graph } of inputs) {
+      const deployment = `${outdir}/${name}.${graph.stage}.gen.c4`;
+      await write(deployment, buildDeployment(graph, model.resources, stackHidden));
+      files.push(deployment);
+      summaries.push({
+        name,
+        stage: graph.stage,
+        resources: graph.resources.length,
+        relationships: graph.edges.length,
+        described: graph.resources.filter((r) => descriptions.has(r.logicalId)).length,
+        stages,
+      });
+    }
   }
 
   return {
@@ -225,9 +272,8 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
     files,
     kinds: kinds.length,
     stacks: summaries,
-    skipped,
     unresolved: cross.unresolved,
     unparsed,
-    stale: staleStacks(entries, new Set(graphs.map((g) => g.name))),
+    stale: staleStacks(entries, new Set(models.keys())),
   };
 };

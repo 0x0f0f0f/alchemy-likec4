@@ -83,7 +83,7 @@ const readSources = (dir: string): { files: SourceFile[]; exported: Map<string, 
 /**
  * Map canonical resource type → the annotations on its declaring file.
  *
- * @param sourceDir the provider's source root, e.g. `node_modules/alchemy/src/Cloudflare`
+ * @param sourceDir the provider's source root, e.g. `node_modules/@alchemy.run/cloudflare/src`
  * @param types the canonical ids to resolve
  */
 export const annotationsFor = (sourceDir: string, types: readonly string[]): ReadonlyMap<string, Annotations> => {

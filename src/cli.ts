@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 /**
- *   alchemy-likec4 generate --project <dir> [--entrypoint alchemy.run.ts …] [--stage prod] [--all-kinds]
+ *   alchemy-likec4 generate --project <dir> [--entrypoint alchemy.run.ts …] [--stage prod …] [--hide Alchemy.Random …]
  *
  * `<dir>` is a LikeC4 project (holds a likec4.config.*); everything lands in `<dir>/alchemy/`.
  * `--entrypoint` repeats: a monorepo has one stack per composition root, and they share one
- * specification, so they have to be generated together.
+ * specification, so they have to be generated together. `--stage` repeats for the same reason: a
+ * stack's stages share one logical model, which must hold whatever any of them declares.
  *
  * A thin shell over the library — the same `effect/cli` alchemy's own CLI is built on.
  */
@@ -12,7 +13,6 @@ import { DEFAULT_ENTRYPOINT } from "alchemy/Alchemist";
 import { PlatformServices, runMain } from "alchemy/Util/PlatformServices";
 import { CliError, Command, Flag } from "effect/cli";
 import * as Effect from "effect/Effect";
-import * as Option from "effect/Option";
 import pkg from "../package.json" with { type: "json" };
 import { generate, type StackInput } from "./generate.ts";
 import { type NotALikeC4Project, projectOutput } from "./project.ts";
@@ -35,24 +35,28 @@ const generateCmd = Command.make(
       Flag.withDescription("Stack entrypoint; repeat it once per stack in a monorepo"),
       Flag.atLeast(0),
     ),
-    stage: Flag.String("stage").pipe(Flag.withDescription("Stage; only names derived from it change"), Flag.optional),
-    allKinds: Flag.Boolean("all-kinds").pipe(
-      Flag.withDescription("Declare every kind alchemy ships, not only the ones these stacks use"),
-      Flag.withDefault(false),
+    stage: Flag.String("stage").pipe(
+      Flag.withDescription("Stage; repeat it to generate several, when they declare different resources"),
+      Flag.atLeast(0),
+    ),
+    hide: Flag.String("hide").pipe(
+      Flag.withDescription("Canonical type to keep out of every generated view (repeatable), e.g. Alchemy.Random"),
+      Flag.atLeast(0),
     ),
   },
-  ({ project, entrypoint, stage, allKinds }) =>
+  ({ project, entrypoint, stage, hide }) =>
     Effect.gen(function* () {
       const outdir = yield* output(project);
       const entrypoints = entrypoint.length > 0 ? entrypoint : [DEFAULT_ENTRYPOINT];
 
       const stacks: StackInput[] = [];
-      for (const e of entrypoints) {
-        const graph = yield* stackGraph({ entrypoint: e, stage: Option.getOrUndefined(stage) });
-        stacks.push({ graph, entrypoint: e });
-      }
+      for (const e of entrypoints)
+        for (const s of stage.length > 0 ? stage : [undefined]) {
+          const graph = yield* stackGraph({ entrypoint: e, stage: s });
+          stacks.push({ graph, entrypoint: e });
+        }
 
-      const r = yield* Effect.promise(() => generate({ outdir, stacks, allKinds }));
+      const r = yield* Effect.promise(() => generate({ outdir, stacks, hide }));
       for (const f of r.files) yield* say(`  → ${f}`);
       yield* say(`\n${r.kinds} kinds, reflected from alchemy@${r.alchemyVersion}`);
       for (const s of r.stacks)
@@ -62,7 +66,6 @@ const generateCmd = Command.make(
         );
       const stages = [...new Set(r.stacks.flatMap((s) => s.stages))].sort();
       if (stages.length > 1) yield* say(`stages in this project: ${stages.join(", ")}`);
-      if (r.skipped.length > 0) yield* say(`could not import: ${r.skipped.join(", ")}`);
       // A file that will not parse keeps its resources and loses their prose. Never silent.
       if (r.unparsed.length > 0)
         yield* say(

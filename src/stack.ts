@@ -1,8 +1,9 @@
 /**
  * Read a stack's resource graph by compiling its entrypoint — no deploy, no network, no state.
  *
- * `Alchemist.open` imports the entrypoint and runs the stack body under placeholder services.
- * Every `yield* Cloudflare.Worker(...)` is then a registry insert, and the result is a compiled
+ * `Alchemist.importStack` loads the entrypoint and `buildStack` runs the stack body under its
+ * providers. Credentials are resolved lazily, on a provider's first API call, so compiling needs
+ * none. Every `yield* Cloudflare.Worker(...)` is then a registry insert, and the result is a compiled
  * stack whose resources carry symbolic props. Dependencies are recovered by walking those props
  * with `Output.upstreamAny`: a prop that holds another resource (or one of its attributes) is an
  * edge. Value bindings — `plain_text`, `secret_text`, `json` — reference nothing, so they yield no
@@ -16,11 +17,11 @@
  * as a `crossEdge` instead, for a run that holds the target's graph to resolve.
  */
 import * as Alchemist from "alchemy/Alchemist";
+import { buildStack, PLACEHOLDER_STAGE } from "alchemy/Alchemist/Operations";
 import * as Output from "alchemy/Output";
 import { isResource } from "alchemy/Resource";
 import { isPlainData } from "alchemy/Util/data";
 import * as Effect from "effect/Effect";
-import { placeholderEnvironment } from "./auth.ts";
 
 export interface StackResource {
   /** Canonical type, e.g. `Cloudflare.Worker` — the join key to the generated specification. */
@@ -163,12 +164,15 @@ export const deriveGraph = (stack: CompiledStack): StackGraph => {
     };
   });
   const byName = new Map(resources.flatMap((r) => (r.name ? [[r.name, r.fqn] as const] : [])));
+  const fqns = new Set(resources.map((r) => r.fqn));
 
   const edges: StackEdge[] = [];
   const seen = new Set<string>();
+  // An upstream that is no resource of this stack — an Action, such as better-auth's `<id>Migrate`
+  // — has no element to draw, and LikeC4 rejects a relation to one.
   const add = (e: StackEdge) => {
     const key = `${e.from}|${e.to}|${e.kind}|${e.sid ?? ""}`;
-    if (e.from !== e.to && !seen.has(key)) {
+    if (e.from !== e.to && fqns.has(e.to) && !seen.has(key)) {
       seen.add(key);
       edges.push(e);
     }
@@ -227,13 +231,11 @@ export interface OpenOptions {
 /** Compile the stack at `entrypoint` and return its graph, as an Effect. */
 export const stackGraph = (opts: OpenOptions = {}): Effect.Effect<StackGraph> =>
   Effect.gen(function* () {
-    // Building a provider layer resolves credentials, though compiling never calls an API. A
-    // placeholder satisfies each variable alchemy's auth providers declare as required.
-    placeholderEnvironment();
+    const stack = yield* Alchemist.importStack(opts.entrypoint ?? Alchemist.DEFAULT_ENTRYPOINT);
     // Compiled as a deploy (`dev: false`): a stack that branches on `defaultProviderMode` declares
     // what ships, not what `alchemy dev` emulates locally.
-    const session = yield* Alchemist.open({ entrypoint: opts.entrypoint, stage: opts.stage }, { dev: false });
-    return deriveGraph(session.stack as unknown as CompiledStack);
+    const built = yield* buildStack(stack, { stage: opts.stage ?? PLACEHOLDER_STAGE, dev: false });
+    return deriveGraph(built.stack as unknown as CompiledStack);
   }).pipe(Effect.scoped, Effect.provide(Alchemist.layer())) as Effect.Effect<StackGraph>;
 
 /** Promise form, for scripts. */

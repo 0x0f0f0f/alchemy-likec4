@@ -7,8 +7,8 @@
 > [!WARNING]
 > **Alchemy is in beta and under active development.** Resource
 > declarations will change between version, Every release of `alchemy-likec4`
-> targets **one alchemy 2 beta only** and the version says which: `0.80.x` is
-> built against `alchemy@2.0.0-beta.80`. Match them and regenerate your diagrams after every
+> targets **one alchemy 2 beta only** and the version says which: `0.85.x` is
+> built against `alchemy@2.0.0-beta.85`. Match them and regenerate your diagrams after every
 > alchemy bump!
 
 **Why?** You have written your infrastructure with
@@ -29,8 +29,8 @@ architecture and tools to generate diagrams from the model.
 From this stack (`examples/basic/alchemy.run.ts`):
 
 ```ts
+import * as Cloudflare from "@alchemy.run/cloudflare";
 import * as Alchemy from "alchemy";
-import * as Cloudflare from "alchemy/Cloudflare";
 import * as Effect from "effect/Effect";
 
 /**
@@ -167,8 +167,9 @@ One command writes into `docs/architecture/alchemy/`:
 | `<Stack>.views.gen.c4`   | a view scoped to the stack, so its box opens, and one deployment view per stage              |
 
 Run it again with `--stage staging` to add a stage. Nothing else is touched, and the views file
-picks up every stage it finds. `--all-kinds` declares every resource kind alchemy ships instead of
-only the ones you use, which is useful for browsing and noisy for everything else.
+picks up every stage it finds. If your stages declare different resources (a widget only prod
+has), pass every stage in one run instead, `--stage prod --stage staging`: the model is shared by
+all of them, so it has to hold what each one declares.
 
 A stack takes its description, and optionally an icon and colour, from the JSDoc above it. The
 `@icon` and `@color` on the stack above are why its box is blue and carries the Workers mark; the
@@ -324,7 +325,8 @@ by service name, so `AWS.DynamoDB.Table` finds `aws:dynamo-db` with no table to 
 
 ### The deployment model
 
-`alchemy.run.ts` is imported and its body run under placeholder services, so every
+`alchemy.run.ts` is imported and its body run with no credentials (alchemy resolves them on a
+provider's first API call, and compiling makes none), so every
 `yield* Cloudflare.Worker(...)` is a registry insert. Resources keep symbolic props;
 dependencies are recovered by walking them: a prop holding another resource is an edge, and a
 Worker's `env` bindings give each edge its kind.
