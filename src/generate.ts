@@ -48,6 +48,8 @@ export interface GenerateOptions {
   /** Every stack in this run. The specification is their union. A stack may appear once per
    *  stage: its logical model is then the union of what every stage declares. */
   readonly stacks: readonly StackInput[];
+  /** Canonical types (`Alchemy.Random`) kept in the model but left out of every generated view. */
+  readonly hide?: readonly string[];
 }
 
 export interface StackSummary {
@@ -176,6 +178,7 @@ const mergeStages = (graphs: readonly StackGraph[]): Map<string, StackGraph> => 
 
 export const generate = async (opts: GenerateOptions): Promise<GenerateResult> => {
   const { outdir, stacks } = opts;
+  const hide = new Set(opts.hide ?? []);
   const first = stacks[0];
   if (first === undefined) throw new Error("no stacks to generate: pass at least one --entrypoint");
 
@@ -216,7 +219,13 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
     buildSpecification({ alchemyVersion, kinds, annotations, bindings, namespaces: hasNamespaces(graphs) }),
   );
   await write(files[1] as string, buildCrossStack(cross));
-  await write(files[2] as string, buildLandscape(graphs));
+  await write(
+    files[2] as string,
+    buildLandscape(
+      graphs,
+      kinds.filter((t) => hide.has(t)),
+    ),
+  );
 
   const summaries: StackSummary[] = [];
   const unparsed: string[] = [];
@@ -231,6 +240,8 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
       inputs.map((s) => s.graph.stage),
     );
     const stackKinds = [...new Set(model.resources.map((r) => r.type))].sort();
+    // Only kinds this stack declares: an `exclude` naming an undeclared kind fails validation.
+    const stackHidden = stackKinds.filter((t) => hide.has(t));
     const stackBindings = [...new Set(model.edges.filter((e) => e.kind !== "prop").map((e) => e.kind))].sort();
 
     const shared = [`${outdir}/${name}.model.gen.c4`, `${outdir}/${name}.views.gen.c4`] as const;
@@ -238,12 +249,12 @@ export const generate = async (opts: GenerateOptions): Promise<GenerateResult> =
       shared[0],
       buildModel(model, { kinds: stackKinds, bindings: stackBindings, descriptions, stack: prose.stack }),
     );
-    await write(shared[1], buildViews(model, stages));
+    await write(shared[1], buildViews(model, stages, stackHidden));
     files.push(...shared);
 
     for (const { graph } of inputs) {
       const deployment = `${outdir}/${name}.${graph.stage}.gen.c4`;
-      await write(deployment, buildDeployment(graph, model.resources));
+      await write(deployment, buildDeployment(graph, model.resources, stackHidden));
       files.push(deployment);
       summaries.push({
         name,

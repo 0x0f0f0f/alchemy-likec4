@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- *   alchemy-likec4 generate --project <dir> [--entrypoint alchemy.run.ts …] [--stage prod …]
+ *   alchemy-likec4 generate --project <dir> [--entrypoint alchemy.run.ts …] [--stage prod …] [--hide Alchemy.Random …]
  *
  * `<dir>` is a LikeC4 project (holds a likec4.config.*); everything lands in `<dir>/alchemy/`.
  * `--entrypoint` repeats: a monorepo has one stack per composition root, and they share one
@@ -39,8 +39,12 @@ const generateCmd = Command.make(
       Flag.withDescription("Stage; repeat it to generate several, when they declare different resources"),
       Flag.atLeast(0),
     ),
+    hide: Flag.String("hide").pipe(
+      Flag.withDescription("Canonical type to keep out of every generated view (repeatable), e.g. Alchemy.Random"),
+      Flag.atLeast(0),
+    ),
   },
-  ({ project, entrypoint, stage }) =>
+  ({ project, entrypoint, stage, hide }) =>
     Effect.gen(function* () {
       const outdir = yield* output(project);
       const entrypoints = entrypoint.length > 0 ? entrypoint : [DEFAULT_ENTRYPOINT];
@@ -52,7 +56,7 @@ const generateCmd = Command.make(
           stacks.push({ graph, entrypoint: e });
         }
 
-      const r = yield* Effect.promise(() => generate({ outdir, stacks }));
+      const r = yield* Effect.promise(() => generate({ outdir, stacks, hide }));
       for (const f of r.files) yield* say(`  → ${f}`);
       yield* say(`\n${r.kinds} kinds, reflected from alchemy@${r.alchemyVersion}`);
       for (const s of r.stacks)

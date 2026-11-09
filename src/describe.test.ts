@@ -157,4 +157,42 @@ describe("readProse", () => {
     expect(descriptions.get("Site")).toBe("The marketing site.");
     expect(own.description).toBeUndefined();
   });
+
+  it("reads `@resource` blocks on the properties of an object of yields, one id each", () => {
+    const { descriptions } = readProse(
+      stack(
+        [
+          "const keys = {",
+          "  /** The first client's key. @resource KeyA */",
+          '  a: yield* Alchemy.KeyPair("KeyA"),',
+          "  /** The second client's key. @resource KeyB */",
+          '  b: yield* Alchemy.KeyPair("KeyB"),',
+          "};",
+        ].join("\n"),
+      ),
+    );
+    expect(descriptions.get("KeyA")).toBe("The first client's key.");
+    expect(descriptions.get("KeyB")).toBe("The second client's key.");
+  });
+
+  it("never attaches a `@resource` block to the statement below it", () => {
+    const { descriptions } = readProse(
+      stack(`/** Minted by a library. @resource LibSecret */\nconst x = yield* Cloudflare.Worker("Api", {});`),
+    );
+    expect(descriptions.get("LibSecret")).toBe("Minted by a library.");
+    expect(descriptions.has("Api")).toBe(false);
+  });
+
+  it("lets a `@resource` block override the block attached to the declaration", () => {
+    const { descriptions } = readProse(
+      stack(`/** Attached. */\nconst a = yield* Cloudflare.Worker("Api", {});\n/** Explicit. @resource Api */`),
+    );
+    expect(descriptions.get("Api")).toBe("Explicit.");
+  });
+
+  it("ignores a `@resource` that is not a single token", () => {
+    const { descriptions } = readProse(stack(`/** Two words. @resource Not An Id */`));
+    expect(descriptions.has("Not")).toBe(false);
+    expect(descriptions.size).toBe(0);
+  });
 });

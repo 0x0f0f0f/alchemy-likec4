@@ -328,6 +328,23 @@ describe("ids that differ only by case", () => {
     expect(buildDeployment(staging, g.resources)).toInclude("instanceOf v.vault_cloudflare_worker");
   });
 
+  it("excludes a hidden kind from the overview, never from a deployment view, which rejects kinds", () => {
+    const dsl = buildViews(g, ["prod"], ["Cloudflare.Worker"]);
+    expect(dsl).toInclude("exclude element.kind = cloudflare_worker");
+    expect(dsl.slice(dsl.indexOf("deployment view v_prod"))).not.toInclude("exclude");
+  });
+
+  it("leaves a hidden kind's instances out of the deployment, and says so", () => {
+    const dsl = buildDeployment(g, g.resources, ["Cloudflare.Worker"]);
+    expect(dsl).not.toInclude("instanceOf v.vault_cloudflare_worker");
+    expect(dsl).toInclude("instanceOf v.vault_cloudflare_access_application");
+    expect(dsl).toInclude("1 hidden (Cloudflare.Worker)");
+  });
+
+  it("excludes a hidden kind from the landscape", () => {
+    expect(buildLandscape([g], ["Cloudflare.Worker"])).toInclude("exclude element.kind = cloudflare_worker");
+  });
+
   it("builds one model from every stage in the run, so each stage's instances resolve", async () => {
     const outdir = mkdtempSync(join(tmpdir(), "alchemy-likec4-stages-"));
     const entrypoint = "examples/basic/alchemy.run.ts";
